@@ -271,46 +271,67 @@ grows faster than the support/infra costs that scale with it (a low-
 overhead product structurally benefits from this kind of operating
 leverage) — Base Case goes from 82% to 90% net margin Year 1 to Year 3.
 
-### v5: adding paid acquisition (organic + ads combined)
+### v5→v6: adding paid acquisition, then testing whether a better channel fixes the ratio
 
-Real CAC benchmarks found this session: fintech/business apps run $3.50-8
-CPI (non-premium; premium banking/investing keywords run $10-25, not used
-here). Ad spend modeled as a % of the *prior* month's net revenue reinvested
-into paid installs (10%/15%/20% across Conservative/Base/Optimistic) —
-self-funded, no outside capital, consistent with this session's bootstrap
-framing. Paid installs add to organic installs; they don't replace them.
+**v5** modeled generic paid acquisition: ad spend as a % of the *prior*
+month's net revenue reinvested into paid installs (10%/15%/20% across
+Conservative/Base/Optimistic) at a generic fintech CPI (~$3.50-8) —
+self-funded, no outside capital. Paid installs add to organic installs;
+they don't replace them.
+
+The founder's reaction to v5's numbers (a ~$295 Year-1 CAC per converted
+customer against a ~$64 program-only LTV) was that the ROI looked bad. It
+was right to react that way: the rigorous framing — **cost per install vs.
+blended value per install** (program revenue × conversion + referral +
+add-on, since ad spend buys installs, not hand-picked converters) — put
+v5's ratio at **0.96:1 in Year 1** and **1.79:1 in Year 3**, both below the
+industry-standard **3:1 "healthy" LTV:CAC benchmark** (payback under 12
+months, elite operators hit 5-7 months; under 1:1 means losing money per
+customer).
+
+**v6 tested the obvious fix**: switch to Apple Search Ads specifically,
+the best-fit paid channel for finance apps per real 2026 data (finance CPI
+$4.13-8.23, Day-1 retention 35-45% vs. Google UAC's 25-35% or TikTok/Meta
+finance CPMs of $11+). Modeled with real ASA CPI ($7.00/$5.50/$4.00) and a
+conversion-quality multiplier for paid installs (1.25x/1.35x/1.45x,
+extrapolated from the retention gap).
+
+**Result — an honest non-improvement**: the ratio barely moved (0.96:1 →
+0.96:1 Year 1; 1.79:1 → 1.77:1 Year 3). The higher-intent traffic's better
+conversion is real, but realistic ASA CPI for finance ($5.50) is itself
+higher than the earlier generic guess ($5.00) — the two effects roughly
+cancel. **The conclusion isn't "try a different channel," it's that paid
+acquisition on any channel isn't a strong lever for this product yet.**
 
 | | Year 1 | Year 2 | Year 3 |
 |---|---|---|---|
-| Net Revenue | $16,747 | $81,293 | $216,088 |
-| Ad Spend | $2,136 | $11,078 | $30,460 |
-| Paid Installs Bought | 427 | 2,216 | 6,092 |
-| Paying Customers (end of year) | 131 | 500 | 1,249 |
-| Market Share of Category TAM | 0.005% | 0.020% | 0.050% |
-| Total Opex (excl. ads) | $2,887 | $9,539 | $20,275 |
-| Net Profit (after ads + opex) | $11,724 | $60,676 | $165,353 |
-| Net Margin | 70.0% | 74.6% | 76.5% |
+| Net Revenue | $16,812 | $81,711 | $217,186 |
+| Ad Spend | $2,144 | $11,135 | $30,616 |
+| Paid Installs Bought | 390 | 2,024 | 5,567 |
+| Paying Customers (end of year) | 133 | 514 | 1,299 |
+| Market Share of Category TAM | 0.005% | 0.021% | 0.052% |
+| Total Opex (excl. ads) | $2,879 | $9,483 | $20,081 |
+| Net Profit (after ads + opex) | $11,789 | $61,093 | $166,488 |
+| Net Margin | 70.1% | 74.8% | 76.7% |
 
-*(Base Case shown; Conservative and Optimistic are in the spreadsheet.)*
+*(Base Case shown, v6/ASA numbers; Conservative and Optimistic are in the
+spreadsheet.)*
 
-Adding paid acquisition **on top of** organic-only v4 numbers: paying
-customers at month 36 rise from 1,034 → 1,249 (+21%), net profit rises from
-$167,178 → $165,353/yr in Year 3 (essentially flat — the ad spend nearly
-exactly consumes the incremental revenue it buys, which is a reasonable
-outcome at these reinvestment percentages, not a sign of a bug: this is
-what a rationally-sized reinvestment into a real CAC/LTV ratio looks like,
-not free growth). **The paid channel is a growth lever, not a profit
-lever** at these settings — it buys more customers and more market share
-per dollar of revenue than doing nothing, but doesn't materially change the
-profit number, because CAC is real money, not a rounding error.
+**Practical takeaway**: don't budget for a paid-acquisition program in
+Year 1 expecting it to be profitable on its own — at these unit
+economics it's roughly break-even at best. Lean on organic (FinTok-style
+educational content, ASO, the built-in buddy-streak viral mechanic) as the
+real growth engine; treat any paid spend (ASA or otherwise) as a small,
+opportunistic supplement once Year 2-3 conversion rates make the ratio
+look better (1.77:1, still below 3:1 but no longer break-even), not a
+primary lever to plan around.
 
 **Where this breaks down — read before trusting the Optimistic scenario**:
 the model holds CPI constant regardless of spend scale. Optimistic
-compounds into $58,512/mo of ad spend by month 36 (vs. Base Case's
-$3,303/mo) — spending that much in a niche category at a flat $3.50 CPI is
-not realistic; real channels saturate and CPI rises with volume. Treat
-Optimistic's paid-acquisition figures as illustrating the mechanic's upper
-bound, not a real 3-year plan. Base Case and Conservative stay in a
+compounds into ~$59,730/mo of ad spend by month 36 — spending that much in
+a niche category at a flat CPI is not realistic; real channels saturate.
+Treat Optimistic's paid-acquisition figures as illustrating the mechanic's
+upper bound, not a real 3-year plan. Base Case and Conservative stay in a
 believable spend range.
 
 **Market share — the honest, humbling number**: using the global

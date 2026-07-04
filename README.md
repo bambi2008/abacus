@@ -40,21 +40,25 @@ Full evaluation done (customer/market, technical architecture, promotion,
 - [`docs/promotion-plan.md`](docs/promotion-plan.md) — content strategy
   around the ongoing "Mint alternative" search demand.
 - [`docs/financial-model-year1-3.xlsx`](docs/financial-model-year1-3.xlsx) —
-  v5: four revenue engines (program, referral, add-on ARPU, B2B
+  v6: four revenue engines (program, referral, add-on ARPU, B2B
   employer-benefit) + opex (support headcount, infra, Apple fee) + a
-  **paid-acquisition engine** (ad spend = % of prior month's revenue
-  reinvested, at real fintech CPI benchmarks, added on top of organic
-  growth). **Base Case Year 3: $216,088 revenue, $30,460 ad spend, 1,249
-  paying customers, $165,353 net profit, 76.5% net margin** — paid
-  acquisition is a growth lever here, not a profit lever (ad spend roughly
-  consumes the incremental revenue it buys; profit is nearly identical to
-  the organic-only version). Optimistic's paid numbers compound past a
-  believable spend range (flat-CPI assumption breaks down at scale) —
-  treat as illustrating the mechanic's upper bound, not a real plan.
-  **Market-share reality check holds**: ~0.05% of category TAM by month 36
-  even with paid acquisition added — see `customer-and-market.md` for the
-  full per-scenario tables (customers, market share, opex, profit, margin)
-  and the YNAB-persona-gap research (price-sensitive under-$50K users,
+  **paid-acquisition engine (Apple Search Ads specifically)**. **Base Case
+  Year 3: $217,186 revenue, $30,616 ad spend, 1,299 paying customers,
+  $166,488 net profit, 76.7% net margin.**
+  **Honest finding on paid acquisition**: the rigorous LTV:CAC ratio (value
+  per install vs. cost per install) is **0.96:1 in Year 1 and 1.77:1 in
+  Year 3 — below the industry-healthy 3:1 benchmark**. Switching from
+  generic paid social to Apple Search Ads (the best-fit channel for finance
+  apps, per real 2026 CPI/retention data) barely moved this ratio — the
+  better conversion quality and the genuinely higher realistic CPI roughly
+  cancel out. **Conclusion: paid acquisition isn't a strong lever for this
+  product yet, on any channel** — organic (content, ASO, the built-in
+  buddy-streak viral mechanic) should carry Year 1-2 growth; paid spend is
+  a small opportunistic supplement once conversion rates mature, not a
+  primary plan. Market share stays ~0.05% of category TAM by month 36 even
+  with paid acquisition added.
+  See `customer-and-market.md` for full per-scenario tables and the
+  YNAB-persona-gap research (price-sensitive under-$50K users,
   internationally-located users structurally underserved by YNAB's
   bank-linking requirement — a segment Abacus's no-bank-sync architecture
   already fits).
@@ -62,9 +66,9 @@ Full evaluation done (customer/market, technical architecture, promotion,
 ## Next
 
 West-first (China's trend is real but app payment-willingness there is
-weaker — see `customer-and-market.md`). B2B, add-on, and paid-acquisition
-engines are documented and modeled but not built. Decide: run a beta to
-validate the referral participation rate and real paid-acquisition CAC, or
-start the Flutter scaffold for the MVP core loop (habit-tracking + program
-purchase), which doesn't depend on any of the secondary revenue/growth
-engines to function.
+weaker — see `customer-and-market.md`). B2B and add-on engines are
+documented and modeled but not built; paid acquisition was modeled and
+found not worth prioritizing pre-scale. Decide: run a beta to validate the
+referral participation rate, or start the Flutter scaffold for the MVP
+core loop (habit-tracking + program purchase), which doesn't depend on any
+of the secondary revenue/growth engines to function.

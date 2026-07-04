@@ -210,6 +210,49 @@ $3,500/mo by month 36) where the constant-CPI simplification is less of a
 distortion. Treat the Optimistic paid-acquisition numbers as an upper
 bound illustrating the mechanic, not a real plan.
 
+## v6: switching to Apple Search Ads specifically — an honest non-result
+
+The founder's reaction to v5's numbers was correct: a ~$295 CAC against a
+~$64 program-only LTV per converter is a bad ratio by any standard (the
+industry benchmark for a healthy subscription business is **3:1 LTV:CAC**,
+with elite payback in 5-7 months; under 1:1 means losing money per
+customer). The more rigorous **per-install** framing (since ad spend buys
+installs, not hand-picked converters, and non-converting installs still
+generate referral/add-on revenue) put v5 at **0.96:1 in Year 1** and
+**1.79:1 in Year 3** — better than losing money outright, but well below
+the 3:1 healthy bar.
+
+The natural next question was whether switching to a better-targeted
+channel would fix this. Real research this session found Apple Search Ads
+is structurally the best-fit paid channel for finance apps — finance-
+category CPI of $4.13-8.23 with Day-1 retention of 35-45%, vs. Google
+UAC's 25-35% or TikTok/Meta finance CPMs of $11+ for a worse-fit,
+interruption-based audience. v6 modeled this directly: real ASA CPI
+($7.00/$5.50/$4.00 across scenarios) plus a conversion-rate quality
+multiplier (1.25x/1.35x/1.45x) applied only to paid-channel installs,
+extrapolated from the real retention gap.
+
+**The result, stated plainly: it barely moved the ratio.**
+
+| | v5 (generic paid, $5.00 CPI) | v6 (Apple Search Ads, $5.50 CPI) |
+|---|---|---|
+| Year 1 ratio | 0.96:1 | 0.96:1 |
+| Year 3 ratio | 1.79:1 | 1.77:1 |
+
+The quality/conversion premium from higher-intent search traffic is real
+(+35% conversion in Base Case) — but the *realistic* ASA CPI for finance
+($5.50, from real 2026 data) is itself higher than the generic-fintech
+guess used in v5 ($5.00), and the two effects roughly cancel out. This is
+a useful negative result, not a wasted exercise: **the earlier
+recommendation ("switch to Apple Search Ads, it'll be more efficient")
+does not survive contact with the real numbers once modeled precisely.**
+The honest conclusion isn't "pick a different channel" — it's that **paid
+acquisition, on any channel, isn't a strong lever for this specific
+product at this stage of its unit economics.** Organic growth (content,
+ASO, the built-in buddy-streak viral mechanic) remains the primary growth
+engine by default, not because paid channels weren't investigated, but
+because they were investigated and didn't clear the bar.
+
 ## What's still unvalidated
 
 Only one number in the whole model has no real-world anchor at all: the
