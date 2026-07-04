@@ -40,26 +40,31 @@ Full evaluation done (customer/market, technical architecture, promotion,
 - [`docs/promotion-plan.md`](docs/promotion-plan.md) — content strategy
   around the ongoing "Mint alternative" search demand.
 - [`docs/financial-model-year1-3.xlsx`](docs/financial-model-year1-3.xlsx) —
-  v3: four revenue engines (program, referral, add-on ARPU, B2B
-  employer-benefit) plus an opex side (customer support headcount,
-  infra/tools, Apple fee). **Base Case clears the $10,000/mo target on net
-  profit** — $17,536/mo by month 36 (vs. $19,293/mo gross revenue) — needing
-  a **recommended 1-person support hire** (Optimistic needs 2; none of the
-  three scenarios need a hire in Year 1). Referral bounty, add-on ARPU, and
-  B2B pricing are checked against real disclosed benchmarks; the one number
-  still unvalidated is the referral participation rate.
-  **Market-share reality check**: Base Case's ~1,034 paying customers by
-  month 36 is ~0.04% of the (loosely estimated) category TAM, or ~0.23% of
-  YNAB's own implied customer base — small and worth sitting with plainly:
-  the model clears its profit target at a very small scale because the
-  product is low-overhead and high-margin, not because it wins meaningful
-  share. See `customer-and-market.md` for the full breakdown and caveats.
+  v5: four revenue engines (program, referral, add-on ARPU, B2B
+  employer-benefit) + opex (support headcount, infra, Apple fee) + a
+  **paid-acquisition engine** (ad spend = % of prior month's revenue
+  reinvested, at real fintech CPI benchmarks, added on top of organic
+  growth). **Base Case Year 3: $216,088 revenue, $30,460 ad spend, 1,249
+  paying customers, $165,353 net profit, 76.5% net margin** — paid
+  acquisition is a growth lever here, not a profit lever (ad spend roughly
+  consumes the incremental revenue it buys; profit is nearly identical to
+  the organic-only version). Optimistic's paid numbers compound past a
+  believable spend range (flat-CPI assumption breaks down at scale) —
+  treat as illustrating the mechanic's upper bound, not a real plan.
+  **Market-share reality check holds**: ~0.05% of category TAM by month 36
+  even with paid acquisition added — see `customer-and-market.md` for the
+  full per-scenario tables (customers, market share, opex, profit, margin)
+  and the YNAB-persona-gap research (price-sensitive under-$50K users,
+  internationally-located users structurally underserved by YNAB's
+  bank-linking requirement — a segment Abacus's no-bank-sync architecture
+  already fits).
 
 ## Next
 
 West-first (China's trend is real but app payment-willingness there is
-weaker — see `customer-and-market.md`). B2B and add-on engines are
-documented and modeled but not built. Decide: run a beta to validate the
-referral participation rate, or start the Flutter scaffold for the MVP
-core loop (habit-tracking + program purchase), which doesn't depend on any
-of the three secondary revenue engines to function.
+weaker — see `customer-and-market.md`). B2B, add-on, and paid-acquisition
+engines are documented and modeled but not built. Decide: run a beta to
+validate the referral participation rate and real paid-acquisition CAC, or
+start the Flutter scaffold for the MVP core loop (habit-tracking + program
+purchase), which doesn't depend on any of the secondary revenue/growth
+engines to function.

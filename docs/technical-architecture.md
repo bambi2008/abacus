@@ -173,6 +173,43 @@ one behind the "no bank credentials" pitch: no bank-sync support burden, no
 backend-heavy automated-categorization infrastructure to run, and a support
 load driven by a simple, well-understood core product.
 
+## Paid acquisition (v5) — organic + ads combined
+
+v5 adds a paid-acquisition engine on top of the organic-only growth model.
+
+**CAC/CPI benchmarks found this session**: general mobile app CPI runs
+$1-5, with cost-per-paying-user $20-80 (freemium apps convert 2-5% of
+installs, meaning true CPPU is 20-50x CPI). Fintech specifically runs much
+higher: non-premium fintech/business apps at $3.50-8 CPI, premium banking/
+investing keywords at $10-25 CPI (the latter reflects intense competition
+for high-LTV users and wasn't used here — Abacus isn't competing for those
+keywords). Modeled CPI: $6.00 (Conservative) → $5.00 (Base) → $3.50
+(Optimistic), from the non-premium fintech/business range.
+
+**Ad spend logic**: rather than assume a fixed ad budget (which begs the
+question of where that cash comes from on day 1), ad spend is modeled as a
+**reinvestment of a % of the prior month's net revenue** — 10% Conservative,
+15% Base, 20% Optimistic. This is a self-funded growth model consistent
+with this session's "no outside capital" bootstrap framing: there's
+effectively no ad budget in month 1 (no revenue yet), and spend grows
+organically in step with the business, rather than being budgeted
+independent of what the business can actually afford. Paid installs **add
+to** organic installs (which keep growing on their own separate trajectory)
+— this is incremental growth on top of the existing organic plan, not a
+replacement for it.
+
+**Important caveat, stated plainly**: CPI is held constant regardless of
+spend scale. Real customer acquisition cost rises as a channel saturates —
+this model doesn't capture that. It shows up starkly in the Optimistic
+scenario, where compounding (more revenue → more ad spend → more installs
+→ more revenue) pushes month-36 ad spend to $58,512/mo at a flat $3.50 CPI
+— in reality, spending that much in a niche budgeting-app category would
+almost certainly drive CPI up substantially as the channel saturates. Base
+Case and Conservative stay in a more believable range (ad spend under
+$3,500/mo by month 36) where the constant-CPI simplification is less of a
+distortion. Treat the Optimistic paid-acquisition numbers as an upper
+bound illustrating the mechanic, not a real plan.
+
 ## What's still unvalidated
 
 Only one number in the whole model has no real-world anchor at all: the

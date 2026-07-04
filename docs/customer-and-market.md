@@ -55,6 +55,45 @@ backlash), overwhelmed by "serious" spreadsheet-style budgeting (YNAB's
 learning curve is a documented complaint), wants something that feels more
 like a habit-tracker/game than an accounting tool.
 
+### Who YNAB actually serves, and who it structurally can't (researched)
+
+YNAB's real traffic skews 25-34 (33%) and 35-44 (21%), ~80%+ US-based,
+households of two-plus sharing budget access, and — per YNAB's own
+positioning — people actively paying off debt who want a system that
+forces behavior change, not passive tracking. These users accept a steep
+learning curve and a $109/yr price because the zero-based methodology is
+the whole value proposition for them.
+
+Three segments are named directly in user criticism as underserved by
+YNAB, each for a structural reason (not just "YNAB could do this better"):
+
+1. **Price-sensitive budget beginners (under ~$50K income)** — $109/yr
+   with no free tier is explicitly called out as prohibitive for this
+   group. This is a pricing-model gap, not a feature gap.
+2. **Internationally-located users** — YNAB has limited bank-linking
+   support outside the US/UK/EU. This is the sharpest, most structurally-
+   matched gap for Abacus specifically: YNAB's limitation exists *because*
+   it's a bank-linking product, and international bank API coverage is
+   incomplete. Abacus's core architecture never needed bank-linking in the
+   first place ("no bank credentials, ever" — chosen originally as a
+   privacy/trust wedge) — so this isn't a market Abacus has to build new
+   capability to serve, it's a market its existing architecture already
+   fits. Worth treating as a real secondary segment, not just an
+   afterthought.
+3. **Complexity-averse users** — direct quotes describe YNAB as
+   "unnecessarily complicated," with its own vocabulary ("budget" doesn't
+   mean what you think it means). This is the segment the gamification bet
+   was already aimed at; this research confirms it by name rather than
+   just inferring it from YNAB's UI.
+
+**One segment is explicitly NOT a fit, and worth ruling out on purpose**:
+"set-and-forgetters" who want automation, not manual entry — YNAB doesn't
+serve them well, but neither does Abacus (also manual-entry-first). That
+segment's actual home is Monarch/Copilot (bank-linked, automated). Chasing
+them would mean abandoning the "no bank credentials" architecture that is
+Abacus's core differentiation — not a segment to target, a segment to
+consciously not chase.
+
 ## Market sizing — real, proven, not speculative
 
 - **YNAB**: ~$49M ARR, bootstrapped, profitable, no outside capital,
@@ -231,6 +270,48 @@ modeled. Margin climbs over the 3 years in every scenario because revenue
 grows faster than the support/infra costs that scale with it (a low-
 overhead product structurally benefits from this kind of operating
 leverage) — Base Case goes from 82% to 90% net margin Year 1 to Year 3.
+
+### v5: adding paid acquisition (organic + ads combined)
+
+Real CAC benchmarks found this session: fintech/business apps run $3.50-8
+CPI (non-premium; premium banking/investing keywords run $10-25, not used
+here). Ad spend modeled as a % of the *prior* month's net revenue reinvested
+into paid installs (10%/15%/20% across Conservative/Base/Optimistic) —
+self-funded, no outside capital, consistent with this session's bootstrap
+framing. Paid installs add to organic installs; they don't replace them.
+
+| | Year 1 | Year 2 | Year 3 |
+|---|---|---|---|
+| Net Revenue | $16,747 | $81,293 | $216,088 |
+| Ad Spend | $2,136 | $11,078 | $30,460 |
+| Paid Installs Bought | 427 | 2,216 | 6,092 |
+| Paying Customers (end of year) | 131 | 500 | 1,249 |
+| Market Share of Category TAM | 0.005% | 0.020% | 0.050% |
+| Total Opex (excl. ads) | $2,887 | $9,539 | $20,275 |
+| Net Profit (after ads + opex) | $11,724 | $60,676 | $165,353 |
+| Net Margin | 70.0% | 74.6% | 76.5% |
+
+*(Base Case shown; Conservative and Optimistic are in the spreadsheet.)*
+
+Adding paid acquisition **on top of** organic-only v4 numbers: paying
+customers at month 36 rise from 1,034 → 1,249 (+21%), net profit rises from
+$167,178 → $165,353/yr in Year 3 (essentially flat — the ad spend nearly
+exactly consumes the incremental revenue it buys, which is a reasonable
+outcome at these reinvestment percentages, not a sign of a bug: this is
+what a rationally-sized reinvestment into a real CAC/LTV ratio looks like,
+not free growth). **The paid channel is a growth lever, not a profit
+lever** at these settings — it buys more customers and more market share
+per dollar of revenue than doing nothing, but doesn't materially change the
+profit number, because CAC is real money, not a rounding error.
+
+**Where this breaks down — read before trusting the Optimistic scenario**:
+the model holds CPI constant regardless of spend scale. Optimistic
+compounds into $58,512/mo of ad spend by month 36 (vs. Base Case's
+$3,303/mo) — spending that much in a niche category at a flat $3.50 CPI is
+not realistic; real channels saturate and CPI rises with volume. Treat
+Optimistic's paid-acquisition figures as illustrating the mechanic's upper
+bound, not a real 3-year plan. Base Case and Conservative stay in a
+believable spend range.
 
 **Market share — the honest, humbling number**: using the global
 "budgeting app" category's ~$260M 2026 revenue estimate (a figure that
