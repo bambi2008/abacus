@@ -40,13 +40,19 @@ Full evaluation done (customer/market, technical architecture, promotion,
 - [`docs/promotion-plan.md`](docs/promotion-plan.md) — content strategy
   around the ongoing "Mint alternative" search demand.
 - [`docs/financial-model-year1-3.xlsx`](docs/financial-model-year1-3.xlsx) —
-  **Base Case clears the $10,000/mo target** ($13,500/mo by month 36) —
-  first project this session to do so — but 63% of that comes from a
-  referral-revenue assumption with no real benchmark behind it yet. Program
-  revenue alone (the well-anchored part) still beats HeelEase's entire
-  Base Case outcome.
+  v2: four revenue engines (program, referral, add-on ARPU, B2B
+  employer-benefit). **Base Case clears the $10,000/mo target at
+  $19,293/mo by month 36** — up from $13,500/mo in the original two-engine
+  version. Referral bounty, add-on ARPU, and B2B pricing are all now
+  checked against real disclosed benchmarks; the one number still
+  unvalidated is the referral participation rate, which needs real user
+  data (a beta), not more desk research, to resolve.
 
 ## Next
 
-Get real fintech-referral-program economics before trusting the financial
-model's headline number, then decide whether to scaffold.
+West-first (China's trend is real but app payment-willingness there is
+weaker — see `customer-and-market.md`). B2B and add-on engines are
+documented and modeled but not built. Decide: run a beta to validate the
+referral participation rate, or start the Flutter scaffold for the MVP
+core loop (habit-tracking + program purchase), which doesn't depend on any
+of the three secondary revenue engines to function.

@@ -58,7 +58,7 @@ and no Western-trust-positioning conflict — this is a case where the
 earlier "no domestic API" rule doesn't apply, because the sensitivity
 profile is different.
 
-## Second revenue engine — the honest gap
+## Revenue engines beyond the program purchase — four lines, not two
 
 Industry research this session: "2026's budgeting-app winners aren't the
 best budgeters, they're the ones with revenue beyond subscription" (Rocket
@@ -67,19 +67,60 @@ advances). **We can't do Rocket Money's or Cleo's model** — both require
 bank-account access or lending, which conflicts directly with the "no bank
 credentials, ever" positioning, and Cleo's cash-advance model raises the
 same predatory-lending-adjacent concern flagged when DraftKings/FanDuel
-were ruled out earlier this session. The honest second-line candidate:
-**opt-in referrals to high-yield savings accounts or index-fund/robo-
-advisor products** when a user's own logged data shows they're
-consistently saving well — helpful, not predatory, and doesn't require
-touching their bank credentials. This needs real validation before being
-load-bearing in the financial model; flagged as the equivalent of
-Regimen's affiliate-gear engine, but unproven here.
+were ruled out earlier this session. Also explicitly rejected: **advertising**
+(Duolingo's own ~7%-of-revenue ad line) — this would directly contradict the
+"we don't monetize your attention or data" wedge that differentiates Abacus
+from Mint, the exact competitor whose collapse is cited as market
+validation.
 
-**Update after building the financial model**: this caution turned out to
-be load-bearing, not hypothetical — the Base Case scenario clears its
-$10,000/mo target specifically *because* referral revenue is modeled at
-63% of month-36 run-rate, on an invented $30/referral, 0.5-1.2%-of-active-
-users-per-month assumption with no real fintech-affiliate benchmark behind
-it (see `customer-and-market.md` final verdict). Before this number is
-trusted for a go/no-go decision, get real numbers from an actual HYSA or
-robo-advisor affiliate program, not a guess.
+Four lines survive, each checked against a real precedent:
+
+1. **Referral revenue** (opt-in, financial products): when a user's own
+   logged data shows consistent saving, suggest a high-yield savings account
+   or index-fund/robo-advisor product, paid a bounty by the partner directly
+   — no bank-credential access required. Bounty validated against real
+   programs this session (Comenity Direct HYSA $150/CPL, Barclays $250-300/
+   CPL, Chase $50, LendingClub $100, Betterment affiliate channel $150/sale)
+   — the model's $30/referral assumption is conservative relative to this
+   range. The one number still unvalidated is the participation rate
+   (0.5-1.2% of active users/month) — no external benchmark exists for this,
+   since it depends on Abacus's own in-app prompt design, not affiliate-
+   network terms.
+2. **Add-on ARPU (virtual goods + paid course)**: cosmetic streak-freeze
+   packs / theme packs (Duolingo's own IAP line, ~5% of its revenue) plus a
+   one-time paid course (e.g. "Zero-Based Budgeting Mastery") — feasible to
+   build cheaply now that AI can draft structured lesson content for a human
+   to review, unlike a Duolingo English Test-style accredited certification
+   (which needs institutional recognition Abacus doesn't have and shouldn't
+   claim). Sold via IAP, so store commission applies. Modeled as a small
+   blended ARPU on the active-user base, scaled down from Duolingo's real
+   mix since Abacus has no large free/ad-supported base to cross-sell
+   against.
+3. **B2B employer-benefit channel** — real, proven precedent in this exact
+   category (SmartDollar/Ramsey Solutions, Brightside — the latter reports
+   $56M returned to 800K+ families). Employers buy a bulk-seat benefit,
+   employees use it free; this is a completely different acquisition path
+   from the C2C funnel (enterprise/SMB self-serve sales, not app-store
+   installs), which is exactly why it's valuable — it doesn't share failure
+   modes with the referral-rate or ad-spend risk sitting on the C2C side.
+   Modeled as a **self-serve SMB tier only** (no dedicated sales team,
+   matching the small-team constraint), priced at $3-4.50/employee/month —
+   anchored to real basic digital wellness-platform self-serve pricing
+   ($3-5/employee/month found this session; full-service platforms with
+   human coaching run far higher, $58+/employee/month, but that tier needs
+   a service org Abacus doesn't have). Modeled to go live later than the
+   C2C launch (month 10-15 depending on scenario) since a self-serve
+   employer-benefit funnel needs a live product with organic traction to be
+   credible in the first place.
+4. **Program purchase** (lifetime + subscription) — unchanged, the
+   best-anchored line (YNAB $109/yr, Monarch $99/yr).
+
+## What's still unvalidated
+
+Only one number in the whole model has no real-world anchor at all: the
+**referral participation rate** (line 1 above). Everything else — referral
+bounty size, add-on ARPU scale, B2B seat pricing, program pricing — is now
+checked against a real disclosed number, even if the specific rate at which
+Abacus's own users will behave is still a guess. That's a meaningfully
+narrower risk surface than the original two-engine model, where the entire
+referral line (bounty *and* rate) was ungrounded.

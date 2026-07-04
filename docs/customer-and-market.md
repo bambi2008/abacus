@@ -20,6 +20,31 @@ practiced conversation skill doesn't guarantee a match says yes); and
 personal finance management is lifelong, never "done" (unlike a healing
 injury).
 
+## Market geography — West-first, China deliberately deferred
+
+Raised and resolved this session: the underlying "money stress + return to
+rational spending" trend is real in China too, not just the West — 2026
+research shows a genuine "分级/理性回归" (stratification + return to
+rationality) shift, defensive saving becoming mainstream, and a documented
+"disappearing middle class" narrative tied to real-estate decline. China
+also has an existing, non-gamified competitor field (随手记 dominant,
+挖财记账 for investment sync, 鲨鱼记账 for voice-input speed, 网易有钱
+defunct after 6 years — a Mint-shutdown parallel) with the same gamification
+gap found in the West. Separately, Chinese consumer apps have a strong
+precedent for gamification mechanics working at massive scale outside
+finance-as-entertainment (Alipay's 蚂蚁森林/Ant Forest), which argues the
+core bet (gamified daily habit tracking) could land at least as well there.
+
+**Decision: launch West-first anyway.** Chinese users have a well-documented
+lower willingness-to-pay for non-gaming utility/productivity apps — the
+dominant monetization pattern is free+ads or free+IAP-in-games, not
+recurring subscriptions for a budgeting tool, which is the opposite of this
+project's core bet (a paid, subscription/lifetime-purchase habit app with no
+ad-supported free tier). YNAB and Monarch's proof of a real paying market
+is Western. China is a real Phase 2 expansion candidate once the West-first
+version is validated, not a day-one target — the payment-willingness gap is
+a bigger open risk than the demand-side trend is a bonus.
+
 ## Persona
 
 Broader than the male-specific framing of the prior two projects (HeelEase,
@@ -101,37 +126,57 @@ scale by YNAB and Monarch.
 ## Final verdict, after running the numbers (`financial-model-year1-3.xlsx`)
 
 Same methodology as HeelEase/Regimen: 3 scenarios, 36-month cohort model,
-two revenue engines, verified zero formula errors via LibreOffice
-recalculation, cross-checked against an independent Python simulation.
-Target: **$10,000/mo** (carried forward from Regimen for comparability).
+verified zero formula errors via LibreOffice recalculation, cross-checked
+against an independent Python simulation. Target: **$10,000/mo** (carried
+forward from Regimen for comparability).
+
+**v2 update**: the model now has **four revenue engines**, not two — added
+add-on ARPU (virtual goods + paid course) and a B2B employer-benefit channel
+alongside the original program purchase and referral lines (see
+`technical-architecture.md` for what each one is and what it's anchored to).
 
 | | Year 1 | Year 2 | Year 3 | Month-36 run-rate |
 |---|---|---|---|---|
-| Conservative | $3,606 | $11,032 | $23,485 | $2,247/mo |
-| **Base Case** | $13,005 | $52,842 | $132,254 | **$13,500/mo** |
-| Optimistic | $48,525 | $279,652 | $1,017,191 | $115,138/mo |
+| Conservative | $4,217 | $14,921 | $33,163 | $3,248/mo |
+| **Base Case** | $15,929 | $73,965 | $185,203 | **$19,293/mo** |
+| Optimistic | $64,081 | $401,087 | $1,353,535 | $154,561/mo |
 
-**This is the first project this session where Base Case clears its own
-target** — $13,500/mo against $10,000/mo by month 36, and it crosses the
-line well before month 36 (Year 1 alone nets $13,005). Required
-steady-state installs for the target: ~1,306/mo; Base Case already reaches
-~2,388/mo by month 36 — comfortably past the threshold, not straining
-toward it the way Regimen's Base Case was.
+Base Case month-36 run-rate nearly doubled versus the two-engine version
+($13,500/mo → $19,293/mo) and clears the $10,000/mo target with more room.
+More importantly, the composition changed:
 
-**The catch, and it's a real one**: of that $13,500/mo month-36 run-rate,
-**$8,537 (63%) comes from referral revenue** — the least-validated
-assumption in the entire model. Unlike the program-purchase pricing (which
-is anchored to real, disclosed competitor prices — YNAB's $109/yr, Monarch's
-$99/yr), the referral conversion rate (0.5-1.2% of active users completing
-a financial-product referral per month) and bounty ($30/referral) are
-reasoned guesses with no benchmark data behind them — there was no time in
-this research pass to find real affiliate economics for fintech
-referral programs (HYSA/robo-advisor signup bounties). **This model looks
-good specifically because its most optimistic, least-checked assumption is
-doing most of the work.** If real referral uptake comes in at, say, a
-quarter of what's assumed here, the picture reverts to something much
-closer to Regimen's outcome — still probably ahead of it (program revenue
-alone nets ~$4,963/mo, already beating HeelEase's entire Base Case), but
-nowhere near clearing $10,000/mo. **Before trusting this number, the
-referral-bounty assumption specifically needs real data — actual affiliate
-program terms from a HYSA or robo-advisor partner, not a guess.**
+| Engine | Month-36 $ (Base Case) | Share |
+|---|---|---|
+| Referral | $8,537 | 44% |
+| Program (lifetime + sub) | $4,963 | 26% |
+| B2B employer-benefit | $3,777 | 20% |
+| Add-on (virtual goods + course) | $2,016 | 10% |
+
+**The catch is smaller now, and more precisely located.** In the two-engine
+version, 63% of revenue sat on referral revenue, and *both* its inputs
+(bounty size and participation rate) were unchecked guesses. After
+validating the bounty against real fintech affiliate programs this session
+(Comenity Direct $150/CPL, Barclays $250-300/CPL, Betterment $150/sale — all
+above the model's conservative $30 assumption), referral's share of the
+*true unvalidated risk* drops even though its *revenue share* (44%) is
+still the largest single line. The **only number in the entire model with
+zero real-world anchor is the referral participation rate**
+(0.5-1.2% of active users/month) — bounty size, add-on ARPU, and B2B seat
+pricing are now all checked against disclosed real terms, even though the
+specific rate at which Abacus's own users behave in each case is still
+inferred, not measured.
+
+B2B's contribution is modest and plausible for a bootstrapped, no-sales-team
+motion: ~54 active SMB contracts averaging 20 employees each by month 36
+(Base Case) — not a number that requires an enterprise sales org to
+believe, unlike, say, a model that assumed hundreds of large-employer deals.
+
+**Bottom line**: this model is more diversified and better-anchored than
+the two-engine version, but the fundamental caveat from before still
+applies in a narrower form — the single largest revenue line (referral, 44%)
+still rests on a participation-rate assumption that can only be resolved
+with real user data, not further desk research. If referral participation
+comes in at a quarter of what's modeled, month-36 run-rate drops to roughly
+$12,900/mo (still clears the $10,000/mo target, unlike the old two-engine
+model's equivalent scenario) — the added diversification is what changes
+the outcome, not just the bigger headline number.
