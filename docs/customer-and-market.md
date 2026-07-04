@@ -180,3 +180,49 @@ comes in at a quarter of what's modeled, month-36 run-rate drops to roughly
 $12,900/mo (still clears the $10,000/mo target, unlike the old two-engine
 model's equivalent scenario) — the added diversification is what changes
 the outcome, not just the bigger headline number.
+
+## v3: net profit (not just revenue), and a market-share reality check
+
+v3 adds operating costs (customer support headcount, infra/tools, Apple
+fee — see `technical-architecture.md` for the full breakdown) and judges
+the $10,000/mo target against **net profit**, a stricter bar than the
+revenue-only figures above.
+
+| | Year 1 Profit | Year 2 Profit | Year 3 Profit | Month-36 Profit Run-Rate |
+|---|---|---|---|---|
+| Conservative | $2,414 | $10,591 | $25,815 | $2,570/mo |
+| **Base Case** | $13,129 | $65,077 | $167,178 | **$17,536/mo** |
+| Optimistic | $59,378 | $381,251 | $1,293,693 | $148,446/mo |
+
+Base Case still clears $10,000/mo even after opex — because opex stays
+structurally low (Year 3 opex is under 10% of Year 3 revenue in every
+scenario), the profit haircut versus the revenue-only numbers is modest.
+
+**Customer service headcount, the number asked for directly**: Base Case
+needs a **recommended 1 person** (rounded up from 0.68 fractional FTE) by
+month 36; Conservative also rounds to 1 (0.24 FTE — mostly idle capacity);
+Optimistic needs **2** (1.71 FTE). None of the three scenarios require a
+support hire in Year 1 — a founder can realistically handle support solo
+through most of the ramp.
+
+**Market share — the honest, humbling number**: using the global
+"budgeting app" category's ~$260M 2026 revenue estimate (a figure that
+should be treated with real skepticism — a different 2026 source puts the
+US market alone at ~$0.34B, which cannot be reconciled with a $0.26B global
+figure; published TAM sizing for this specific sub-category is inconsistent
+across research firms) and an assumed ~$104/year category ARPU (anchored to
+YNAB's $109/yr and Monarch's $99/yr), the implied total paying-customer
+base for the category is ~2.5M people.
+
+Abacus's Base Case active paying-customer base at month 36 (active
+subscribers + cumulative lifetime buyers) is **~1,034 people** — an implied
+market share of **~0.04%**. A more concrete, single-anchor comparison: that
+is **~0.23% of YNAB's own implied customer count** (YNAB's $49M ARR ÷ $109
+≈ 450,000 customers). This is not a rounding error to explain away — it is
+the realistic scale of a 3-year-old bootstrapped niche entrant, and it is
+worth sitting with plainly: **the unit economics clearing the profit target
+does not mean the business has meaningfully dented the category** — it
+means the product can be profitable at a very small scale because it is
+low-overhead and high-margin, not because it has won meaningful share.
+Category leadership was never the 3-year plan and these numbers confirm it
+shouldn't be treated as one.
