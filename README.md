@@ -27,7 +27,14 @@ Duolingo-style gamification to the daily-logging habit itself.
 ## Status
 
 Full evaluation done (customer/market, technical architecture, promotion,
-3-year financial model) — see `docs/`. No Flutter code yet.
+3-year financial model) plus a screen-by-screen product design — see
+`docs/`. No Flutter code yet.
+
+- [`docs/product-design.md`](docs/product-design.md) — screen inventory,
+  onboarding flow (Day-1 guaranteed win, paywall delayed to Day 5+), the
+  core logging loop, streak/buddy-streak/freeze UI, Progress and Paywall
+  screens, and an explicit MVP out-of-scope list (no zero-based budgeting,
+  no bank linking, no B2B console, no AI chat surface).
 
 - [`docs/customer-and-market.md`](docs/customer-and-market.md) — the
   three-factor framework, persona, YNAB/Monarch/Mint-shutdown market data,
@@ -65,10 +72,10 @@ Full evaluation done (customer/market, technical architecture, promotion,
 
 ## Next
 
+Product design is done — next is the Flutter scaffold, building exactly
+the screens in `docs/product-design.md` (Today/Progress/Settings/Paywall +
+onboarding), reusing the HeelEase/Regimen Provider+Hive+PostHog+IAP stack.
 West-first (China's trend is real but app payment-willingness there is
-weaker — see `customer-and-market.md`). B2B and add-on engines are
-documented and modeled but not built; paid acquisition was modeled and
-found not worth prioritizing pre-scale. Decide: run a beta to validate the
-referral participation rate, or start the Flutter scaffold for the MVP
-core loop (habit-tracking + program purchase), which doesn't depend on any
-of the secondary revenue/growth engines to function.
+weaker — see `customer-and-market.md`). B2B and add-on engines stay
+documented-but-unbuilt until the MVP core loop is validated; paid
+acquisition was modeled and found not worth prioritizing pre-scale.
