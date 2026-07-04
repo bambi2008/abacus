@@ -205,6 +205,33 @@ Optimistic needs **2** (1.71 FTE). None of the three scenarios require a
 support hire in Year 1 — a founder can realistically handle support solo
 through most of the ramp.
 
+### Year-by-year detail (Base Case)
+
+| | Year 1 | Year 2 | Year 3 |
+|---|---|---|---|
+| Net Revenue | $15,929 | $73,965 | $185,203 |
+| Paying Customers (end of year) | 124 | 444 | 1,034 |
+| Market Share of Category TAM | 0.005% | 0.018% | 0.041% |
+| Total Opex | $2,800 | $8,888 | $18,025 |
+| Net Profit | $13,129 | $65,077 | $167,178 |
+| Net Margin (= Gross Margin here) | 82.4% | 88.0% | 90.3% |
+
+Conservative and Optimistic year-by-year tables are in the spreadsheet
+(`financial-model-year1-3.xlsx`, Summary tab) — same structure, all three
+scenarios side by side.
+
+**On margin**: net margin and gross margin are the same number in this
+model because there's no separate COGS/SG&A split — Total Opex (support +
+infra + Apple fee) is the only cost layer, and no paid user-acquisition
+spend is budgeted anywhere (growth is assumed organic, per
+`promotion-plan.md`). A business that spent on paid acquisition or added
+headcount beyond support would see gross margin stay high while net margin
+fell below it — that gap doesn't show up here because that spending isn't
+modeled. Margin climbs over the 3 years in every scenario because revenue
+grows faster than the support/infra costs that scale with it (a low-
+overhead product structurally benefits from this kind of operating
+leverage) — Base Case goes from 82% to 90% net margin Year 1 to Year 3.
+
 **Market share — the honest, humbling number**: using the global
 "budgeting app" category's ~$260M 2026 revenue estimate (a figure that
 should be treated with real skepticism — a different 2026 source puts the
