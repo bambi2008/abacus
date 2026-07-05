@@ -25,11 +25,25 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    storeAvailable = await _iap.isAvailable();
-    if (storeAvailable) {
-      final response = await _iap.queryProductDetails({ProductIds.monthly, ProductIds.lifetime});
-      products = response.productDetails;
-      _purchaseSubscription = _iap.purchaseStream.listen(_onPurchaseUpdate, onError: (Object _) {});
+    // in_app_purchase has no Flutter Web platform implementation — there's
+    // no App Store/Play Store checkout on web at all, so
+    // InAppPurchasePlatform.instance is never registered there and throws
+    // a LateInitializationError the moment isAvailable() is called. Skip
+    // entirely on web; purchase() still works via its kDebugMode mock so
+    // the paywall flow stays testable in a web preview.
+    if (kIsWeb) {
+      notifyListeners();
+      return;
+    }
+    try {
+      storeAvailable = await _iap.isAvailable();
+      if (storeAvailable) {
+        final response = await _iap.queryProductDetails({ProductIds.monthly, ProductIds.lifetime});
+        products = response.productDetails;
+        _purchaseSubscription = _iap.purchaseStream.listen(_onPurchaseUpdate, onError: (Object _) {});
+      }
+    } catch (e) {
+      debugPrint('SubscriptionProvider: IAP unavailable on this platform: $e');
     }
     notifyListeners();
   }
