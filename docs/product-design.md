@@ -76,12 +76,16 @@ must be a guaranteed-achievable win, not a setup chore.
   effect" from HeelEase's original research). A push notification confirms
   after the fact: "Your streak survived — you used a freeze." Pro users get
   3 concurrent freezes and can bank one per week.
-- **Buddy streak** (the viral mechanic): from Settings or a post-streak-
-  milestone prompt, "Start a buddy streak" generates a share link/code.
-  Once a second person joins, a **separate, second streak counter** appears
-  on the Today screen (visually distinct color) that only increments if
-  **both** parties log an expense that day. Losing a buddy streak shows
-  both parties a joint notification — social accountability is the
+- **Buddy streak** (the viral mechanic — 2026-07-05: elevated to its own
+  main-line card on Today, `BuddyStreakCard`, parallel in visual weight to
+  the streak card and the companion cat card: the streak card is the
+  individual habit metric, the cat is the individual emotional/growth
+  metric, this card is the relational one — not buried in Settings behind
+  a single list tile anymore). "Start a buddy streak" generates a share
+  link/code. Once a second person joins, a **separate, second streak
+  counter** appears on the Today screen (visually distinct color) that only
+  increments if **both** parties log an expense that day. Losing a buddy
+  streak shows both parties a joint notification — social accountability is the
   mechanic, not shame copy.
 - **Milestone badges**: Day 7, 30, 100, 365 — full-screen celebration +
   a shareable image card (reuses HeelEase's shareable-achievement-card
@@ -131,7 +135,8 @@ established across all three projects this session.
 
 ## Settings
 
-- Streak & buddy-streak management (view/leave buddy streaks)
+- Buddy-streak invite/status lives on Today (`BuddyStreakCard`) now — the
+  Settings entry here is a pointer, not a duplicate interactive control.
 - **Referral**: "Know someone who'd like a high-yield savings account?" —
   surfaced here (not pushed proactively in Year 1, per the unresolved
   participation-rate question in `customer-and-market.md`) — opt-in,

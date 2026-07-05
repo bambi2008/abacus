@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:uuid/uuid.dart';
 
-import '../config/constants.dart';
 import '../models/expense.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
-import '../providers/gamification_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/export_service.dart';
@@ -56,7 +51,14 @@ class SettingsScreen extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text('Streaks', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          const _BuddyStreakTile(),
+          // Buddy-streak invite/status now lives on the Today screen as its
+          // own main-line card (BuddyStreakCard) — this is just a pointer,
+          // not a duplicate interactive control.
+          const ListTile(
+            leading: Icon(Icons.people_outline),
+            title: Text('Savings buddy'),
+            subtitle: Text('Find or manage your savings buddy from the Today screen.'),
+          ),
           const Divider(),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -150,55 +152,6 @@ class _NotificationTimeTileState extends State<_NotificationTimeTile> {
           AnalyticsService.instance.capture('reminder_time_changed');
         }
       },
-    );
-  }
-}
-
-/// Buddy streak — the one mechanic that fixes the "no viral loop" weakness
-/// identified in HeelEase's business-model critique. This scaffold
-/// implements the sharing/UI surface plus a real, locally-computed weekly
-/// count for the user's own side; real two-way sync (the partner's count)
-/// needs a lightweight backend (Phase 2, not part of the local-first Hive
-/// architecture this MVP uses) — so that side is shown as an honest
-/// "waiting to sync" state, never a fabricated number.
-class _BuddyStreakTile extends StatefulWidget {
-  const _BuddyStreakTile();
-
-  @override
-  State<_BuddyStreakTile> createState() => _BuddyStreakTileState();
-}
-
-class _BuddyStreakTileState extends State<_BuddyStreakTile> {
-  late Box _settings;
-  late bool _inviteSent;
-
-  @override
-  void initState() {
-    super.initState();
-    _settings = Hive.box(HiveBoxes.settings);
-    _inviteSent = (_settings.get(SettingsKeys.buddyStreakCode) as String?)?.isNotEmpty ?? false;
-  }
-
-  Future<void> _sendInvite() async {
-    final code = const Uuid().v4().substring(0, 6).toUpperCase();
-    await _settings.put(SettingsKeys.buddyStreakCode, code);
-    AnalyticsService.instance.capture('buddy_streak_invite_sent');
-    setState(() => _inviteSent = true);
-    await Share.share('Join my Abacus buddy streak! Use code $code in the app.');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final selfCount = context.watch<GamificationProvider>().currentWeekLoggedDaysCount;
-    return ListTile(
-      leading: const Icon(Icons.people_outline),
-      title: const Text('Start a buddy streak'),
-      subtitle: Text(
-        _inviteSent
-            ? 'This week: you logged $selfCount/7 days. Waiting for your buddy to sync — coming soon.'
-            : 'Both of you log an expense the same day to keep it alive.',
-      ),
-      trailing: FilledButton.tonal(onPressed: _sendInvite, child: const Text('Invite')),
     );
   }
 }

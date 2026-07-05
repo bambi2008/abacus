@@ -7,6 +7,7 @@ import '../models/category.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
+import '../widgets/buddy_streak_card.dart';
 import '../widgets/companion_cat_card.dart';
 import 'category_challenge_win_screen.dart';
 import 'milestone_celebration_screen.dart';
@@ -84,6 +85,8 @@ class _TodayScreenState extends State<TodayScreen> {
             _StreakCard(streak: streak, atRisk: atRisk),
             const SizedBox(height: 12),
             const CompanionCatCard(),
+            const SizedBox(height: 12),
+            const BuddyStreakCard(),
             if (!loggedToday) ...[
               const SizedBox(height: 8),
               Align(

@@ -155,6 +155,40 @@ users" cuts directly against a manual-entry-first bet. This is the load-
 bearing assumption for this whole concept and needs to be pressure-tested
 with real users, not just argued from first principles.
 
+### Follow-up research (2026-07-05): is manual entry actually a viable daily ask?
+
+Two real data points partially de-risk this, though they don't fully
+resolve it:
+
+- **Real transaction volume is lower than intuition suggests.** The Federal
+  Reserve's 2026 Diary of Consumer Payment Choice found consumers average
+  16 credit + 15 debit + 6 cash payments per month — **~37/month, ~1.2
+  transactions/day**. Card + digital payments are ~2/3 of all transactions;
+  cash is ~1 in 7 and concentrated in demographics *outside* Abacus's
+  target (households under $25K/year, ages 55+, rural) — meaning the
+  actual target user (younger, urban, digital-native) likely transacts
+  even more card-heavy than the average. The core mechanic only requires
+  logging *at least one* expense per day to hold a streak — at ~1.2
+  transactions/day average, that's close to "log the one thing you did
+  today," not "reconstruct a full ledger from memory every night."
+- **Manual friction may be a feature, not just a retention cost.** NBER
+  research found people who manually record transactions **spend 15-20%
+  less** than people relying on automated bank-linked tools — the same
+  friction that automation researchers cite as a retention drag is also
+  the mechanism behind the actual behavior change budgeting apps are
+  supposed to produce. Separately, research on why manual tracking gets
+  abandoned points to **consistency collapse, not per-entry effort**: "miss
+  two days and the backlog grows, so people quit" — which is exactly the
+  failure mode the existing streak-freeze mechanic (auto-applied, no user
+  action) was already built to intercept, not a new problem to solve.
+
+**Net effect on the open question**: this doesn't prove gamified manual
+entry beats automation for THIS product specifically — that still needs
+real users. But it does undercut the strongest version of the counter-
+argument ("nobody will do this daily") — the daily ask is smaller than it
+sounds, and the mechanism already built (streak freeze) targets the
+specific way manual tracking actually fails in practice.
+
 **Score against the framework**: cleaner fit than HeelEase, Regimen, or the
 dating-coach idea on the "self-discipline reliably produces the outcome"
 axis — but competing in the most mature, best-funded field attempted this
