@@ -21,6 +21,40 @@ Same stack, same reasons, third time proven:
 - **Payments**: `in_app_purchase`, no weekly billing (same discipline as
   HeelEase/Regimen).
 
+## Savings-buddy backend (the one networked feature)
+
+Everything financial in Abacus is local-first Hive, by design — but the
+"省钱搭子" (savings buddy) mechanic is inherently two-device and can't work
+without *some* server to broker it. Rather than ship it as a permanent local
+stub, it's now backed by **Supabase** (hosted Postgres + anonymous auth +
+row-level security), chosen for: a generous free tier, a first-class Flutter
+SDK, RLS enforced in the database rather than trusted-client code, and
+accessibility from mainland China (unlike Firebase).
+
+**The privacy boundary is the whole point of this design**: the buddy tables
+store only `(anonymous_user_id, date, logged: bool)` per person per day —
+never an amount, category, or note. No expense data has ever left the
+device, or ever will through this path. See `app/supabase/schema.sql` for
+the two tables (`buddy_links`, `buddy_marks`), RLS policies (a user can only
+read/write rows for links they belong to), and the `join_buddy_link`
+security-definer RPC (needed because the joiner doesn't own the link row
+yet, so plain RLS would hide it from them).
+
+**Safe-by-default, same pattern as `AnalyticsService`**: `SupabaseConfig.url`
+/ `anonKey` (`config/constants.dart`) come from `--dart-define` and default
+to empty. `BuddyProvider.isConfigured` gates everything — with no keys
+supplied, `BuddyStreakCard` renders its original local-only invite behavior
+(on-device code, "waiting to sync" copy) and zero network calls are made.
+The joint-streak calculation itself (`computeJointStreak` in
+`services/buddy_backend.dart`) is pure/pubspec-free logic over two sets of
+dates, independently unit-tested (`test/buddy_streak_test.dart`) since live
+two-device sync can't be asserted in CI.
+
+**Setup is manual, by design**: creating a Supabase project and running the
+SQL is a one-time action for whoever owns the `bambi2008/abacus` project —
+not something the app or CI does automatically, since it involves an
+external account and real credentials.
+
 ## Core data model
 
 - `Expense`: amount, category, note, date — the single atomic unit, entered

@@ -65,6 +65,16 @@ class RemoteConfig {
   static const posthogHost = 'https://us.i.posthog.com';
 }
 
+/// Savings-buddy sync backend. Empty values (the default) disable networking
+/// entirely and the buddy feature degrades to its local-only behavior — same
+/// safe-by-default pattern as [RemoteConfig]. Supply via
+/// --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
+/// See app/supabase/schema.sql for the one-time project setup.
+class SupabaseConfig {
+  static const url = String.fromEnvironment('SUPABASE_URL');
+  static const anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+}
+
 /// Preset starter categories offered during onboarding — deliberately not
 /// YNAB's "give every dollar a job" zero-based setup. See
 /// docs/product-design.md.

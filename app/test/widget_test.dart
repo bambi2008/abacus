@@ -13,11 +13,13 @@ import 'package:abacus/models/category_challenge_result.dart';
 import 'package:abacus/models/daily_log_completion.dart';
 import 'package:abacus/models/expense.dart';
 import 'package:abacus/models/no_spend_day_mark.dart';
+import 'package:abacus/providers/buddy_provider.dart';
 import 'package:abacus/providers/category_provider.dart';
 import 'package:abacus/providers/expense_provider.dart';
 import 'package:abacus/providers/gamification_provider.dart';
 import 'package:abacus/providers/onboarding_provider.dart';
 import 'package:abacus/providers/subscription_provider.dart';
+import 'package:abacus/services/buddy_backend.dart';
 
 void main() {
   setUp(() async {
@@ -70,6 +72,7 @@ void main() {
           ChangeNotifierProvider(create: (_) => CategoryProvider()..load()),
           ChangeNotifierProvider(create: (_) => ExpenseProvider()..load()),
           ChangeNotifierProvider(create: (_) => GamificationProvider()..load()),
+          ChangeNotifierProvider(create: (_) => BuddyProvider(NoopBuddyBackend())),
           ChangeNotifierProvider(create: (_) => SubscriptionProvider()..load()),
         ],
         child: const AbacusApp(),

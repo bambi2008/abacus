@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 
 import '../models/category.dart';
+import '../providers/buddy_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
@@ -294,6 +295,7 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
     setState(() => _confirmed = true);
     final expenseProvider = context.read<ExpenseProvider>();
     final gamificationProvider = context.read<GamificationProvider>();
+    final buddyProvider = context.read<BuddyProvider>();
     final navigator = Navigator.of(context);
     await expenseProvider.addExpense(
       amount: amount,
@@ -301,6 +303,9 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
       note: _noteController.text,
     );
     final badge = await gamificationProvider.onExpenseLogged(expenseProvider.currentStreak);
+    // Push today's "logged" signal to the buddy backend (no-op when
+    // unconfigured or unlinked) so the shared streak stays in sync.
+    await buddyProvider.markTodayLogged(true);
     // Brief pause so the inline checkmark is actually seen before the sheet
     // closes — this replaces the previous silent, instant dismiss.
     await Future.delayed(const Duration(milliseconds: 300));

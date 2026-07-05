@@ -12,12 +12,14 @@ import 'models/category_challenge_result.dart';
 import 'models/daily_log_completion.dart';
 import 'models/expense.dart';
 import 'models/no_spend_day_mark.dart';
+import 'providers/buddy_provider.dart';
 import 'providers/category_provider.dart';
 import 'providers/expense_provider.dart';
 import 'providers/gamification_provider.dart';
 import 'providers/onboarding_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'services/analytics_service.dart';
+import 'services/supabase_buddy_backend.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,6 +78,14 @@ void main() async {
   // runs on a month-boundary crossing, not every app open.
   await gamificationProvider.refreshOwlState();
 
+  // Opt-in savings-buddy sync. Unconfigured (no Supabase --dart-defines) →
+  // NoopBuddyBackend, and the buddy card keeps its local-only behavior.
+  final buddyProvider = BuddyProvider(SupabaseBuddyBackend());
+  await buddyProvider.init();
+  // Push today's log status up front so the partner's board is current, then
+  // reflect it locally.
+  await buddyProvider.markTodayLogged(expenseProvider.loggedToday);
+
   runApp(
     MultiProvider(
       providers: [
@@ -83,6 +93,7 @@ void main() async {
         ChangeNotifierProvider.value(value: categoryProvider),
         ChangeNotifierProvider.value(value: expenseProvider),
         ChangeNotifierProvider.value(value: gamificationProvider),
+        ChangeNotifierProvider.value(value: buddyProvider),
         ChangeNotifierProvider(create: (_) => SubscriptionProvider()..load()..init()),
       ],
       child: const AbacusApp(),

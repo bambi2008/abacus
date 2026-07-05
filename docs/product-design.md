@@ -86,7 +86,12 @@ must be a guaranteed-achievable win, not a setup chore.
   counter** appears on the Today screen (visually distinct color) that only
   increments if **both** parties log an expense that day. Losing a buddy
   streak shows both parties a joint notification — social accountability is the
-  mechanic, not shame copy.
+  mechanic, not shame copy. **2026-07-05: real two-device sync shipped**
+  (Supabase + anonymous auth, `BuddyProvider`/`SupabaseBuddyBackend`) — see
+  `docs/technical-architecture.md`. Only an anonymous id, a date, and a
+  logged/not-logged boolean ever leave the device; when no Supabase project
+  is configured the card silently falls back to the original local-only
+  invite behavior, so the app still works with zero backend.
 - **Milestone badges**: Day 7, 30, 100, 365 — full-screen celebration +
   a shareable image card (reuses HeelEase's shareable-achievement-card
   pattern), not gated behind Pro (badges are a retention hook, not a
