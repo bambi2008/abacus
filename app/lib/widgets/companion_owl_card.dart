@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 
-import '../models/cat_mood.dart';
+import '../models/owl_mood.dart';
 import '../providers/gamification_provider.dart';
 
 /// The emotional/visual layer on top of the numeric, loss-averse streak
-/// card — never repeats the streak number, only reflects mood. V1 art is
-/// mood-mapped emoji (no illustration/sprite pipeline exists in this app
-/// yet); each mood gets a distinct idle motion so it reads as "alive," not
-/// a static emoji swap. See docs/technical-architecture.md and the
-/// gamification-depth plan.
-class CompanionCatCard extends StatelessWidget {
-  const CompanionCatCard({super.key});
+/// card — never repeats the streak number, only reflects mood. V1 art is a
+/// single owl emoji (no illustration/sprite pipeline exists in this app
+/// yet, and Unicode has no owl mood variants); each mood gets a distinct
+/// idle motion so it reads as "alive," not a static emoji. See
+/// docs/technical-architecture.md and the gamification-depth plan.
+class CompanionOwlCard extends StatelessWidget {
+  const CompanionOwlCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class CompanionCatCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Your cat is ${mood.label.toLowerCase()}', style: Theme.of(context).textTheme.titleMedium),
+                    Text('Your owl is ${mood.label.toLowerCase()}', style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 2),
                     Text(mood.actionableLine, style: Theme.of(context).textTheme.bodySmall),
                   ],
@@ -74,35 +74,35 @@ class CompanionCatCard extends StatelessWidget {
 }
 
 class _AnimatedMoodEmoji extends StatelessWidget {
-  final CatMood mood;
+  final OwlMood mood;
   const _AnimatedMoodEmoji({super.key, required this.mood});
 
   @override
   Widget build(BuildContext context) {
     final text = Text(mood.emoji, style: const TextStyle(fontSize: 40));
     switch (mood) {
-      case CatMood.sleeping:
+      case OwlMood.sleeping:
         // Very slow, subtle breathing — dormant, not distressed.
         return text
             .animate(onPlay: (c) => c.repeat(reverse: true))
             .scale(begin: const Offset(1, 1), end: const Offset(1.04, 1.04), duration: 2400.ms, curve: Curves.easeInOut);
-      case CatMood.hungry:
+      case OwlMood.hungry:
         // A small shiver loop — needs attention.
         return text
             .animate(onPlay: (c) => c.repeat())
             .shake(duration: 600.ms, hz: 4, rotation: 0.03);
-      case CatMood.content:
+      case OwlMood.content:
         // A gentle bob.
         return text
             .animate(onPlay: (c) => c.repeat(reverse: true))
             .moveY(begin: 0, end: -4, duration: 900.ms, curve: Curves.easeInOut);
-      case CatMood.happy:
+      case OwlMood.happy:
         // A bit more energetic bob with a slight rotation.
         return text
             .animate(onPlay: (c) => c.repeat(reverse: true))
             .moveY(begin: 0, end: -6, duration: 700.ms, curve: Curves.easeInOut)
             .rotate(begin: -0.02, end: 0.02, duration: 700.ms);
-      case CatMood.thriving:
+      case OwlMood.thriving:
         // Bright bounce + sparkle — everything's going great.
         return text
             .animate(onPlay: (c) => c.repeat(reverse: true))

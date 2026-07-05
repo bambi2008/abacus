@@ -6,7 +6,7 @@ import 'app.dart';
 import 'config/constants.dart';
 import 'models/badge_record.dart';
 import 'models/buddy_weekly_challenge.dart';
-import 'models/cat_state.dart';
+import 'models/owl_state.dart';
 import 'models/category.dart';
 import 'models/category_challenge_result.dart';
 import 'models/daily_log_completion.dart';
@@ -43,8 +43,8 @@ void main() async {
   if (!Hive.isAdapterRegistered(HiveTypeIds.buddyWeeklyChallenge)) {
     Hive.registerAdapter(BuddyWeeklyChallengeAdapter());
   }
-  if (!Hive.isAdapterRegistered(HiveTypeIds.cat)) {
-    Hive.registerAdapter(CatStateAdapter());
+  if (!Hive.isAdapterRegistered(HiveTypeIds.owl)) {
+    Hive.registerAdapter(OwlStateAdapter());
   }
   await Hive.openBox<Expense>(HiveBoxes.expenses);
   await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
@@ -53,7 +53,7 @@ void main() async {
   await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
   await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
   await Hive.openBox<BuddyWeeklyChallenge>(HiveBoxes.buddyWeeklyChallenges);
-  await Hive.openBox<CatState>(HiveBoxes.catState);
+  await Hive.openBox<OwlState>(HiveBoxes.owlState);
   await Hive.openBox(HiveBoxes.settings);
   await AnalyticsService.instance.init();
   AnalyticsService.instance.capture('app_opened');
@@ -71,10 +71,10 @@ void main() async {
   // crossed while the app was closed — see evaluateMonthBoundaryIfNeeded.
   await gamificationProvider.evaluateMonthBoundaryIfNeeded();
   // Reflect any mood decay from real time passing while the app was closed
-  // (e.g. it's now evening and today isn't logged yet) — refreshCatState()
+  // (e.g. it's now evening and today isn't logged yet) — refreshOwlState()
   // is also called from evaluateMonthBoundaryIfNeeded above, but that only
   // runs on a month-boundary crossing, not every app open.
-  await gamificationProvider.refreshCatState();
+  await gamificationProvider.refreshOwlState();
 
   runApp(
     MultiProvider(

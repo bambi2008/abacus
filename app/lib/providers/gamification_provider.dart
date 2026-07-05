@@ -3,8 +3,8 @@ import 'package:hive/hive.dart';
 
 import '../config/constants.dart';
 import '../models/badge_record.dart';
-import '../models/cat_mood.dart';
-import '../models/cat_state.dart';
+import '../models/owl_mood.dart';
+import '../models/owl_state.dart';
 import '../models/category_challenge_result.dart';
 import '../models/no_spend_day_mark.dart';
 import '../services/analytics_service.dart';
@@ -20,7 +20,7 @@ class GamificationProvider extends ChangeNotifier {
   late Box<BadgeRecord> _badges;
   late Box<NoSpendDayMark> _noSpendDays;
   late Box<CategoryChallengeResult> _categoryResults;
-  late Box<CatState> _catStateBox;
+  late Box<OwlState> _owlStateBox;
   late Box _settings;
   ExpenseProvider? _expenseProvider;
   CategoryProvider? _categoryProvider;
@@ -29,7 +29,7 @@ class GamificationProvider extends ChangeNotifier {
     _badges = Hive.box<BadgeRecord>(HiveBoxes.badges);
     _noSpendDays = Hive.box<NoSpendDayMark>(HiveBoxes.noSpendDays);
     _categoryResults = Hive.box<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
-    _catStateBox = Hive.box<CatState>(HiveBoxes.catState);
+    _owlStateBox = Hive.box<OwlState>(HiveBoxes.owlState);
     _settings = Hive.box(HiveBoxes.settings);
   }
 
@@ -96,7 +96,7 @@ class GamificationProvider extends ChangeNotifier {
     if (_noSpendDays.get(key) != null) return;
     await _noSpendDays.put(key, NoSpendDayMark(date: _dateOnly(date), markedAt: DateTime.now()));
     AnalyticsService.instance.capture('no_spend_day_logged');
-    await refreshCatState();
+    await refreshOwlState();
     notifyListeners();
   }
 
@@ -169,7 +169,7 @@ class GamificationProvider extends ChangeNotifier {
       }
     }
     await _settings.put(SettingsKeys.lastMonthBoundaryCheck, now.toIso8601String());
-    await refreshCatState();
+    await refreshOwlState();
     notifyListeners();
     return wins;
   }
@@ -194,7 +194,7 @@ class GamificationProvider extends ChangeNotifier {
     return count;
   }
 
-  // --- Companion cat (Layer 3) ---
+  // --- Companion owl (Layer 3) ---
 
   /// A category win counts toward mood for roughly one evaluation cycle
   /// after it happened — category wins are always retrospective (evaluated
@@ -209,22 +209,22 @@ class GamificationProvider extends ChangeNotifier {
   }
 
   /// Computed live from real streak/challenge data every time — never
-  /// stored as the source of truth. See CatMood for the emoji/copy per
+  /// stored as the source of truth. See OwlMood for the emoji/copy per
   /// state and docs/technical-architecture.md for the design rationale.
-  CatMood get currentMood {
+  OwlMood get currentMood {
     final expenseProvider = _expenseProvider;
-    if (expenseProvider == null) return CatMood.sleeping;
+    if (expenseProvider == null) return OwlMood.sleeping;
     final streak = expenseProvider.currentStreak;
-    if (streak == 0) return CatMood.sleeping;
+    if (streak == 0) return OwlMood.sleeping;
 
     final loggedToday = expenseProvider.loggedToday;
     final isEvening = DateTime.now().hour >= 18;
     final atRisk = !loggedToday && isEvening;
-    if (atRisk) return CatMood.hungry;
+    if (atRisk) return OwlMood.hungry;
 
-    if (streak >= 100 || _recentCategoryWinCount >= 2) return CatMood.thriving;
-    if (streak >= 30 || (streak >= 7 && _recentCategoryWinCount >= 1)) return CatMood.happy;
-    return CatMood.content;
+    if (streak >= 100 || _recentCategoryWinCount >= 2) return OwlMood.thriving;
+    if (streak >= 30 || (streak >= 7 && _recentCategoryWinCount >= 1)) return OwlMood.happy;
+    return OwlMood.content;
   }
 
   /// A derived, on-demand accumulator over data that already exists
@@ -255,31 +255,31 @@ class GamificationProvider extends ChangeNotifier {
 
   /// Recomputes mood/stage and persists only when something actually
   /// changed — this both avoids needless Hive writes and ensures
-  /// `cat_evolved` only fires on genuine stage transitions, not every call.
-  Future<void> refreshCatState() async {
+  /// `owl_evolved` only fires on genuine stage transitions, not every call.
+  Future<void> refreshOwlState() async {
     final mood = currentMood;
     final stage = evolutionStage;
-    final existing = _catStateBox.get('cat');
+    final existing = _owlStateBox.get('owl');
     if (existing != null && existing.moodLevel == mood.index && existing.evolutionStage == stage) {
       return;
     }
     final previousStage = existing?.evolutionStage;
-    await _catStateBox.put(
-      'cat',
-      CatState(moodLevel: mood.index, totalCareScore: careScore, lastUpdated: DateTime.now(), evolutionStage: stage),
+    await _owlStateBox.put(
+      'owl',
+      OwlState(moodLevel: mood.index, totalCareScore: careScore, lastUpdated: DateTime.now(), evolutionStage: stage),
     );
     if (previousStage != null && stage != previousStage) {
-      AnalyticsService.instance.capture('cat_evolved', properties: {'new_stage': stage});
+      AnalyticsService.instance.capture('owl_evolved', properties: {'new_stage': stage});
     }
     notifyListeners();
   }
 
   /// Single orchestration entry point for "something just happened that
-  /// might earn a badge and/or change the cat's mood" — called from the
+  /// might earn a badge and/or change the owl's mood" — called from the
   /// log-expense confirm flow instead of two separate provider calls.
   Future<BadgeRecord?> onExpenseLogged(int currentStreak) async {
     final badge = await checkForNewMilestone(currentStreak);
-    await refreshCatState();
+    await refreshOwlState();
     return badge;
   }
 }

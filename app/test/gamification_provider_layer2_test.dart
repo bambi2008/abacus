@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 import 'package:abacus/config/constants.dart';
 import 'package:abacus/models/badge_record.dart';
-import 'package:abacus/models/cat_state.dart';
+import 'package:abacus/models/owl_state.dart';
 import 'package:abacus/models/category.dart';
 import 'package:abacus/models/category_challenge_result.dart';
 import 'package:abacus/models/daily_log_completion.dart';
@@ -38,8 +38,8 @@ void main() {
     if (!Hive.isAdapterRegistered(HiveTypeIds.categoryChallengeResult)) {
       Hive.registerAdapter(CategoryChallengeResultAdapter());
     }
-    if (!Hive.isAdapterRegistered(HiveTypeIds.cat)) {
-      Hive.registerAdapter(CatStateAdapter());
+    if (!Hive.isAdapterRegistered(HiveTypeIds.owl)) {
+      Hive.registerAdapter(OwlStateAdapter());
     }
     await Hive.openBox<Expense>(HiveBoxes.expenses);
     await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
@@ -47,7 +47,7 @@ void main() {
     await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
     await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
     await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
-    await Hive.openBox<CatState>(HiveBoxes.catState);
+    await Hive.openBox<OwlState>(HiveBoxes.owlState);
     await Hive.openBox(HiveBoxes.settings);
 
     expenseProvider = ExpenseProvider()..load();

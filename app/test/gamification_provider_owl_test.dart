@@ -3,13 +3,13 @@ import 'package:hive/hive.dart';
 
 import 'package:abacus/config/constants.dart';
 import 'package:abacus/models/badge_record.dart';
-import 'package:abacus/models/cat_mood.dart';
-import 'package:abacus/models/cat_state.dart';
 import 'package:abacus/models/category.dart';
 import 'package:abacus/models/category_challenge_result.dart';
 import 'package:abacus/models/daily_log_completion.dart';
 import 'package:abacus/models/expense.dart';
 import 'package:abacus/models/no_spend_day_mark.dart';
+import 'package:abacus/models/owl_mood.dart';
+import 'package:abacus/models/owl_state.dart';
 import 'package:abacus/providers/category_provider.dart';
 import 'package:abacus/providers/expense_provider.dart';
 import 'package:abacus/providers/gamification_provider.dart';
@@ -20,7 +20,7 @@ void main() {
   late CategoryProvider categoryProvider;
 
   setUp(() async {
-    Hive.init('test_hive_gamification_cat');
+    Hive.init('test_hive_gamification_owl');
     if (!Hive.isAdapterRegistered(HiveTypeIds.expense)) {
       Hive.registerAdapter(ExpenseAdapter());
     }
@@ -39,8 +39,8 @@ void main() {
     if (!Hive.isAdapterRegistered(HiveTypeIds.categoryChallengeResult)) {
       Hive.registerAdapter(CategoryChallengeResultAdapter());
     }
-    if (!Hive.isAdapterRegistered(HiveTypeIds.cat)) {
-      Hive.registerAdapter(CatStateAdapter());
+    if (!Hive.isAdapterRegistered(HiveTypeIds.owl)) {
+      Hive.registerAdapter(OwlStateAdapter());
     }
     await Hive.openBox<Expense>(HiveBoxes.expenses);
     await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
@@ -48,7 +48,7 @@ void main() {
     await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
     await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
     await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
-    await Hive.openBox<CatState>(HiveBoxes.catState);
+    await Hive.openBox<OwlState>(HiveBoxes.owlState);
     await Hive.openBox(HiveBoxes.settings);
 
     expenseProvider = ExpenseProvider()..load();
@@ -69,7 +69,7 @@ void main() {
     // streak/category-win state instead.
 
     test('zero streak is sleeping, regardless of anything else', () {
-      expect(gamification.currentMood, CatMood.sleeping);
+      expect(gamification.currentMood, OwlMood.sleeping);
     });
 
     test('an active streak with nothing special is content', () async {
@@ -80,8 +80,8 @@ void main() {
       // "hungry" if the test happens to run in the evening — assert the
       // weaker, still-meaningful property that it's neither sleeping nor a
       // higher tier than warranted by a 1-day streak with no wins.
-      expect(gamification.currentMood, isNot(CatMood.sleeping));
-      expect(gamification.currentMood, isNot(CatMood.thriving));
+      expect(gamification.currentMood, isNot(OwlMood.sleeping));
+      expect(gamification.currentMood, isNot(OwlMood.thriving));
     });
   });
 
@@ -102,26 +102,26 @@ void main() {
   });
 
   group('evolutionStage', () {
-    test('starts at kitten (stage 0) with zero score', () {
+    test('starts at owlet (stage 0) with zero score', () {
       expect(gamification.evolutionStage, 0);
-      expect(gamification.evolutionStageName, 'Kitten');
+      expect(gamification.evolutionStageName, 'Owlet');
     });
 
-    test('crosses into young cat once score reaches the threshold', () async {
-      // 3 badges * 10 = 30, right at the young-cat threshold.
+    test('crosses into young owl once score reaches the threshold', () async {
+      // 3 badges * 10 = 30, right at the young-owl threshold.
       await gamification.checkForNewMilestone(7);
       await gamification.checkForNewMilestone(30);
       await gamification.checkForNewMilestone(100);
       expect(gamification.careScore, 30);
       expect(gamification.evolutionStage, 1);
-      expect(gamification.evolutionStageName, 'Young Cat');
+      expect(gamification.evolutionStageName, 'Young Owl');
     });
   });
 
-  group('refreshCatState', () {
-    test('is idempotent when nothing changed (no duplicate cat_evolved-worthy writes)', () async {
-      await gamification.refreshCatState();
-      await gamification.refreshCatState();
+  group('refreshOwlState', () {
+    test('is idempotent when nothing changed (no duplicate owl_evolved-worthy writes)', () async {
+      await gamification.refreshOwlState();
+      await gamification.refreshOwlState();
       // No exception, no crash — the point of this test is the guard
       // clause comparing against the persisted record short-circuits.
     });

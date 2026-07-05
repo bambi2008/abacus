@@ -9,9 +9,9 @@ import '../providers/gamification_provider.dart';
 import '../services/analytics_service.dart';
 
 /// "省钱搭子" (savings buddy) — the third main-line card on Today, parallel
-/// in visual weight to the streak card and the companion cat card. This is
+/// in visual weight to the streak card and the companion owl card. This is
 /// the social/relational pillar: the streak card is the individual habit
-/// metric, the cat is the individual emotional/growth metric, this card is
+/// metric, the owl is the individual emotional/growth metric, this card is
 /// the relational one. Local-only scaffold: the invite/own-count side is
 /// real, the partner's side is an honest "waiting to sync" placeholder
 /// since no backend exists yet for real two-device sync — see

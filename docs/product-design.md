@@ -78,8 +78,8 @@ must be a guaranteed-achievable win, not a setup chore.
   3 concurrent freezes and can bank one per week.
 - **Buddy streak** (the viral mechanic — 2026-07-05: elevated to its own
   main-line card on Today, `BuddyStreakCard`, parallel in visual weight to
-  the streak card and the companion cat card: the streak card is the
-  individual habit metric, the cat is the individual emotional/growth
+  the streak card and the companion owl card: the streak card is the
+  individual habit metric, the owl is the individual emotional/growth
   metric, this card is the relational one — not buried in Settings behind
   a single list tile anymore). "Start a buddy streak" generates a share
   link/code. Once a second person joins, a **separate, second streak

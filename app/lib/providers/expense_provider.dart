@@ -154,7 +154,7 @@ class ExpenseProvider extends ChangeNotifier {
   }
 
   /// All-time count of days with a real log (excludes frozen days) — used
-  /// by the companion cat's care-score accumulator. Not the same as
+  /// by the companion owl's care-score accumulator. Not the same as
   /// [currentStreak], which only counts the *current* consecutive run.
   int get totalLoggedDaysCount => _completionBox.values.where((c) => c.loggedAnyExpense).length;
 }
