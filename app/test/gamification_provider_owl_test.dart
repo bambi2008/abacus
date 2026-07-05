@@ -10,6 +10,7 @@ import 'package:abacus/models/expense.dart';
 import 'package:abacus/models/no_spend_day_mark.dart';
 import 'package:abacus/models/owl_mood.dart';
 import 'package:abacus/models/owl_state.dart';
+import 'package:abacus/models/complete_log_day_mark.dart';
 import 'package:abacus/providers/category_provider.dart';
 import 'package:abacus/providers/expense_provider.dart';
 import 'package:abacus/providers/gamification_provider.dart';
@@ -42,6 +43,9 @@ void main() {
     if (!Hive.isAdapterRegistered(HiveTypeIds.owl)) {
       Hive.registerAdapter(OwlStateAdapter());
     }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.completeLogDay)) {
+      Hive.registerAdapter(CompleteLogDayMarkAdapter());
+    }
     await Hive.openBox<Expense>(HiveBoxes.expenses);
     await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
     await Hive.openBox<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
@@ -49,6 +53,7 @@ void main() {
     await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
     await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
     await Hive.openBox<OwlState>(HiveBoxes.owlState);
+    await Hive.openBox<CompleteLogDayMark>(HiveBoxes.completeLogDays);
     await Hive.openBox(HiveBoxes.settings);
 
     expenseProvider = ExpenseProvider()..load();
@@ -90,14 +95,15 @@ void main() {
       expect(gamification.careScore, 0);
     });
 
-    test('accumulates from logged days, category wins, no-spend days, and badges', () async {
+    test('accumulates from logged days, category wins, no-spend days, complete-log days, and badges', () async {
       final category = await _addCategory(categoryProvider, 'Food', limit: 100.0);
       await expenseProvider.addExpense(amount: 5.0, categoryId: category.id); // +1 logged day
       await gamification.markNoSpendDay(DateTime.now().subtract(const Duration(days: 1))); // +5
+      await gamification.markCompleteLogDay(DateTime.now()); // +3
       await gamification.checkForNewMilestone(7); // +10 (badge, even though streak isn't really 7 here)
 
-      // 1 logged day (+1) + 0 category wins (+0) + 1 no-spend day (+5) + 1 badge (+10) = 16
-      expect(gamification.careScore, 16);
+      // 1 logged day (+1) + 0 category wins (+0) + 1 no-spend day (+5) + 1 complete-log day (+3) + 1 badge (+10) = 19
+      expect(gamification.careScore, 19);
     });
   });
 

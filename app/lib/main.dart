@@ -6,6 +6,7 @@ import 'app.dart';
 import 'config/constants.dart';
 import 'models/badge_record.dart';
 import 'models/buddy_weekly_challenge.dart';
+import 'models/complete_log_day_mark.dart';
 import 'models/owl_state.dart';
 import 'models/category.dart';
 import 'models/category_challenge_result.dart';
@@ -48,6 +49,9 @@ void main() async {
   if (!Hive.isAdapterRegistered(HiveTypeIds.owl)) {
     Hive.registerAdapter(OwlStateAdapter());
   }
+  if (!Hive.isAdapterRegistered(HiveTypeIds.completeLogDay)) {
+    Hive.registerAdapter(CompleteLogDayMarkAdapter());
+  }
   await Hive.openBox<Expense>(HiveBoxes.expenses);
   await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
   await Hive.openBox<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
@@ -56,6 +60,7 @@ void main() async {
   await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
   await Hive.openBox<BuddyWeeklyChallenge>(HiveBoxes.buddyWeeklyChallenges);
   await Hive.openBox<OwlState>(HiveBoxes.owlState);
+  await Hive.openBox<CompleteLogDayMark>(HiveBoxes.completeLogDays);
   await Hive.openBox(HiveBoxes.settings);
   await AnalyticsService.instance.init();
   AnalyticsService.instance.capture('app_opened');

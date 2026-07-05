@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 
 import '../config/constants.dart';
 import '../models/badge_record.dart';
+import '../models/complete_log_day_mark.dart';
 import '../models/owl_mood.dart';
 import '../models/owl_state.dart';
 import '../models/category_challenge_result.dart';
@@ -21,6 +22,7 @@ class GamificationProvider extends ChangeNotifier {
   late Box<NoSpendDayMark> _noSpendDays;
   late Box<CategoryChallengeResult> _categoryResults;
   late Box<OwlState> _owlStateBox;
+  late Box<CompleteLogDayMark> _completeLogDays;
   late Box _settings;
   ExpenseProvider? _expenseProvider;
   CategoryProvider? _categoryProvider;
@@ -30,6 +32,7 @@ class GamificationProvider extends ChangeNotifier {
     _noSpendDays = Hive.box<NoSpendDayMark>(HiveBoxes.noSpendDays);
     _categoryResults = Hive.box<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
     _owlStateBox = Hive.box<OwlState>(HiveBoxes.owlState);
+    _completeLogDays = Hive.box<CompleteLogDayMark>(HiveBoxes.completeLogDays);
     _settings = Hive.box(HiveBoxes.settings);
   }
 
@@ -96,6 +99,30 @@ class GamificationProvider extends ChangeNotifier {
     if (_noSpendDays.get(key) != null) return;
     await _noSpendDays.put(key, NoSpendDayMark(date: _dateOnly(date), markedAt: DateTime.now()));
     AnalyticsService.instance.capture('no_spend_day_logged');
+    await refreshOwlState();
+    notifyListeners();
+  }
+
+  // --- Complete-log days (Layer 2 bonus — does NOT gate the streak) ---
+
+  /// 2026-07-05 design decision: raising the streak's daily requirement from
+  /// 1 log to a fixed count (e.g. 3-5) was considered and rejected — a fixed
+  /// count is arbitrary and unfair on days a user genuinely only spent once,
+  /// and it would raise the core loop's daily friction right after the
+  /// opposite direction (lowering psychological pressure to "just log your
+  /// biggest expense") was chosen. Instead this is a self-declared, opt-in
+  /// bonus — mirrors NoSpendDayMark's honesty-based pattern, since there's
+  /// no bank sync to verify true completeness against. It only feeds
+  /// [careScore] as an optional depth layer for more engaged users; the
+  /// streak itself is untouched.
+  bool isCompleteLogDay(DateTime date) => _completeLogDays.get(_dateKey(date)) != null;
+
+  /// Idempotent — marking an already-marked day is a no-op.
+  Future<void> markCompleteLogDay(DateTime date) async {
+    final key = _dateKey(date);
+    if (_completeLogDays.get(key) != null) return;
+    await _completeLogDays.put(key, CompleteLogDayMark(date: _dateOnly(date), markedAt: DateTime.now()));
+    AnalyticsService.instance.capture('complete_log_day_marked');
     await refreshOwlState();
     notifyListeners();
   }
@@ -228,17 +255,19 @@ class GamificationProvider extends ChangeNotifier {
   }
 
   /// A derived, on-demand accumulator over data that already exists
-  /// elsewhere (logged days, category wins, no-spend days, badges) —
-  /// deliberately never imperatively incremented at each trigger point,
-  /// which would risk drifting out of sync with the underlying records.
+  /// elsewhere (logged days, category wins, no-spend days, complete-log
+  /// days, badges) — deliberately never imperatively incremented at each
+  /// trigger point, which would risk drifting out of sync with the
+  /// underlying records.
   int get careScore {
     final expenseProvider = _expenseProvider;
     if (expenseProvider == null) return 0;
     final loggedDays = expenseProvider.totalLoggedDaysCount;
     final categoryWins = _categoryResults.values.where((r) => r.won).length;
     final noSpendDays = _noSpendDays.length;
+    final completeLogDays = _completeLogDays.length;
     final badges = _badges.length;
-    return loggedDays * 1 + categoryWins * 3 + noSpendDays * 5 + badges * 10;
+    return loggedDays * 1 + categoryWins * 3 + noSpendDays * 5 + completeLogDays * 3 + badges * 10;
   }
 
   /// Coarse, long-term tier over [careScore] — separate from the day-to-day

@@ -103,6 +103,27 @@ class _TodayScreenState extends State<TodayScreen> {
                   label: Text(gamification.isNoSpendDay(now) ? 'Marked as no-spend today' : 'Mark today as no-spend'),
                 ),
               ),
+            ] else ...[
+              // Optional bonus layer, not a requirement — the streak itself
+              // only ever needs one log/day. This just lets a more engaged
+              // user flag "that's everything I spent today" for extra owl
+              // care score, without a fixed log-count quota that would be
+              // arbitrary on days with genuinely few transactions.
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: gamification.isCompleteLogDay(now)
+                      ? null
+                      : () => context.read<GamificationProvider>().markCompleteLogDay(now),
+                  icon: const Icon(Icons.playlist_add_check, size: 18),
+                  label: Text(
+                    gamification.isCompleteLogDay(now)
+                        ? 'Marked as fully logged today'
+                        : 'That\'s everything I spent today',
+                  ),
+                ),
+              ),
             ],
             const SizedBox(height: 16),
             Text('Today\'s spending', style: Theme.of(context).textTheme.titleMedium),

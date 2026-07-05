@@ -70,6 +70,15 @@ must be a guaranteed-achievable win, not a setup chore.
   count when a freeze is available (see below), tapped to see remaining
   freeze count — visible but not intrusive, so it functions as a safety
   net the user is aware of, not a hidden mechanic.
+- **"That's everything I spent today" (2026-07-05)** — a low-key text
+  button shown once the user has logged at least one expense that day.
+  Considered and rejected: raising the streak's requirement from 1 log/day
+  to a fixed count (3-5) to make the streak actually mean "complete data" —
+  rejected because a fixed count is arbitrary on days with genuinely few
+  transactions and would raise the core loop's daily friction right after
+  the opposite direction (lower the psychological bar) was chosen. Instead
+  this is a self-declared, opt-in bonus that only feeds the owl's care
+  score — the streak itself never requires more than one log.
 
 ## Streak mechanics (UI surface for the retention system)
 

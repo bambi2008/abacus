@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:abacus/config/constants.dart';
 import 'package:abacus/models/badge_record.dart';
 import 'package:abacus/models/owl_state.dart';
+import 'package:abacus/models/complete_log_day_mark.dart';
 import 'package:abacus/models/category_challenge_result.dart';
 import 'package:abacus/models/no_spend_day_mark.dart';
 import 'package:abacus/providers/gamification_provider.dart';
@@ -25,10 +26,14 @@ void main() {
     if (!Hive.isAdapterRegistered(HiveTypeIds.owl)) {
       Hive.registerAdapter(OwlStateAdapter());
     }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.completeLogDay)) {
+      Hive.registerAdapter(CompleteLogDayMarkAdapter());
+    }
     await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
     await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
     await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
     await Hive.openBox<OwlState>(HiveBoxes.owlState);
+    await Hive.openBox<CompleteLogDayMark>(HiveBoxes.completeLogDays);
     await Hive.openBox(HiveBoxes.settings);
     provider = GamificationProvider()..load();
   });

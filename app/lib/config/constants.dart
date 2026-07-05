@@ -8,6 +8,7 @@ class HiveBoxes {
   static const categoryChallengeResults = 'category_challenge_results';
   static const buddyWeeklyChallenges = 'buddy_weekly_challenges';
   static const owlState = 'owl_state';
+  static const completeLogDays = 'complete_log_days';
 }
 
 class HiveTypeIds {
@@ -19,6 +20,7 @@ class HiveTypeIds {
   static const categoryChallengeResult = 5;
   static const owl = 6;
   static const buddyWeeklyChallenge = 7;
+  static const completeLogDay = 8;
 }
 
 /// Coarse, long-term progression tier over cumulative care score — separate
