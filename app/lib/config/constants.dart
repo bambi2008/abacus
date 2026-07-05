@@ -7,6 +7,7 @@ class HiveBoxes {
   static const noSpendDays = 'no_spend_days';
   static const categoryChallengeResults = 'category_challenge_results';
   static const buddyWeeklyChallenges = 'buddy_weekly_challenges';
+  static const catState = 'cat_state';
 }
 
 class HiveTypeIds {
@@ -16,7 +17,14 @@ class HiveTypeIds {
   static const badge = 3;
   static const noSpendDay = 4;
   static const categoryChallengeResult = 5;
+  static const cat = 6;
   static const buddyWeeklyChallenge = 7;
+}
+
+/// Coarse, long-term progression tier over cumulative care score — separate
+/// from the day-to-day CatMood. See GamificationProvider.evolutionStage.
+class EvolutionStages {
+  static const names = ['Kitten', 'Young Cat', 'Grown Cat', 'Elder Cat'];
 }
 
 /// Milestone streak days that trigger a full-screen celebration, and the

@@ -3,6 +3,8 @@ import 'package:hive/hive.dart';
 
 import '../config/constants.dart';
 import '../models/badge_record.dart';
+import '../models/cat_mood.dart';
+import '../models/cat_state.dart';
 import '../models/category_challenge_result.dart';
 import '../models/no_spend_day_mark.dart';
 import '../services/analytics_service.dart';
@@ -18,6 +20,7 @@ class GamificationProvider extends ChangeNotifier {
   late Box<BadgeRecord> _badges;
   late Box<NoSpendDayMark> _noSpendDays;
   late Box<CategoryChallengeResult> _categoryResults;
+  late Box<CatState> _catStateBox;
   late Box _settings;
   ExpenseProvider? _expenseProvider;
   CategoryProvider? _categoryProvider;
@@ -26,6 +29,7 @@ class GamificationProvider extends ChangeNotifier {
     _badges = Hive.box<BadgeRecord>(HiveBoxes.badges);
     _noSpendDays = Hive.box<NoSpendDayMark>(HiveBoxes.noSpendDays);
     _categoryResults = Hive.box<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
+    _catStateBox = Hive.box<CatState>(HiveBoxes.catState);
     _settings = Hive.box(HiveBoxes.settings);
   }
 
@@ -92,6 +96,7 @@ class GamificationProvider extends ChangeNotifier {
     if (_noSpendDays.get(key) != null) return;
     await _noSpendDays.put(key, NoSpendDayMark(date: _dateOnly(date), markedAt: DateTime.now()));
     AnalyticsService.instance.capture('no_spend_day_logged');
+    await refreshCatState();
     notifyListeners();
   }
 
@@ -164,6 +169,7 @@ class GamificationProvider extends ChangeNotifier {
       }
     }
     await _settings.put(SettingsKeys.lastMonthBoundaryCheck, now.toIso8601String());
+    await refreshCatState();
     notifyListeners();
     return wins;
   }
@@ -186,5 +192,94 @@ class GamificationProvider extends ChangeNotifier {
       if (completion != null && (completion.loggedAnyExpense || completion.usedStreakFreeze)) count++;
     }
     return count;
+  }
+
+  // --- Companion cat (Layer 3) ---
+
+  /// A category win counts toward mood for roughly one evaluation cycle
+  /// after it happened — category wins are always retrospective (evaluated
+  /// at a month boundary, about the month that just ended), so "recent"
+  /// here means "from the most recent evaluation," not "this calendar
+  /// month" literally.
+  static const _recentWinWindow = Duration(days: 35);
+
+  int get _recentCategoryWinCount {
+    final cutoff = DateTime.now().subtract(_recentWinWindow);
+    return _categoryResults.values.where((r) => r.won && r.evaluatedAt.isAfter(cutoff)).length;
+  }
+
+  /// Computed live from real streak/challenge data every time — never
+  /// stored as the source of truth. See CatMood for the emoji/copy per
+  /// state and docs/technical-architecture.md for the design rationale.
+  CatMood get currentMood {
+    final expenseProvider = _expenseProvider;
+    if (expenseProvider == null) return CatMood.sleeping;
+    final streak = expenseProvider.currentStreak;
+    if (streak == 0) return CatMood.sleeping;
+
+    final loggedToday = expenseProvider.loggedToday;
+    final isEvening = DateTime.now().hour >= 18;
+    final atRisk = !loggedToday && isEvening;
+    if (atRisk) return CatMood.hungry;
+
+    if (streak >= 100 || _recentCategoryWinCount >= 2) return CatMood.thriving;
+    if (streak >= 30 || (streak >= 7 && _recentCategoryWinCount >= 1)) return CatMood.happy;
+    return CatMood.content;
+  }
+
+  /// A derived, on-demand accumulator over data that already exists
+  /// elsewhere (logged days, category wins, no-spend days, badges) —
+  /// deliberately never imperatively incremented at each trigger point,
+  /// which would risk drifting out of sync with the underlying records.
+  int get careScore {
+    final expenseProvider = _expenseProvider;
+    if (expenseProvider == null) return 0;
+    final loggedDays = expenseProvider.totalLoggedDaysCount;
+    final categoryWins = _categoryResults.values.where((r) => r.won).length;
+    final noSpendDays = _noSpendDays.length;
+    final badges = _badges.length;
+    return loggedDays * 1 + categoryWins * 3 + noSpendDays * 5 + badges * 10;
+  }
+
+  /// Coarse, long-term tier over [careScore] — separate from the day-to-day
+  /// [currentMood]. Thresholds are a planning estimate, not load-bearing.
+  int get evolutionStage {
+    final score = careScore;
+    if (score < 30) return 0;
+    if (score < 120) return 1;
+    if (score < 365) return 2;
+    return 3;
+  }
+
+  String get evolutionStageName => EvolutionStages.names[evolutionStage];
+
+  /// Recomputes mood/stage and persists only when something actually
+  /// changed — this both avoids needless Hive writes and ensures
+  /// `cat_evolved` only fires on genuine stage transitions, not every call.
+  Future<void> refreshCatState() async {
+    final mood = currentMood;
+    final stage = evolutionStage;
+    final existing = _catStateBox.get('cat');
+    if (existing != null && existing.moodLevel == mood.index && existing.evolutionStage == stage) {
+      return;
+    }
+    final previousStage = existing?.evolutionStage;
+    await _catStateBox.put(
+      'cat',
+      CatState(moodLevel: mood.index, totalCareScore: careScore, lastUpdated: DateTime.now(), evolutionStage: stage),
+    );
+    if (previousStage != null && stage != previousStage) {
+      AnalyticsService.instance.capture('cat_evolved', properties: {'new_stage': stage});
+    }
+    notifyListeners();
+  }
+
+  /// Single orchestration entry point for "something just happened that
+  /// might earn a badge and/or change the cat's mood" — called from the
+  /// log-expense confirm flow instead of two separate provider calls.
+  Future<BadgeRecord?> onExpenseLogged(int currentStreak) async {
+    final badge = await checkForNewMilestone(currentStreak);
+    await refreshCatState();
+    return badge;
   }
 }

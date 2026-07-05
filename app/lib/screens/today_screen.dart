@@ -7,6 +7,7 @@ import '../models/category.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
+import '../widgets/companion_cat_card.dart';
 import 'category_challenge_win_screen.dart';
 import 'milestone_celebration_screen.dart';
 
@@ -81,6 +82,8 @@ class _TodayScreenState extends State<TodayScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             _StreakCard(streak: streak, atRisk: atRisk),
+            const SizedBox(height: 12),
+            const CompanionCatCard(),
             if (!loggedToday) ...[
               const SizedBox(height: 8),
               Align(
@@ -294,7 +297,7 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
       categoryId: _selectedCategoryId!,
       note: _noteController.text,
     );
-    final badge = await gamificationProvider.checkForNewMilestone(expenseProvider.currentStreak);
+    final badge = await gamificationProvider.onExpenseLogged(expenseProvider.currentStreak);
     // Brief pause so the inline checkmark is actually seen before the sheet
     // closes — this replaces the previous silent, instant dismiss.
     await Future.delayed(const Duration(milliseconds: 300));
