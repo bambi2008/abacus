@@ -31,7 +31,10 @@ entry speed without ever silently creating a transaction on its own.
 
 iOS-only for v1 (`ReceiptOcrService.isAvailable`); the "Scan receipt" button
 is hidden on other platforms rather than shown broken, since there's no
-Android/desktop text-recognition plugin wired up yet.
+Android/desktop text-recognition plugin wired up yet. Tapping it offers a
+choice of camera or photo library (`image_picker`'s `ImageSource`) — needed
+for testing on the iOS Simulator (no camera hardware), and a real convenience
+for real users who already have a receipt photo saved.
 
 ## Flutter app (reuse from HeelEase/Regimen)
 
