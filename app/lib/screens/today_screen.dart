@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 
 import '../models/category.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
+import '../providers/gamification_provider.dart';
+import 'milestone_celebration_screen.dart';
 
 class TodayScreen extends StatelessWidget {
   const TodayScreen({super.key});
@@ -78,7 +82,30 @@ class _StreakCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            Text(streak > 0 ? '🔥' : '🔒', style: const TextStyle(fontSize: 40)),
+            // AnimatedSwitcher plays an elastic "pop" whenever the streak
+            // value changes (increment or the 🔥/🔒 swap at zero); the
+            // wrapped flutter_animate chain gives it a continuous idle
+            // "breathing" pulse the rest of the time, so the card feels
+            // alive even between logs, not just at the moment of change.
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (child, animation) => ScaleTransition(
+                scale: CurvedAnimation(parent: animation, curve: Curves.elasticOut),
+                child: child,
+              ),
+              child: Text(
+                streak > 0 ? '🔥' : '🔒',
+                key: ValueKey(streak),
+                style: const TextStyle(fontSize: 40),
+              )
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .scale(
+                    begin: const Offset(1, 1),
+                    end: const Offset(1.08, 1.08),
+                    duration: 1800.ms,
+                    curve: Curves.easeInOut,
+                  ),
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -155,6 +182,7 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   String? _selectedCategoryId;
+  bool _confirmed = false;
 
   @override
   void dispose() {
@@ -163,15 +191,31 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
     super.dispose();
   }
 
-  void _confirm(BuildContext context) {
+  Future<void> _confirm(BuildContext context) async {
+    if (_confirmed) return;
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0 || _selectedCategoryId == null) return;
-    context.read<ExpenseProvider>().addExpense(
-          amount: amount,
-          categoryId: _selectedCategoryId!,
-          note: _noteController.text,
-        );
-    Navigator.of(context).pop();
+    // Light haptic on every routine log — deliberately the *light* variant,
+    // reserving stronger haptics/confetti for milestones only. See
+    // docs/technical-architecture.md's "game feel" calibration.
+    HapticFeedback.lightImpact();
+    setState(() => _confirmed = true);
+    final expenseProvider = context.read<ExpenseProvider>();
+    final gamificationProvider = context.read<GamificationProvider>();
+    final navigator = Navigator.of(context);
+    await expenseProvider.addExpense(
+      amount: amount,
+      categoryId: _selectedCategoryId!,
+      note: _noteController.text,
+    );
+    final badge = await gamificationProvider.checkForNewMilestone(expenseProvider.currentStreak);
+    // Brief pause so the inline checkmark is actually seen before the sheet
+    // closes — this replaces the previous silent, instant dismiss.
+    await Future.delayed(const Duration(milliseconds: 300));
+    navigator.pop();
+    if (badge != null) {
+      navigator.push(MaterialPageRoute(builder: (_) => MilestoneCelebrationScreen(badge: badge)));
+    }
   }
 
   @override
@@ -217,7 +261,16 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            child: FilledButton(onPressed: () => _confirm(context), child: const Text('Confirm')),
+            child: FilledButton(
+              onPressed: _confirmed ? null : () => _confirm(context),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                child: _confirmed
+                    ? const Icon(Icons.check, key: ValueKey('check'))
+                    : const Text('Confirm', key: ValueKey('label')),
+              ),
+            ),
           ),
         ],
       ),

@@ -5,11 +5,13 @@ import 'package:provider/provider.dart';
 
 import 'package:abacus/app.dart';
 import 'package:abacus/config/constants.dart';
+import 'package:abacus/models/badge_record.dart';
 import 'package:abacus/models/category.dart';
 import 'package:abacus/models/daily_log_completion.dart';
 import 'package:abacus/models/expense.dart';
 import 'package:abacus/providers/category_provider.dart';
 import 'package:abacus/providers/expense_provider.dart';
+import 'package:abacus/providers/gamification_provider.dart';
 import 'package:abacus/providers/onboarding_provider.dart';
 import 'package:abacus/providers/subscription_provider.dart';
 
@@ -25,9 +27,13 @@ void main() {
     if (!Hive.isAdapterRegistered(HiveTypeIds.dailyLogCompletion)) {
       Hive.registerAdapter(DailyLogCompletionAdapter());
     }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.badge)) {
+      Hive.registerAdapter(BadgeRecordAdapter());
+    }
     await Hive.openBox<Expense>(HiveBoxes.expenses);
     await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
     await Hive.openBox<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
+    await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
     final settings = await Hive.openBox(HiveBoxes.settings);
     await settings.put(SettingsKeys.hasOnboarded, true);
   });
@@ -43,12 +49,18 @@ void main() {
           ChangeNotifierProvider(create: (_) => OnboardingProvider()..load()),
           ChangeNotifierProvider(create: (_) => CategoryProvider()..load()),
           ChangeNotifierProvider(create: (_) => ExpenseProvider()..load()),
+          ChangeNotifierProvider(create: (_) => GamificationProvider()..load()),
           ChangeNotifierProvider(create: (_) => SubscriptionProvider()..load()),
         ],
         child: const AbacusApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    // Not pumpAndSettle: the streak card has an intentionally infinite
+    // repeating idle-pulse animation (flutter_animate), so pumpAndSettle
+    // would hang forever waiting for it to "finish." A bounded pump is
+    // enough to let one frame of that animation and any transient/entrance
+    // animations settle.
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('Today'), findsWidgets);

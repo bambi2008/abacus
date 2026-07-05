@@ -3,12 +3,27 @@ class HiveBoxes {
   static const categories = 'categories';
   static const dailyLogCompletions = 'daily_log_completions';
   static const settings = 'settings';
+  static const badges = 'badges';
 }
 
 class HiveTypeIds {
   static const expense = 0;
   static const category = 1;
   static const dailyLogCompletion = 2;
+  static const badge = 3;
+}
+
+/// Milestone streak days that trigger a full-screen celebration, and the
+/// escalating emoji/copy for each — see MilestoneCelebrationScreen.
+class MilestoneCatalog {
+  static const Map<int, (String emoji, String headline, String message)> data = {
+    7: ('🔥', '7-Day Streak!', 'One week of consistent logging. Keep it up.'),
+    30: ('🏆', '30-Day Streak!', 'A full month. This is a habit now.'),
+    100: ('💎', '100-Day Streak!', 'Triple digits. Most people never get here.'),
+    365: ('👑', 'One Year Streak!', 'You logged an expense every day for a year.'),
+  };
+
+  static List<int> get milestoneDays => data.keys.toList();
 }
 
 class SettingsKeys {
