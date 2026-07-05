@@ -2,11 +2,36 @@
 
 ## This is the simplest core loop of any project this session
 
-No AI vision API, no LLM analysis needed for the MVP core loop at all —
+No cloud AI vision API or LLM is needed for the MVP core loop at all —
 manual expense entry is just structured data (amount, category, note, date).
 This removes an entire class of risk present in HeelEase (medical evidence
 correctness) and Regimen (vision-model accuracy, biometric-data handling).
-AI is optional/Pro-tier polish here, not load-bearing for MVP.
+Cloud AI is optional/Pro-tier polish here, not load-bearing for MVP.
+**2026-07-05: an on-device (not cloud) receipt-scan assist was added** — see
+"Receipt OCR" below — but the core loop still works with zero AI of any kind
+if the user just types the three fields.
+
+## Receipt OCR (on-device entry-speed assist, not a step toward bank sync)
+
+The single biggest lever on the "will people actually do fully-manual entry"
+question isn't automating it away — that's Copilot/Monarch's territory and
+conceding it would erase Abacus's whole positioning — it's making each
+manual entry faster. `ReceiptOcrService` (`lib/services/receipt_ocr_service.dart`)
+lets the user snap a photo of a receipt from the log-expense sheet; Apple's
+**Vision framework** (`VNRecognizeTextRequest`, `ios/Runner/ReceiptOcrPlugin.swift`)
+recognizes the text entirely on-device — the photo is never uploaded anywhere,
+matching the "no cloud, no bank credentials" positioning. Recognized lines
+cross a method channel back to Dart, where a pure, independently-unit-tested
+heuristic (`parseReceiptText` in `lib/models/receipt_scan_result.dart`) guesses
+an amount (prefers a "Total" line, falls back to the largest amount on the
+receipt), a vendor (first substantial text line), and a date. Every guessed
+field only **pre-fills** the existing manual log-expense sheet — the user
+still confirms or edits it before it becomes a real Expense, so OCR assists
+entry speed without ever silently creating a transaction on its own.
+
+iOS-only for v1 (`ReceiptOcrService.isAvailable`); the "Scan receipt" button
+is hidden on other platforms rather than shown broken, since there's no
+Android/desktop text-recognition plugin wired up yet.
 
 ## Flutter app (reuse from HeelEase/Regimen)
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../models/category.dart';
@@ -8,6 +9,8 @@ import '../providers/buddy_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
+import '../services/analytics_service.dart';
+import '../services/receipt_ocr_service.dart';
 import '../widgets/buddy_streak_card.dart';
 import '../widgets/companion_owl_card.dart';
 import 'category_challenge_win_screen.dart';
@@ -276,12 +279,34 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
   final _noteController = TextEditingController();
   String? _selectedCategoryId;
   bool _confirmed = false;
+  bool _scanning = false;
 
   @override
   void dispose() {
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  Future<void> _scanReceipt() async {
+    final picker = ImagePicker();
+    final photo = await picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+    if (photo == null || !mounted) return;
+    setState(() => _scanning = true);
+    final result = await ReceiptOcrService.scan(photo.path);
+    if (!mounted) return;
+    setState(() => _scanning = false);
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not read that receipt — enter it manually.')),
+      );
+      return;
+    }
+    AnalyticsService.instance.capture('receipt_scanned');
+    setState(() {
+      if (result.amount != null) _amountController.text = result.amount!.toStringAsFixed(2);
+      if (result.vendor != null && _noteController.text.isEmpty) _noteController.text = result.vendor!;
+    });
   }
 
   Future<void> _confirm(BuildContext context) async {
@@ -331,7 +356,19 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Log an expense', style: Theme.of(context).textTheme.titleLarge),
+          Row(
+            children: [
+              Expanded(child: Text('Log an expense', style: Theme.of(context).textTheme.titleLarge)),
+              if (ReceiptOcrService.isAvailable)
+                IconButton(
+                  tooltip: 'Scan a receipt',
+                  onPressed: _scanning ? null : _scanReceipt,
+                  icon: _scanning
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.document_scanner_outlined),
+                ),
+            ],
+          ),
           const SizedBox(height: 16),
           TextField(
             controller: _amountController,

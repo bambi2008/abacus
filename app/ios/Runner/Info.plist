@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Abacus uses your camera to scan receipts and pre-fill expense amounts. Photos are processed on your device and are never uploaded.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Abacus can scan a receipt photo from your library to pre-fill expense amounts. Photos are processed on your device and are never uploaded.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

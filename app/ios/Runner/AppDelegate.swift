@@ -12,5 +12,7 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    let ocrRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "ReceiptOcrPlugin")
+    ReceiptOcrPlugin.register(with: ocrRegistrar)
   }
 }

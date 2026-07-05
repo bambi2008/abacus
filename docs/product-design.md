@@ -57,7 +57,10 @@ must be a guaranteed-achievable win, not a setup chore.
 - **"Log an expense" button** — the single largest tappable element on
   the screen. Opens a 3-field bottom sheet: amount (numeric keypad,
   auto-focused), category (horizontal chip picker, most-recently-used
-  first), optional note. No date picker (always today; editing past days
+  first), optional note. A camera icon (iOS only — see "Receipt OCR" in
+  `docs/technical-architecture.md`) lets the user snap a receipt instead of
+  typing the amount; recognition runs on-device and only pre-fills the same
+  fields, never auto-submits. No date picker (always today; editing past days
   happens in Progress). Confirm → haptic tick → sheet dismisses → running
   total updates.
 - **Today's spending vs. budget**, a simple bar per category, not a
