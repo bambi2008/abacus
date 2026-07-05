@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
+import '../providers/gamification_provider.dart';
 import '../providers/subscription_provider.dart';
 import 'paywall_screen.dart';
 
@@ -74,6 +75,15 @@ class ProgressScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _StreakCalendar(month: now),
           const SizedBox(height: 24),
+          Text('No-spend days', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(
+            'Tap a day to mark it as a deliberate no-spend win.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          _NoSpendCalendar(month: now),
+          const SizedBox(height: 24),
           Text('Recent entries', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           ..._recentEntries(context, expenses, categories),
@@ -134,6 +144,72 @@ class _InsightCard extends StatelessWidget {
             : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PaywallScreen())),
       ),
     );
+  }
+}
+
+/// Visually distinct from _StreakCalendar (a different fill color, and
+/// cells are tappable) — a no-spend day is a separate, opt-in signal, not
+/// the same thing as "logged an expense." See
+/// GamificationProvider.markNoSpendDay and docs/technical-architecture.md.
+class _NoSpendCalendar extends StatelessWidget {
+  final DateTime month;
+  const _NoSpendCalendar({required this.month});
+
+  @override
+  Widget build(BuildContext context) {
+    final gamification = context.watch<GamificationProvider>();
+    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
+    final today = DateTime.now();
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: List.generate(daysInMonth, (i) {
+        final day = DateTime(month.year, month.month, i + 1);
+        final marked = gamification.isNoSpendDay(day);
+        final isFuture = day.isAfter(today);
+        return GestureDetector(
+          onTap: isFuture || marked ? null : () => _confirmMark(context, day),
+          child: Container(
+            width: 28,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isFuture
+                  ? Colors.transparent
+                  : marked
+                      ? Theme.of(context).colorScheme.tertiary
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
+            ),
+            child: Text(
+              marked ? '💚' : '${i + 1}',
+              style: TextStyle(
+                fontSize: marked ? 12 : 10,
+                color: marked ? Theme.of(context).colorScheme.onTertiary : null,
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Future<void> _confirmMark(BuildContext context, DateTime day) async {
+    final gamification = context.read<GamificationProvider>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Mark ${day.month}/${day.day} as a no-spend day?'),
+        content: const Text('This is a separate win from your logging streak — a deliberate day you chose not to spend.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Mark it')),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await gamification.markNoSpendDay(day);
+    }
   }
 }
 

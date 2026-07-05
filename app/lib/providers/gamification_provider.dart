@@ -3,21 +3,41 @@ import 'package:hive/hive.dart';
 
 import '../config/constants.dart';
 import '../models/badge_record.dart';
+import '../models/category_challenge_result.dart';
+import '../models/no_spend_day_mark.dart';
 import '../services/analytics_service.dart';
+import 'category_provider.dart';
+import 'expense_provider.dart';
 
 /// Owns gamification state layered on top of ExpenseProvider/CategoryProvider
 /// without changing either's public API — see docs/technical-architecture.md
-/// and the gamification-depth plan. Milestone A: badge/milestone detection
-/// only. Later milestones (no-spend days, category challenges, cat state)
-/// will need live ExpenseProvider/CategoryProvider references — add a
-/// `bind()` method + ChangeNotifierProxyProvider2 wiring then, not before,
-/// to avoid unused fields now.
+/// and the gamification-depth plan. Reads live streak/category state via
+/// [bind], set once at app start (see main.dart) — no ChangeNotifierProxyProvider
+/// wiring needed since neither dependency is expected to be swapped at runtime.
 class GamificationProvider extends ChangeNotifier {
   late Box<BadgeRecord> _badges;
+  late Box<NoSpendDayMark> _noSpendDays;
+  late Box<CategoryChallengeResult> _categoryResults;
+  late Box _settings;
+  ExpenseProvider? _expenseProvider;
+  CategoryProvider? _categoryProvider;
 
   void load() {
     _badges = Hive.box<BadgeRecord>(HiveBoxes.badges);
+    _noSpendDays = Hive.box<NoSpendDayMark>(HiveBoxes.noSpendDays);
+    _categoryResults = Hive.box<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
+    _settings = Hive.box(HiveBoxes.settings);
   }
+
+  void bind(ExpenseProvider expenseProvider, CategoryProvider categoryProvider) {
+    _expenseProvider = expenseProvider;
+    _categoryProvider = categoryProvider;
+  }
+
+  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+  String _dateKey(DateTime d) => _dateOnly(d).toIso8601String();
+
+  // --- Badges / milestones (Layer 1) ---
 
   List<BadgeRecord> get earnedBadges => _badges.values.toList();
 
@@ -52,5 +72,119 @@ class GamificationProvider extends ChangeNotifier {
     if (badge == null) return;
     await _badges.put(badgeId, badge.copyWith(celebrationShown: true));
     notifyListeners();
+  }
+
+  // --- No-spend days (Layer 2) ---
+
+  bool isNoSpendDay(DateTime date) => _noSpendDays.get(_dateKey(date)) != null;
+
+  int get noSpendDayCountThisMonth {
+    final now = DateTime.now();
+    return _noSpendDays.values.where((m) => m.date.year == now.year && m.date.month == now.month).length;
+  }
+
+  /// Idempotent — marking an already-marked day is a no-op. Any date
+  /// (including today) can be marked: intent-based framing ("I'm
+  /// committing to no spend today") is a valid win condition too, matching
+  /// real no-spend-challenge apps' "mark as a deliberate win" language.
+  Future<void> markNoSpendDay(DateTime date) async {
+    final key = _dateKey(date);
+    if (_noSpendDays.get(key) != null) return;
+    await _noSpendDays.put(key, NoSpendDayMark(date: _dateOnly(date), markedAt: DateTime.now()));
+    AnalyticsService.instance.capture('no_spend_day_logged');
+    notifyListeners();
+  }
+
+  // --- Category "boss battle" (Layer 2) ---
+
+  List<CategoryChallengeResult> get categoryChallengeResults => _categoryResults.values.toList();
+
+  CategoryChallengeResult? get pendingCategoryCelebration {
+    for (final result in _categoryResults.values) {
+      if (result.won && !result.celebrationShown) return result;
+    }
+    return null;
+  }
+
+  Future<void> markCategoryCelebrationShown(String resultId) async {
+    final result = _categoryResults.get(resultId);
+    if (result == null) return;
+    await _categoryResults.put(resultId, result.copyWith(celebrationShown: true));
+    notifyListeners();
+  }
+
+  /// Idempotent and safe to call repeatedly (app start, first screen build
+  /// each session). Evaluates the previous calendar month's spend-vs-limit
+  /// for every category, exactly once per month boundary crossed. On the
+  /// very first-ever call there is nothing to evaluate retroactively (no
+  /// prior "previous month" the app was actually used for) — this just
+  /// records today as the baseline so evaluation starts from the *next*
+  /// month boundary, avoiding a spurious trivial "win" for a month that
+  /// predates any real usage.
+  Future<List<CategoryChallengeResult>> evaluateMonthBoundaryIfNeeded() async {
+    final expenseProvider = _expenseProvider;
+    final categoryProvider = _categoryProvider;
+    if (expenseProvider == null || categoryProvider == null) return [];
+
+    final now = DateTime.now();
+    final lastCheckStr = _settings.get(SettingsKeys.lastMonthBoundaryCheck) as String?;
+
+    if (lastCheckStr == null) {
+      await _settings.put(SettingsKeys.lastMonthBoundaryCheck, now.toIso8601String());
+      return [];
+    }
+
+    final lastCheck = DateTime.parse(lastCheckStr);
+    if (lastCheck.year == now.year && lastCheck.month == now.month) {
+      return [];
+    }
+
+    final prevMonthDate = DateTime(now.year, now.month - 1, 1);
+    final wins = <CategoryChallengeResult>[];
+    for (final category in categoryProvider.all) {
+      if (category.monthlyLimit <= 0) continue; // no challenge set — same convention as _totalMonthlyBudget
+      final id = '${category.id}_${prevMonthDate.year}-${prevMonthDate.month.toString().padLeft(2, '0')}';
+      if (_categoryResults.get(id) != null) continue; // already evaluated
+      final spend = expenseProvider.spendForCategoryInMonth(category.id, prevMonthDate);
+      final won = spend <= category.monthlyLimit;
+      final result = CategoryChallengeResult(
+        id: id,
+        categoryId: category.id,
+        year: prevMonthDate.year,
+        month: prevMonthDate.month,
+        limit: category.monthlyLimit,
+        actualSpend: spend,
+        won: won,
+        evaluatedAt: now,
+      );
+      await _categoryResults.put(id, result);
+      if (won) {
+        AnalyticsService.instance.capture('category_challenge_won', properties: {'category_id': category.id});
+        wins.add(result);
+      }
+    }
+    await _settings.put(SettingsKeys.lastMonthBoundaryCheck, now.toIso8601String());
+    notifyListeners();
+    return wins;
+  }
+
+  // --- Buddy weekly mini-challenge (Layer 2, local scaffold only) ---
+
+  /// Computed live from real local DailyLogCompletion data over the last 7
+  /// days — no persistence needed for this, it's a view over data that
+  /// already exists. The partner side has no real data source yet (no
+  /// backend), so the UI must show an honest "waiting to sync" state rather
+  /// than fabricate a number — see settings_screen.dart's _BuddyStreakTile.
+  int get currentWeekLoggedDaysCount {
+    final expenseProvider = _expenseProvider;
+    if (expenseProvider == null) return 0;
+    var count = 0;
+    final today = _dateOnly(DateTime.now());
+    for (var i = 0; i < 7; i++) {
+      final day = today.subtract(Duration(days: i));
+      final completion = expenseProvider.completionOn(day);
+      if (completion != null && (completion.loggedAnyExpense || completion.usedStreakFreeze)) count++;
+    }
+    return count;
   }
 }

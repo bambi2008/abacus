@@ -7,19 +7,58 @@ import '../models/category.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
+import 'category_challenge_win_screen.dart';
 import 'milestone_celebration_screen.dart';
 
-class TodayScreen extends StatelessWidget {
+class TodayScreen extends StatefulWidget {
   const TodayScreen({super.key});
+
+  @override
+  State<TodayScreen> createState() => _TodayScreenState();
+}
+
+class _TodayScreenState extends State<TodayScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Check for any celebration earned while the app was closed (or just
+    // now, via the log sheet) that hasn't been shown yet — done here rather
+    // than at the moment of earning so a cold-boot catch-up (see main.dart)
+    // doesn't celebrate before the user has even opened a normal screen.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showPendingCelebrationsIfAny());
+  }
+
+  void _showPendingCelebrationsIfAny() {
+    if (!mounted) return;
+    final gamification = context.read<GamificationProvider>();
+    final pendingBadge = gamification.pendingCelebration;
+    if (pendingBadge != null) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => MilestoneCelebrationScreen(badge: pendingBadge)));
+      return;
+    }
+    final pendingResult = gamification.pendingCategoryCelebration;
+    if (pendingResult != null) {
+      final category = context.read<CategoryProvider>().byId(pendingResult.categoryId);
+      if (category != null) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => CategoryChallengeWinScreen(result: pendingResult, category: category),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final expenses = context.watch<ExpenseProvider>();
     final categories = context.watch<CategoryProvider>();
+    final gamification = context.watch<GamificationProvider>();
     final streak = expenses.currentStreak;
     final loggedToday = expenses.loggedToday;
     final isEvening = DateTime.now().hour >= 18;
     final atRisk = !loggedToday && isEvening && streak > 0;
+    final now = DateTime.now();
 
     return Scaffold(
       appBar: AppBar(
@@ -42,12 +81,29 @@ class TodayScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           children: [
             _StreakCard(streak: streak, atRisk: atRisk),
+            if (!loggedToday) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: gamification.isNoSpendDay(now)
+                      ? null
+                      : () => context.read<GamificationProvider>().markNoSpendDay(now),
+                  icon: const Icon(Icons.savings_outlined, size: 18),
+                  label: Text(gamification.isNoSpendDay(now) ? 'Marked as no-spend today' : 'Mark today as no-spend'),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             Text('Today\'s spending', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text('\$${expenses.todaySpend.toStringAsFixed(2)}', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 16),
-            ...categories.all.map((c) => _CategoryBar(category: c, spentToday: expenses.spendForCategoryToday(c.id))),
+            ...categories.all.map((c) => _CategoryBar(
+                  category: c,
+                  spentToday: expenses.spendForCategoryToday(c.id),
+                  spentThisMonth: expenses.spendForCategoryInMonth(c.id, now),
+                )),
             const SizedBox(height: 96),
           ],
         ),
@@ -65,7 +121,7 @@ class TodayScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (_) => const _LogExpenseSheet(),
-    );
+    ).then((_) => _showPendingCelebrationsIfAny());
   }
 }
 
@@ -138,14 +194,19 @@ class _StreakCard extends StatelessWidget {
 class _CategoryBar extends StatelessWidget {
   final ExpenseCategory category;
   final double spentToday;
-  const _CategoryBar({required this.category, required this.spentToday});
+  final double spentThisMonth;
+  const _CategoryBar({required this.category, required this.spentToday, required this.spentThisMonth});
 
   @override
   Widget build(BuildContext context) {
     final dailyShare = category.monthlyLimit / 30;
     final progress = dailyShare <= 0 ? 0.0 : (spentToday / dailyShare).clamp(0.0, 1.0);
+    final hasBossBattle = category.monthlyLimit > 0;
+    final bossHealth = hasBossBattle ? (1 - (spentThisMonth / category.monthlyLimit)).clamp(0.0, 1.0) : 0.0;
+    final bossDefeatedYou = hasBossBattle && spentThisMonth > category.monthlyLimit;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -165,6 +226,31 @@ class _CategoryBar extends StatelessWidget {
               color: Color(category.colorValue),
             ),
           ),
+          if (hasBossBattle) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(bossDefeatedYou ? Icons.dangerous_outlined : Icons.shield_outlined, size: 14),
+                const SizedBox(width: 4),
+                Text(
+                  bossDefeatedYou
+                      ? 'Boss defeated you this month'
+                      : '${(bossHealth * 100).round()}% boss health remaining this month',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: bossHealth,
+                minHeight: 4,
+                backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                color: Theme.of(context).colorScheme.tertiary,
+              ),
+            ),
+          ],
         ],
       ),
     );

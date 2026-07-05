@@ -65,6 +65,13 @@ class ExpenseProvider extends ChangeNotifier {
     return map;
   }
 
+  /// Single-category convenience wrapper around [spendByCategoryInMonth] —
+  /// used by the category "boss battle" month-end evaluation and the
+  /// in-progress boss-health-bar display. See GamificationProvider.
+  double spendForCategoryInMonth(String categoryId, DateTime month) {
+    return spendByCategoryInMonth(month)[categoryId] ?? 0.0;
+  }
+
   Future<void> addExpense({required double amount, required String categoryId, String note = ''}) async {
     final expense = Expense(id: _uuid.v4(), amount: amount, categoryId: categoryId, note: note, date: DateTime.now());
     await _expenseBox.put(expense.id, expense);

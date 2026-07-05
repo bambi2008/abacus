@@ -4,6 +4,9 @@ class HiveBoxes {
   static const dailyLogCompletions = 'daily_log_completions';
   static const settings = 'settings';
   static const badges = 'badges';
+  static const noSpendDays = 'no_spend_days';
+  static const categoryChallengeResults = 'category_challenge_results';
+  static const buddyWeeklyChallenges = 'buddy_weekly_challenges';
 }
 
 class HiveTypeIds {
@@ -11,6 +14,9 @@ class HiveTypeIds {
   static const category = 1;
   static const dailyLogCompletion = 2;
   static const badge = 3;
+  static const noSpendDay = 4;
+  static const categoryChallengeResult = 5;
+  static const buddyWeeklyChallenge = 7;
 }
 
 /// Milestone streak days that trigger a full-screen celebration, and the
@@ -34,6 +40,7 @@ class SettingsKeys {
   static const reminderHour = 'reminder_hour';
   static const buddyStreakCode = 'buddy_streak_code';
   static const buddyStreakPartnerName = 'buddy_streak_partner_name';
+  static const lastMonthBoundaryCheck = 'last_month_boundary_check';
 }
 
 /// No weekly billing — see docs/customer-and-market.md for why competitors'

@@ -5,9 +5,12 @@ import 'package:provider/provider.dart';
 import 'app.dart';
 import 'config/constants.dart';
 import 'models/badge_record.dart';
+import 'models/buddy_weekly_challenge.dart';
 import 'models/category.dart';
+import 'models/category_challenge_result.dart';
 import 'models/daily_log_completion.dart';
 import 'models/expense.dart';
+import 'models/no_spend_day_mark.dart';
 import 'providers/category_provider.dart';
 import 'providers/expense_provider.dart';
 import 'providers/gamification_provider.dart';
@@ -30,27 +33,44 @@ void main() async {
   if (!Hive.isAdapterRegistered(HiveTypeIds.badge)) {
     Hive.registerAdapter(BadgeRecordAdapter());
   }
+  if (!Hive.isAdapterRegistered(HiveTypeIds.noSpendDay)) {
+    Hive.registerAdapter(NoSpendDayMarkAdapter());
+  }
+  if (!Hive.isAdapterRegistered(HiveTypeIds.categoryChallengeResult)) {
+    Hive.registerAdapter(CategoryChallengeResultAdapter());
+  }
+  if (!Hive.isAdapterRegistered(HiveTypeIds.buddyWeeklyChallenge)) {
+    Hive.registerAdapter(BuddyWeeklyChallengeAdapter());
+  }
   await Hive.openBox<Expense>(HiveBoxes.expenses);
   await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
   await Hive.openBox<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
   await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
+  await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
+  await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
+  await Hive.openBox<BuddyWeeklyChallenge>(HiveBoxes.buddyWeeklyChallenges);
   await Hive.openBox(HiveBoxes.settings);
   await AnalyticsService.instance.init();
   AnalyticsService.instance.capture('app_opened');
 
   final expenseProvider = ExpenseProvider()..load();
   await expenseProvider.checkAndApplyStreakFreeze();
+  final categoryProvider = CategoryProvider()..load();
   final gamificationProvider = GamificationProvider()..load();
+  gamificationProvider.bind(expenseProvider, categoryProvider);
   // Catch a milestone reached while the app was closed — recorded silently
   // here, the celebration itself is shown on the next Today screen visit
   // (see GamificationProvider.pendingCelebration).
   await gamificationProvider.checkForNewMilestone(expenseProvider.currentStreak);
+  // Evaluate last month's category "boss battles" if a month boundary was
+  // crossed while the app was closed — see evaluateMonthBoundaryIfNeeded.
+  await gamificationProvider.evaluateMonthBoundaryIfNeeded();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => OnboardingProvider()..load()),
-        ChangeNotifierProvider(create: (_) => CategoryProvider()..load()),
+        ChangeNotifierProvider.value(value: categoryProvider),
         ChangeNotifierProvider.value(value: expenseProvider),
         ChangeNotifierProvider.value(value: gamificationProvider),
         ChangeNotifierProvider(create: (_) => SubscriptionProvider()..load()..init()),

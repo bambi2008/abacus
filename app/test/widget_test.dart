@@ -6,9 +6,12 @@ import 'package:provider/provider.dart';
 import 'package:abacus/app.dart';
 import 'package:abacus/config/constants.dart';
 import 'package:abacus/models/badge_record.dart';
+import 'package:abacus/models/buddy_weekly_challenge.dart';
 import 'package:abacus/models/category.dart';
+import 'package:abacus/models/category_challenge_result.dart';
 import 'package:abacus/models/daily_log_completion.dart';
 import 'package:abacus/models/expense.dart';
+import 'package:abacus/models/no_spend_day_mark.dart';
 import 'package:abacus/providers/category_provider.dart';
 import 'package:abacus/providers/expense_provider.dart';
 import 'package:abacus/providers/gamification_provider.dart';
@@ -30,10 +33,22 @@ void main() {
     if (!Hive.isAdapterRegistered(HiveTypeIds.badge)) {
       Hive.registerAdapter(BadgeRecordAdapter());
     }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.noSpendDay)) {
+      Hive.registerAdapter(NoSpendDayMarkAdapter());
+    }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.categoryChallengeResult)) {
+      Hive.registerAdapter(CategoryChallengeResultAdapter());
+    }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.buddyWeeklyChallenge)) {
+      Hive.registerAdapter(BuddyWeeklyChallengeAdapter());
+    }
     await Hive.openBox<Expense>(HiveBoxes.expenses);
     await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
     await Hive.openBox<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
     await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
+    await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
+    await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
+    await Hive.openBox<BuddyWeeklyChallenge>(HiveBoxes.buddyWeeklyChallenges);
     final settings = await Hive.openBox(HiveBoxes.settings);
     await settings.put(SettingsKeys.hasOnboarded, true);
   });

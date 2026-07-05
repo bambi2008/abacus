@@ -3,6 +3,8 @@ import 'package:hive/hive.dart';
 
 import 'package:abacus/config/constants.dart';
 import 'package:abacus/models/badge_record.dart';
+import 'package:abacus/models/category_challenge_result.dart';
+import 'package:abacus/models/no_spend_day_mark.dart';
 import 'package:abacus/providers/gamification_provider.dart';
 
 void main() {
@@ -13,7 +15,16 @@ void main() {
     if (!Hive.isAdapterRegistered(HiveTypeIds.badge)) {
       Hive.registerAdapter(BadgeRecordAdapter());
     }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.noSpendDay)) {
+      Hive.registerAdapter(NoSpendDayMarkAdapter());
+    }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.categoryChallengeResult)) {
+      Hive.registerAdapter(CategoryChallengeResultAdapter());
+    }
     await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
+    await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
+    await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
+    await Hive.openBox(HiveBoxes.settings);
     provider = GamificationProvider()..load();
   });
 
