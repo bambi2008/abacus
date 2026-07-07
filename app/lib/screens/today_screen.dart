@@ -5,12 +5,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../models/category.dart';
+import '../models/voice_expense_result.dart';
 import '../providers/buddy_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/receipt_ocr_service.dart';
+import '../services/voice_input_service.dart';
 import '../widgets/buddy_streak_card.dart';
 import '../widgets/companion_owl_card.dart';
 import 'category_challenge_win_screen.dart';
@@ -301,6 +303,7 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
   String? _selectedCategoryId;
   bool _confirmed = false;
   bool _scanning = false;
+  bool _listening = false;
 
   @override
   void dispose() {
@@ -347,6 +350,27 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
     setState(() {
       if (result.amount != null) _amountController.text = result.amount!.toStringAsFixed(2);
       if (result.vendor != null && _noteController.text.isEmpty) _noteController.text = result.vendor!;
+    });
+  }
+
+  Future<void> _startVoiceInput() async {
+    setState(() => _listening = true);
+    final transcript = await VoiceInputService.listenOnce();
+    if (!mounted) return;
+    setState(() => _listening = false);
+    if (transcript == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Didn\'t catch that — try again or enter it manually.')),
+      );
+      return;
+    }
+    final categories = context.read<CategoryProvider>().all;
+    final result = parseVoiceExpense(transcript, categories);
+    AnalyticsService.instance.capture('voice_expense_logged');
+    setState(() {
+      if (result.amount != null) _amountController.text = result.amount!.toStringAsFixed(2);
+      if (result.categoryId != null) _selectedCategoryId = result.categoryId;
+      if (_noteController.text.isEmpty) _noteController.text = result.note;
     });
   }
 
@@ -400,13 +424,23 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
           Row(
             children: [
               Expanded(child: Text('Log an expense', style: Theme.of(context).textTheme.titleLarge)),
+              if (VoiceInputService.isSupportedPlatform)
+                IconButton.filledTonal(
+                  tooltip: 'Speak an expense',
+                  iconSize: 26,
+                  onPressed: _listening ? null : _startVoiceInput,
+                  icon: _listening
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.mic_none_outlined),
+                ),
               if (ReceiptOcrService.isAvailable)
-                IconButton(
+                IconButton.filledTonal(
                   tooltip: 'Scan a receipt',
+                  iconSize: 26,
                   onPressed: _scanning ? null : _scanReceipt,
                   icon: _scanning
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.document_scanner_outlined),
+                      : const Icon(Icons.photo_camera_outlined),
                 ),
             ],
           ),

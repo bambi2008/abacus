@@ -83,6 +83,50 @@ SQL is a one-time action for whoever owns the `bambi2008/abacus` project —
 not something the app or CI does automatically, since it involves an
 external account and real credentials.
 
+**2026-07-06: live updates + honest local-mode copy.** Real device testing
+surfaced that the buddy card was confusing: two devices only ever saw each
+other's state on their *own* next local action (no push), and the
+local-only fallback (no Supabase keys) has no join flow at all — a single
+device testing it alone can never see it "work," which reads as broken
+rather than as the intentional local-only placeholder it is. Fixed both:
+- **Supabase Realtime**: `SupabaseBuddyBackend` subscribes to
+  `postgres_changes` on `buddy_links`/`buddy_marks` for the active link
+  (`schema.sql` adds both tables to the `supabase_realtime` publication);
+  `BuddyProvider` listens to `BuddyBackend.changes` and calls `refresh()`
+  automatically. RLS applies to Realtime exactly like normal queries — a
+  device only ever receives events for rows it could already read.
+- **Manual refresh stays available regardless** — Realtime delivery isn't
+  guaranteed (dropped connection, backgrounded app), so `BuddyStreakCard`
+  always has a refresh icon rather than assuming live updates alone are
+  enough.
+- **Local-mode copy is now explicit** that sync isn't enabled in that
+  build ("Sync isn't enabled in this build — inviting won't actually
+  connect two devices yet."), instead of implying a working feature that
+  silently never completes.
+
+## Voice input (on-device speech-to-text, same "assist, never auto-submit" rule as OCR)
+
+Second entry-speed assist alongside receipt OCR, added for the same
+reason: manual entry's friction is the thing to shrink, not the thing to
+architect around. `VoiceInputService` (`lib/services/voice_input_service.dart`)
+wraps the `speech_to_text` package, requesting **on-device** recognition
+(`SpeechListenOptions(onDevice: true)`) where the platform supports it —
+consistent with the no-cloud-by-default posture, though iOS falls back to
+network recognition if the on-device language pack isn't downloaded, which
+is a platform limitation this app can't control. Initialization is fully
+lazy — nothing touches the `speech_to_text` plugin until the user taps the
+mic button, the same startup-safety pattern the in_app_purchase web-crash
+fix established (never call a platform API eagerly that a given
+platform/build might not support).
+
+The transcript crosses into a pure, independently-unit-tested heuristic
+(`parseVoiceExpense` in `lib/models/voice_expense_result.dart`) that takes
+the first number spoken as the amount and matches a category by checking
+whether any of the user's own category names appears in the transcript.
+Exactly like OCR: every guessed field only pre-fills the log-expense sheet,
+the raw transcript always survives as the note even when parsing gets it
+wrong, and the user still confirms before anything becomes a real Expense.
+
 ## Core data model
 
 - `Expense`: amount, category, note, date — the single atomic unit, entered

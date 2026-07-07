@@ -36,6 +36,17 @@ abstract class BuddyBackend {
   /// an unlinked state on any failure — network errors must never surface
   /// as crashes in a local-first app.
   Future<BuddyRemoteState> fetchState();
+
+  /// Fires whenever the backend detects the link/marks may have changed
+  /// remotely (e.g. the partner joined or logged a day) — a listener
+  /// should call [fetchState] again in response. Backends without live
+  /// updates (e.g. [NoopBuddyBackend]) just never emit; callers must not
+  /// rely on this as the only way to get fresh state (see
+  /// [BuddyProvider.refresh] for the manual-refresh fallback).
+  Stream<void> get changes;
+
+  /// Releases any live subscription. Safe to call even if never subscribed.
+  Future<void> dispose();
 }
 
 /// Raw sync snapshot from the backend — the provider derives the joint
@@ -120,4 +131,8 @@ class NoopBuddyBackend implements BuddyBackend {
   Future<void> markDay(DateTime date, {required bool logged}) async {}
   @override
   Future<BuddyRemoteState> fetchState() async => const BuddyRemoteState.unlinked();
+  @override
+  Stream<void> get changes => const Stream.empty();
+  @override
+  Future<void> dispose() async {}
 }

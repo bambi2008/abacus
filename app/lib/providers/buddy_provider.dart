@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../services/analytics_service.dart';
@@ -10,7 +12,16 @@ import '../services/buddy_backend.dart';
 /// status purely from the backend's raw signals via [computeJointStreak].
 class BuddyProvider extends ChangeNotifier {
   final BuddyBackend _backend;
-  BuddyProvider(this._backend);
+  StreamSubscription<void>? _changesSubscription;
+
+  BuddyProvider(this._backend) {
+    // Auto-refresh on Realtime events (partner joined / partner logged a
+    // day) so both sides update live. This is on top of, not instead of,
+    // the manual pull-to-refresh in the UI — Realtime delivery isn't
+    // guaranteed (dropped connections, backgrounded app), so a manual
+    // fallback still matters.
+    _changesSubscription = _backend.changes.listen((_) => refresh());
+  }
 
   bool get isConfigured => _backend.isConfigured;
 
@@ -65,5 +76,12 @@ class BuddyProvider extends ChangeNotifier {
     if (!_backend.isConfigured || !_state.linked) return;
     await _backend.markDay(DateTime.now(), logged: logged);
     await refresh();
+  }
+
+  @override
+  void dispose() {
+    _changesSubscription?.cancel();
+    _backend.dispose();
+    super.dispose();
   }
 }

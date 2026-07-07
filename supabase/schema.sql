@@ -91,3 +91,10 @@ begin
   return claimed_id;
 end;
 $$;
+
+-- Realtime so both devices update live (partner joining, partner logging a
+-- day) instead of only on the next local action. RLS still applies to
+-- Realtime the same as regular queries — a device only ever receives
+-- events for rows it's already allowed to read.
+alter publication supabase_realtime add table public.buddy_links;
+alter publication supabase_realtime add table public.buddy_marks;

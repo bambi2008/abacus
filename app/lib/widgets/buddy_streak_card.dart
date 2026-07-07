@@ -37,9 +37,25 @@ class BuddyStreakCard extends StatelessWidget {
 }
 
 /// Real-backend card: reflects create/join/streak state from [BuddyProvider].
-class _SyncedBuddyCard extends StatelessWidget {
+class _SyncedBuddyCard extends StatefulWidget {
   final BuddyProvider buddy;
   const _SyncedBuddyCard({required this.buddy});
+
+  @override
+  State<_SyncedBuddyCard> createState() => _SyncedBuddyCardState();
+}
+
+class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
+  bool _refreshing = false;
+
+  BuddyProvider get buddy => widget.buddy;
+
+  Future<void> _manualRefresh() async {
+    if (_refreshing) return;
+    setState(() => _refreshing = true);
+    await buddy.refresh();
+    if (mounted) setState(() => _refreshing = false);
+  }
 
   Future<void> _invite(BuildContext context) async {
     final code = await buddy.createLink();
@@ -105,9 +121,15 @@ class _SyncedBuddyCard extends StatelessWidget {
         theme,
         title: 'Waiting for your buddy',
         subtitle: 'Share code ${buddy.code} — your streak starts the day you both log.',
-        trailing: IconButton(
-          icon: const Icon(Icons.share_outlined),
-          onPressed: () => Share.share('Join my Abacus savings-buddy streak! Use code ${buddy.code} in the app.'),
+        trailing: Wrap(
+          spacing: 4,
+          children: [
+            _refreshButton(),
+            IconButton(
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () => Share.share('Join my Abacus savings-buddy streak! Use code ${buddy.code} in the app.'),
+            ),
+          ],
         ),
       );
     } else {
@@ -117,6 +139,7 @@ class _SyncedBuddyCard extends StatelessWidget {
         theme,
         title: '${buddy.jointStreak}-day buddy streak',
         subtitle: 'Today — you $selfMark · buddy $partnerMark. Both must log to keep it alive.',
+        trailing: _refreshButton(),
       );
     }
 
@@ -125,6 +148,23 @@ class _SyncedBuddyCard extends StatelessWidget {
       color: scheme.tertiaryContainer.withValues(alpha: 0.6),
       child: Padding(padding: const EdgeInsets.all(16), child: body),
     );
+  }
+
+  /// Manual fallback for "I don't see my buddy's latest status" — Realtime
+  /// keeps both sides live in the common case, but delivery isn't
+  /// guaranteed (dropped connection, backgrounded app), so this always
+  /// stays available rather than assuming Realtime alone is enough.
+  Widget _refreshButton() {
+    return _refreshing
+        ? const Padding(
+            padding: EdgeInsets.all(8),
+            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+          )
+        : IconButton(
+            tooltip: 'Refresh',
+            icon: const Icon(Icons.refresh),
+            onPressed: _manualRefresh,
+          );
   }
 
   Widget _row(ThemeData theme, {required String title, required String subtitle, Widget? trailing}) {
@@ -200,6 +240,14 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
                       'Both of you log an expense the same day to keep it alive.',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Sync isn\'t enabled in this build — inviting won\'t actually connect two devices yet.',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: Theme.of(context).colorScheme.error),
+                    ),
                   ],
                 ),
               ),
@@ -228,8 +276,11 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
                   Text('This week: $selfCount/7 days', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 2),
                   Text(
-                    'Waiting for your buddy to sync — coming soon.',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    'Sync isn\'t enabled in this build — your buddy\'s side won\'t actually connect.',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Theme.of(context).colorScheme.error),
                   ),
                 ],
               ),

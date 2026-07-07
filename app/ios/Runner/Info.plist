@@ -30,6 +30,10 @@
 	<string>Abacus uses your camera to scan receipts and pre-fill expense amounts. Photos are processed on your device and are never uploaded.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Abacus can scan a receipt photo from your library to pre-fill expense amounts. Photos are processed on your device and are never uploaded.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Abacus uses your microphone so you can speak an expense instead of typing it. Audio is processed for recognition only and is never uploaded as a recording.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Abacus uses speech recognition to turn what you say into an amount and note, on-device where your iPhone supports it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

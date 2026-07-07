@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -16,9 +17,15 @@ import 'buddy_backend.dart';
 /// financial data).
 class SupabaseBuddyBackend implements BuddyBackend {
   SupabaseClient? _client;
+  final _changesController = StreamController<void>.broadcast();
+  RealtimeChannel? _channel;
+  String? _subscribedLinkId;
 
   @override
   bool get isConfigured => SupabaseConfig.url.isNotEmpty && SupabaseConfig.anonKey.isNotEmpty;
+
+  @override
+  Stream<void> get changes => _changesController.stream;
 
   @override
   Future<void> init() async {
@@ -125,6 +132,9 @@ class SupabaseBuddyBackend implements BuddyBackend {
   }
 
   /// The most recent link this device is part of (as creator or partner).
+  /// Also ensures a Realtime subscription is active for that link, so a
+  /// call to [fetchState] anywhere (app start, after any local action)
+  /// naturally keeps the live-update subscription current too.
   Future<Map<String, dynamic>?> _activeLink() async {
     final client = _client;
     final uid = _uid;
@@ -136,7 +146,50 @@ class SupabaseBuddyBackend implements BuddyBackend {
         .order('created_at', ascending: false)
         .limit(1);
     final list = rows as List;
-    return list.isEmpty ? null : list.first as Map<String, dynamic>;
+    if (list.isEmpty) return null;
+    final link = list.first as Map<String, dynamic>;
+    _subscribeToLink(client, link['id'] as String);
+    return link;
+  }
+
+  /// Subscribes to Realtime changes on this link's row (partner joining)
+  /// and its marks (either side logging a day), so both devices update
+  /// live instead of only on the next local action. RLS applies to
+  /// Realtime the same as to regular queries, so this only ever sees rows
+  /// the current user is already allowed to read. Idempotent per link —
+  /// re-subscribing to the same link id is a no-op.
+  void _subscribeToLink(SupabaseClient client, String linkId) {
+    if (_subscribedLinkId == linkId) return;
+    if (_channel != null) client.removeChannel(_channel!);
+    _subscribedLinkId = linkId;
+    _channel = client
+        .channel('buddy_link_$linkId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'buddy_marks',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'link_id', value: linkId),
+          callback: (_) => _changesController.add(null),
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'buddy_links',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'id', value: linkId),
+          callback: (_) => _changesController.add(null),
+        )
+        .subscribe();
+  }
+
+  @override
+  Future<void> dispose() async {
+    final client = _client;
+    if (client != null && _channel != null) {
+      await client.removeChannel(_channel!);
+    }
+    _channel = null;
+    _subscribedLinkId = null;
+    await _changesController.close();
   }
 
   static String _generateCode() {

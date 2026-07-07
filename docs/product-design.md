@@ -57,12 +57,14 @@ must be a guaranteed-achievable win, not a setup chore.
 - **"Log an expense" button** — the single largest tappable element on
   the screen. Opens a 3-field bottom sheet: amount (numeric keypad,
   auto-focused), category (horizontal chip picker, most-recently-used
-  first), optional note. A camera icon (iOS only — see "Receipt OCR" in
-  `docs/technical-architecture.md`) lets the user snap a receipt instead of
-  typing the amount; recognition runs on-device and only pre-fills the same
-  fields, never auto-submits. No date picker (always today; editing past days
-  happens in Progress). Confirm → haptic tick → sheet dismisses → running
-  total updates.
+  first), optional note. Two entry-speed assists sit next to the sheet
+  title, both on-device and both "pre-fill only, never auto-submit" (see
+  `docs/technical-architecture.md`): a **mic icon** (any non-web platform)
+  that transcribes a spoken amount/category via on-device speech-to-text,
+  and a **camera icon** (iOS only — see "Receipt OCR") that lets the user
+  snap a receipt instead of typing the amount. No date picker (always
+  today; editing past days happens in Progress). Confirm → haptic tick →
+  sheet dismisses → running total updates.
 - **Today's spending vs. budget**, a simple bar per category, not a
   chart — "Food: $23 of $40." Deliberately terse; the daily screen is for
   logging, not analysis (that's Progress's job).
@@ -104,6 +106,12 @@ must be a guaranteed-achievable win, not a setup chore.
   logged/not-logged boolean ever leave the device; when no Supabase project
   is configured the card silently falls back to the original local-only
   invite behavior, so the app still works with zero backend.
+  **2026-07-06**: real-device testing found the card confusing — added a
+  Supabase Realtime subscription so both sides update live, a manual
+  refresh icon as a fallback (Realtime delivery isn't guaranteed), and
+  made the local-only fallback's copy explicit that sync isn't enabled in
+  that build rather than implying a working feature that quietly never
+  completes.
 - **Milestone badges**: Day 7, 30, 100, 365 — full-screen celebration +
   a shareable image card (reuses HeelEase's shareable-achievement-card
   pattern), not gated behind Pro (badges are a retention hook, not a
