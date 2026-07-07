@@ -17,6 +17,7 @@ import '../widgets/buddy_streak_card.dart';
 import '../widgets/companion_owl_card.dart';
 import 'category_challenge_win_screen.dart';
 import 'milestone_celebration_screen.dart';
+import 'owl_evolution_celebration_screen.dart';
 
 class TodayScreen extends StatefulWidget {
   const TodayScreen({super.key});
@@ -53,7 +54,13 @@ class _TodayScreenState extends State<TodayScreen> {
             builder: (_) => CategoryChallengeWinScreen(result: pendingResult, category: category),
           ),
         );
+        return;
       }
+    }
+    if (gamification.pendingOwlEvolutionCelebration) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => OwlEvolutionCelebrationScreen(newStage: gamification.evolutionStage)),
+      );
     }
   }
 
@@ -235,8 +242,27 @@ class _CategoryBar extends StatelessWidget {
     final dailyShare = category.monthlyLimit / 30;
     final progress = dailyShare <= 0 ? 0.0 : (spentToday / dailyShare).clamp(0.0, 1.0);
     final hasBossBattle = category.monthlyLimit > 0;
-    final bossHealth = hasBossBattle ? (1 - (spentThisMonth / category.monthlyLimit)).clamp(0.0, 1.0) : 0.0;
-    final bossDefeatedYou = hasBossBattle && spentThisMonth > category.monthlyLimit;
+    // This is YOUR shield against this month's boss for the category —
+    // every dollar spent is the boss's attack chipping it away. An empty
+    // shield (spend >= limit) means the boss broke through: you lose.
+    // Surviving to month-end with any shield left means you defeated the
+    // boss (see GamificationProvider.evaluateMonthBoundaryIfNeeded /
+    // CategoryChallengeWinScreen). "Defeated" now only ever means "you
+    // won" — an earlier version used it for both outcomes depending on
+    // when you read it, which was genuinely backwards from how every
+    // combat game uses the word.
+    final shieldHealth = hasBossBattle ? (1 - (spentThisMonth / category.monthlyLimit)).clamp(0.0, 1.0) : 0.0;
+    final shieldBroken = hasBossBattle && spentThisMonth > category.monthlyLimit;
+    final shieldColor = shieldHealth > 0.5
+        ? Colors.green
+        : shieldHealth > 0.2
+            ? Colors.orange
+            : Colors.red;
+    final bossEmoji = shieldHealth > 0.5
+        ? '😈'
+        : shieldHealth > 0.2
+            ? '👹'
+            : '🔥';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -263,13 +289,15 @@ class _CategoryBar extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(bossDefeatedYou ? Icons.dangerous_outlined : Icons.shield_outlined, size: 14),
+                Text(shieldBroken ? '💥' : bossEmoji, style: const TextStyle(fontSize: 14)),
                 const SizedBox(width: 4),
-                Text(
-                  bossDefeatedYou
-                      ? 'Boss defeated you this month'
-                      : '${(bossHealth * 100).round()}% boss health remaining this month',
-                  style: Theme.of(context).textTheme.bodySmall,
+                Expanded(
+                  child: Text(
+                    shieldBroken
+                        ? 'The ${category.name} boss broke your shield — you\'re over budget this month'
+                        : '🛡️ ${(shieldHealth * 100).round()}% shield left vs. this month\'s ${category.name} boss',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
               ],
             ),
@@ -277,10 +305,10 @@ class _CategoryBar extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: bossHealth,
-                minHeight: 4,
+                value: shieldHealth,
+                minHeight: 6,
                 backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                color: Theme.of(context).colorScheme.tertiary,
+                color: shieldColor,
               ),
             ),
           ],

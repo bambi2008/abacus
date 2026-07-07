@@ -27,6 +27,24 @@ class HiveTypeIds {
 /// from the day-to-day OwlMood. See GamificationProvider.evolutionStage.
 class EvolutionStages {
   static const names = ['Owlet', 'Young Owl', 'Grown Owl', 'Elder Owl'];
+
+  /// The careScore threshold each stage index is reached AT — mirrors the
+  /// cutoffs in GamificationProvider.evolutionStage, duplicated here (not
+  /// derived) so the companion-owl detail sheet can show "X to next stage"
+  /// without the provider needing to expose its internal thresholds.
+  static const thresholds = [0, 30, 120, 365];
+}
+
+/// Flavor line shown on the full-screen celebration when the owl crosses
+/// into a new evolution stage — keyed by the stage just reached. Stage 0
+/// (Owlet) has no entry since there's no "reached" transition into it, it's
+/// the starting stage. See OwlEvolutionCelebrationScreen.
+class EvolutionCelebrationCatalog {
+  static const Map<int, String> messages = {
+    1: 'Steady care is starting to show.',
+    2: 'Your owl is thriving under your care.',
+    3: 'A wise elder now — this is what long-term care looks like.',
+  };
 }
 
 /// Milestone streak days that trigger a full-screen celebration, and the

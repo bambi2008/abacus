@@ -285,6 +285,9 @@ class GamificationProvider extends ChangeNotifier {
   /// Recomputes mood/stage and persists only when something actually
   /// changed — this both avoids needless Hive writes and ensures
   /// `owl_evolved` only fires on genuine stage transitions, not every call.
+  /// A genuine transition also arms [pendingOwlEvolutionCelebration] so the
+  /// UI can show a real full-screen moment for it instead of the silent
+  /// text-label swap this used to be.
   Future<void> refreshOwlState() async {
     final mood = currentMood;
     final stage = evolutionStage;
@@ -293,13 +296,36 @@ class GamificationProvider extends ChangeNotifier {
       return;
     }
     final previousStage = existing?.evolutionStage;
+    final justEvolved = previousStage != null && stage != previousStage;
     await _owlStateBox.put(
       'owl',
-      OwlState(moodLevel: mood.index, totalCareScore: careScore, lastUpdated: DateTime.now(), evolutionStage: stage),
+      OwlState(
+        moodLevel: mood.index,
+        totalCareScore: careScore,
+        lastUpdated: DateTime.now(),
+        evolutionStage: stage,
+        evolutionCelebrationShown: !justEvolved,
+      ),
     );
-    if (previousStage != null && stage != previousStage) {
+    if (justEvolved) {
       AnalyticsService.instance.capture('owl_evolved', properties: {'new_stage': stage});
     }
+    notifyListeners();
+  }
+
+  /// An owl-evolution celebration that hasn't been shown yet — mirrors
+  /// [pendingCelebration] for badges. Surfaced on the next natural Today
+  /// screen visit rather than the instant it happens, same reasoning as
+  /// badges (don't celebrate before the user has even opened a screen).
+  bool get pendingOwlEvolutionCelebration {
+    final state = _owlStateBox.get('owl');
+    return state != null && !state.evolutionCelebrationShown;
+  }
+
+  Future<void> markOwlEvolutionCelebrationShown() async {
+    final state = _owlStateBox.get('owl');
+    if (state == null) return;
+    await _owlStateBox.put('owl', state.copyWith(evolutionCelebrationShown: true));
     notifyListeners();
   }
 

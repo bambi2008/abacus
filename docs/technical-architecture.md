@@ -127,6 +127,67 @@ Exactly like OCR: every guessed field only pre-fills the log-expense sheet,
 the raw transcript always survives as the note even when parsing gets it
 wrong, and the user still confirms before anything becomes a real Expense.
 
+## Category "boss battle" — fixing an inverted metaphor (2026-07-06)
+
+The founder tried to explain this mechanic back to us and couldn't — a
+real signal the metaphor itself was backwards, not just under-explained.
+The original version labeled the bar "boss health," decreasing as the user
+spent — which reads as "I'm damaging the boss" (a winning action in every
+combat game convention), but hitting zero actually meant the user lost
+(overspent). The win screen then said "Boss Defeated" for the *opposite*
+case (the bar survived to month-end) — so the same word meant opposite
+things depending on when you read it.
+
+**Fix: the bar is now explicitly the user's own shield, not the boss's
+health.** Every dollar spent is the boss's attack chipping away at it —
+empty shield (spend ≥ limit) means the boss broke through and the user
+lost; surviving to month-end with any shield left means the user defeated
+the boss. "Defeated" now only ever appears in the win case, so it always
+means the same thing. Presentation also borrows directly from combat-game
+HUD convention (the founder's ask) rather than a generic progress bar:
+- **Green/orange/red bar color** at >50% / 20-50% / ≤20% shield — the
+  universal HP-bar convention, not a flat single color.
+- **An escalating threat emoji** next to the label (😈 → 👹 → 🔥 as the
+  shield drops), and 💥 the moment it breaks — same idea as an enemy
+  sprite growing more aggressive as a fight goes on.
+- Copy: `🛡️ 91% shield left vs. this month's Food boss` while surviving,
+  `The Food boss broke your shield — you're over budget this month` on
+  loss. The win screen (`CategoryChallengeWinScreen`) is unchanged — it
+  was already correct under the new framing.
+
+## Owl evolution: from a silent number to an actual moment (2026-07-06)
+
+Feedback was blunt and correct: the owl's "care score" was just a number
+going up with no payoff — evolution stage transitions were already
+detected (for the `owl_evolved` analytics event) but had zero user-facing
+moment, and the four evolution stages (`EvolutionStages.names`) rendered
+as the exact same 🦉 glyph regardless of stage, so "evolving" was a text
+label swap nobody would ever notice. Three fixes, matching what the
+founder asked for specifically (a transformation moment, not just more
+numbers):
+
+- **A real full-screen celebration on evolution** — `OwlState` gained an
+  `evolutionCelebrationShown` flag (mirrors `BadgeRecord.celebrationShown`);
+  `refreshOwlState()` arms it on a genuine stage transition, and
+  `GamificationProvider.pendingOwlEvolutionCelebration` surfaces it the
+  same way `pendingCelebration` does for badges — checked in
+  `_showPendingCelebrationsIfAny()` on the next natural Today-screen visit.
+  `OwlEvolutionCelebrationScreen` reuses the exact same
+  `CelebrationBody`/confetti/haptic/share machinery as milestone and
+  category-win celebrations, with per-stage flavor text
+  (`EvolutionCelebrationCatalog` in `config/constants.dart`).
+- **Stages actually look different now** — `_StagedOwl` in
+  `companion_owl_card.dart` scales the emoji size up per stage (no new art
+  assets needed) and adds a background "aura" circle whose color intensity
+  increases with stage, plus a 👑 crown overlay at the top stage (Elder
+  Owl). Still the same single Unicode glyph underneath, but the growth is
+  now visible, not just named.
+- **A visible progress bar toward the next stage** in the companion-owl
+  detail sheet, computed from `EvolutionStages.thresholds` (duplicated,
+  not derived, from `GamificationProvider.evolutionStage`'s cutoffs) —
+  replacing the previous bare "Care score: 47" with no context for what it
+  meant or how close the next stage was.
+
 ## Core data model
 
 - `Expense`: amount, category, note, date — the single atomic unit, entered

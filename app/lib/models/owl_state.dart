@@ -11,12 +11,29 @@ class OwlState {
   final DateTime lastUpdated;
   final int evolutionStage;
 
+  /// Whether the full-screen evolution celebration for [evolutionStage] has
+  /// already been shown — mirrors BadgeRecord.celebrationShown. Defaults to
+  /// true (already shown) so a fresh record (the very first save, before
+  /// any real transition has happened) never spuriously celebrates.
+  final bool evolutionCelebrationShown;
+
   OwlState({
     required this.moodLevel,
     required this.totalCareScore,
     required this.lastUpdated,
     required this.evolutionStage,
+    this.evolutionCelebrationShown = true,
   });
+
+  OwlState copyWith({bool? evolutionCelebrationShown}) {
+    return OwlState(
+      moodLevel: moodLevel,
+      totalCareScore: totalCareScore,
+      lastUpdated: lastUpdated,
+      evolutionStage: evolutionStage,
+      evolutionCelebrationShown: evolutionCelebrationShown ?? this.evolutionCelebrationShown,
+    );
+  }
 }
 
 class OwlStateAdapter extends TypeAdapter<OwlState> {
@@ -35,12 +52,16 @@ class OwlStateAdapter extends TypeAdapter<OwlState> {
       totalCareScore: fields[1] as int,
       lastUpdated: fields[2] as DateTime,
       evolutionStage: fields[3] as int,
+      // Older records predate this field — default to "already shown" so
+      // upgrading doesn't spuriously celebrate a stage the user has been
+      // sitting at for a while.
+      evolutionCelebrationShown: fields[4] as bool? ?? true,
     );
   }
 
   @override
   void write(BinaryWriter writer, OwlState obj) {
-    writer.writeByte(4);
+    writer.writeByte(5);
     writer.writeByte(0);
     writer.write(obj.moodLevel);
     writer.writeByte(1);
@@ -49,5 +70,7 @@ class OwlStateAdapter extends TypeAdapter<OwlState> {
     writer.write(obj.lastUpdated);
     writer.writeByte(3);
     writer.write(obj.evolutionStage);
+    writer.writeByte(4);
+    writer.write(obj.evolutionCelebrationShown);
   }
 }

@@ -132,6 +132,29 @@ void main() {
       // clause comparing against the persisted record short-circuits.
     });
   });
+
+  group('pendingOwlEvolutionCelebration', () {
+    test('is false before any state has ever been saved', () {
+      expect(gamification.pendingOwlEvolutionCelebration, isFalse);
+    });
+
+    test('stays false on the very first save (no prior stage to have transitioned from)', () async {
+      await gamification.refreshOwlState();
+      expect(gamification.pendingOwlEvolutionCelebration, isFalse);
+    });
+
+    test('becomes true on a genuine stage transition, then false once marked shown', () async {
+      await gamification.refreshOwlState(); // first save: stage 0, not pending
+      await gamification.checkForNewMilestone(7);
+      await gamification.checkForNewMilestone(30);
+      await gamification.checkForNewMilestone(100); // careScore 30 -> stage 1
+      await gamification.refreshOwlState();
+      expect(gamification.pendingOwlEvolutionCelebration, isTrue);
+
+      await gamification.markOwlEvolutionCelebrationShown();
+      expect(gamification.pendingOwlEvolutionCelebration, isFalse);
+    });
+  });
 }
 
 Future<ExpenseCategory> _addCategory(CategoryProvider provider, String name, {required double limit}) async {
