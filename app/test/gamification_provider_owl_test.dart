@@ -11,6 +11,7 @@ import 'package:abacus/models/no_spend_day_mark.dart';
 import 'package:abacus/models/owl_mood.dart';
 import 'package:abacus/models/owl_state.dart';
 import 'package:abacus/models/complete_log_day_mark.dart';
+import 'package:abacus/models/monthly_savings_result.dart';
 import 'package:abacus/providers/category_provider.dart';
 import 'package:abacus/providers/expense_provider.dart';
 import 'package:abacus/providers/gamification_provider.dart';
@@ -46,6 +47,9 @@ void main() {
     if (!Hive.isAdapterRegistered(HiveTypeIds.completeLogDay)) {
       Hive.registerAdapter(CompleteLogDayMarkAdapter());
     }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.monthlySavingsResult)) {
+      Hive.registerAdapter(MonthlySavingsResultAdapter());
+    }
     await Hive.openBox<Expense>(HiveBoxes.expenses);
     await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
     await Hive.openBox<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
@@ -54,6 +58,7 @@ void main() {
     await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
     await Hive.openBox<OwlState>(HiveBoxes.owlState);
     await Hive.openBox<CompleteLogDayMark>(HiveBoxes.completeLogDays);
+    await Hive.openBox<MonthlySavingsResult>(HiveBoxes.monthlySavingsResults);
     await Hive.openBox(HiveBoxes.settings);
 
     expenseProvider = ExpenseProvider()..load();

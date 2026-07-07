@@ -17,6 +17,7 @@ import '../widgets/buddy_streak_card.dart';
 import '../widgets/companion_owl_card.dart';
 import 'category_challenge_win_screen.dart';
 import 'milestone_celebration_screen.dart';
+import 'monthly_savings_celebration_screen.dart';
 import 'owl_evolution_celebration_screen.dart';
 
 class TodayScreen extends StatefulWidget {
@@ -60,6 +61,13 @@ class _TodayScreenState extends State<TodayScreen> {
     if (gamification.pendingOwlEvolutionCelebration) {
       Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => OwlEvolutionCelebrationScreen(newStage: gamification.evolutionStage)),
+      );
+      return;
+    }
+    final pendingSavings = gamification.pendingMonthlySavingsCelebration;
+    if (pendingSavings != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => MonthlySavingsCelebrationScreen(result: pendingSavings)),
       );
     }
   }

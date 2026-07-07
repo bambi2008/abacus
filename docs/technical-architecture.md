@@ -188,6 +188,80 @@ numbers):
   replacing the previous bare "Care score: 47" with no context for what it
   meant or how close the next stage was.
 
+## Categories redefined around "beyond survival" spending (2026-07-06)
+
+The founder proposed a sharper framing than "track your spending": track
+spending you actually have a *choice* about, not baseline necessities that
+don't respond to day-to-day willpower anyway. Cooking at home isn't
+tracked; eating out is. Public transit isn't tracked; a taxi is. Clothing
+is always tracked, on the reasoning that everyone already owns clothes, so
+any purchase there is a want, not a need. This directly sharpens the
+"avoid consumption traps" positioning that's been the product's core bet
+all along — previous categories (Food, Transport, Fun, Everything Else)
+were organized around *what you bought*, not *whether you had a real
+choice about buying it*, which is the actual lever the app is trying to
+pull.
+
+`StarterCategories.presets` (`config/constants.dart`) is now: Dining Out,
+Snacks & Drinks, Taxi & Rideshare, Clothing & Shopping, Subscriptions, Fun
+& Entertainment. No "Everything Else" catch-all — a purchase that doesn't
+fit one of these is very likely not the kind of spending this app exists
+to catch, and a genuine edge case can still get a custom category via
+Settings. The onboarding category picker (`_PickCategoriesPage`) already
+supported selecting any subset via `FilterChip` toggles, so this only
+required expanding the preset pool, not touching the picker's interaction
+model. All six are pre-selected by default now (previously a fixed 4 of a
+4-item list) since 6 items is still scannable at a glance.
+
+## Monthly savings recap — "you spent less than average" (2026-07-06)
+
+The founder's idea: at each month's close, tell the user roughly how much
+less they spent than a typical consumer, and frame it as something
+concrete they could do with that money — the abstract "I was disciplined
+this month" turned into a specific, comparable number.
+
+**The whole feature only works if the comparison is true**, so before
+building anything we researched real benchmark data (2024 BLS Consumer
+Expenditure Survey, https://www.bls.gov/news.release/cesan.nr0.htm) rather
+than inventing plausible-sounding averages. Three categories have a single,
+clean, government-sourced national average for the exact same survey year:
+- Food away from home: $3,945/yr → benchmarks the combined **Dining Out +
+  Snacks & Drinks** spend (BLS doesn't split these, so neither do we for
+  this comparison)
+- Apparel and services: $2,001/yr → **Clothing & Shopping**
+- Entertainment fees & admissions: $935/yr → **Fun & Entertainment**
+
+**Taxi & Rideshare and Subscriptions are deliberately excluded** from the
+comparison. Every available estimate for those varies 3-4x across sources
+depending on methodology — some measure spend *per active user of the
+service* rather than *per average American* (a very different, much
+higher denominator), and subscription-spend estimates range from $86
+self-reported to $273 "actual" depending on which SaaS-adjacent blog is
+selling you a subscription-tracking product. A comparison claim is only as
+credible as the data behind it; those two categories are still tracked
+normally, just without a "vs. average" badge, rather than built on numbers
+that shaky.
+
+`computeMonthlySavings` (`models/monthly_savings_result.dart`) is a pure,
+independently-unit-tested function: for each benchmark group, if the user
+tracks at least one of its category names, `max(0, benchmark - actual
+spend)` counts toward the total; a category that's simply *absent* from
+the user's list (deleted, never added) is excluded, not assumed to be a
+free win — Abacus has no way to know whether the user actually avoided
+that spending or just isn't tracking it. `GamificationProvider` evaluates
+this at the same month-boundary check that already runs the category boss
+battles, persists a `MonthlySavingsResult` keyed by `"yyyy-MM"` (idempotent,
+same pattern as `CategoryChallengeResult`), and surfaces a pending
+celebration only when the total is positive — a $0 month has nothing to
+celebrate.
+
+`MonthlySavingsCelebrationScreen` reuses the standard `CelebrationBody`
+machinery and frames the saved amount against a **$500 starter emergency
+fund** (the standard figure cited by consumer financial educators like the
+CFPB) rather than a specific product price — a round, stable heuristic
+that doesn't need upkeep the way "X months of a $15.49 subscription" would
+once that price changes.
+
 ## Core data model
 
 - `Expense`: amount, category, note, date — the single atomic unit, entered

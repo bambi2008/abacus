@@ -9,6 +9,7 @@ class HiveBoxes {
   static const buddyWeeklyChallenges = 'buddy_weekly_challenges';
   static const owlState = 'owl_state';
   static const completeLogDays = 'complete_log_days';
+  static const monthlySavingsResults = 'monthly_savings_results';
 }
 
 class HiveTypeIds {
@@ -21,6 +22,7 @@ class HiveTypeIds {
   static const owl = 6;
   static const buddyWeeklyChallenge = 7;
   static const completeLogDay = 8;
+  static const monthlySavingsResult = 9;
 }
 
 /// Coarse, long-term progression tier over cumulative care score — separate
@@ -98,11 +100,52 @@ class SupabaseConfig {
 /// Preset starter categories offered during onboarding — deliberately not
 /// YNAB's "give every dollar a job" zero-based setup. See
 /// docs/product-design.md.
+///
+/// 2026-07-06: redefined around a "beyond survival" philosophy — track
+/// discretionary spending you actually have a choice about (dining out,
+/// impulse buys, rideshare, subscriptions), not baseline necessities
+/// (groceries you cook yourself, rent, public transit) that don't respond
+/// to day-to-day willpower anyway. No "Everything Else" catch-all: if a
+/// purchase doesn't fit one of these, it's very likely not the kind of
+/// spending this app is trying to catch, and users can still add a custom
+/// category any time via Settings if they genuinely want one.
 class StarterCategories {
   static const presets = [
-    ('Food', '🍔', 0xFFEF6C00),
-    ('Transport', '🚗', 0xFF1E88E5),
-    ('Fun', '🎬', 0xFF8E24AA),
-    ('Everything Else', '📦', 0xFF546E7A),
+    ('Dining Out', '🍽️', 0xFFEF6C00),
+    ('Snacks & Drinks', '🍿', 0xFFFFB300),
+    ('Taxi & Rideshare', '🚕', 0xFF1E88E5),
+    ('Clothing & Shopping', '👕', 0xFF8E24AA),
+    ('Subscriptions', '📺', 0xFF43A047),
+    ('Fun & Entertainment', '🎬', 0xFFD81B60),
   ];
+}
+
+/// Real, government-sourced monthly spending benchmarks used for the
+/// monthly savings recap (see MonthlySavingsResult /
+/// computeMonthlySavings) — 2024 BLS Consumer Expenditure Survey
+/// (https://www.bls.gov/news.release/cesan.nr0.htm), same survey/year
+/// across all three so the comparisons are methodologically consistent.
+///
+/// Deliberately excludes Taxi & Rideshare and Subscriptions: every
+/// available estimate for those varies 3-4x across sources depending on
+/// methodology (often "per active user of the service" rather than
+/// "average American," or wildly different self-reported vs
+/// vendor-estimated figures from SaaS-adjacent blogs with an incentive to
+/// make the number look scary). A comparison claim is only as credible as
+/// the data behind it — those two are tracked normally, just without a
+/// "vs. average" badge, rather than built on numbers that shaky.
+class NationalSpendingBenchmarks {
+  /// "Food away from home," 2024: $3,945/year. Applies to the combined
+  /// Dining Out + Snacks & Drinks spend since BLS doesn't split these.
+  static const diningAndSnacksMonthly = 3945 / 12;
+
+  /// "Apparel and services," 2024: $2,001/year.
+  static const clothingMonthly = 2001 / 12;
+
+  /// "Entertainment: fees and admissions," 2024: $935/year.
+  static const entertainmentMonthly = 935 / 12;
+
+  static const diningAndSnacksCategoryNames = {'Dining Out', 'Snacks & Drinks'};
+  static const clothingCategoryNames = {'Clothing & Shopping'};
+  static const entertainmentCategoryNames = {'Fun & Entertainment'};
 }

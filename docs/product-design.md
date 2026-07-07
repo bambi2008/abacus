@@ -126,6 +126,15 @@ Deliberately no zero-based-budgeting requirement (categories can be
 under- or over-allocated relative to income — that rigor is exactly what
 YNAB owns and what this product is *not* trying to compete on).
 
+**2026-07-06: starter categories redefined around "beyond survival"
+spending** — Dining Out, Snacks & Drinks, Taxi & Rideshare, Clothing &
+Shopping, Subscriptions, Fun & Entertainment (see
+`docs/technical-architecture.md`). Necessities you don't really have a
+day-to-day choice about (groceries you cook, rent, public transit) aren't
+in the default set at all; no "Everything Else" catch-all either, on the
+reasoning that a purchase not fitting one of these six is unlikely to be
+the kind of spending this app exists to catch.
+
 ## Progress screen
 
 - **This month vs. last month**, one bar chart per category (reuse
@@ -141,6 +150,13 @@ YNAB owns and what this product is *not* trying to compete on).
   spec ("You've spent 40% more on dining out this month than your 3-month
   average"). Free users see a blurred/locked version of this card as the
   paywall trigger point, not a separate ad screen.
+- **Monthly savings recap (2026-07-06)**: a full-screen celebration at
+  month's close comparing the user's spend in three categories against
+  real 2024 BLS national averages, framed as progress toward a $500
+  starter emergency fund — not gated behind Pro, same reasoning as
+  milestone badges (a retention/motivation hook, not a monetization
+  lever). See `docs/technical-architecture.md` for exactly which
+  categories are compared and why two are deliberately excluded.
 
 ## Paywall
 

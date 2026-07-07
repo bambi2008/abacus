@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import '../config/constants.dart';
 import '../models/badge_record.dart';
 import '../models/complete_log_day_mark.dart';
+import '../models/monthly_savings_result.dart';
 import '../models/owl_mood.dart';
 import '../models/owl_state.dart';
 import '../models/category_challenge_result.dart';
@@ -23,6 +24,7 @@ class GamificationProvider extends ChangeNotifier {
   late Box<CategoryChallengeResult> _categoryResults;
   late Box<OwlState> _owlStateBox;
   late Box<CompleteLogDayMark> _completeLogDays;
+  late Box<MonthlySavingsResult> _monthlySavingsResults;
   late Box _settings;
   ExpenseProvider? _expenseProvider;
   CategoryProvider? _categoryProvider;
@@ -33,6 +35,7 @@ class GamificationProvider extends ChangeNotifier {
     _categoryResults = Hive.box<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
     _owlStateBox = Hive.box<OwlState>(HiveBoxes.owlState);
     _completeLogDays = Hive.box<CompleteLogDayMark>(HiveBoxes.completeLogDays);
+    _monthlySavingsResults = Hive.box<MonthlySavingsResult>(HiveBoxes.monthlySavingsResults);
     _settings = Hive.box(HiveBoxes.settings);
   }
 
@@ -195,10 +198,63 @@ class GamificationProvider extends ChangeNotifier {
         wins.add(result);
       }
     }
+    await _evaluateMonthlySavings(categoryProvider, expenseProvider, prevMonthDate, now);
     await _settings.put(SettingsKeys.lastMonthBoundaryCheck, now.toIso8601String());
     await refreshOwlState();
     notifyListeners();
     return wins;
+  }
+
+  /// The monthly "you spent less than average" recap — same idempotent
+  /// once-per-month-boundary evaluation as the category boss battles above,
+  /// just a single aggregate number instead of per-category detail. See
+  /// computeMonthlySavings for the real-BLS-benchmark comparison logic.
+  Future<void> _evaluateMonthlySavings(
+    CategoryProvider categoryProvider,
+    ExpenseProvider expenseProvider,
+    DateTime prevMonthDate,
+    DateTime now,
+  ) async {
+    final id = '${prevMonthDate.year}-${prevMonthDate.month.toString().padLeft(2, '0')}';
+    if (_monthlySavingsResults.get(id) != null) return;
+    final spendByName = <String, double>{
+      for (final category in categoryProvider.all)
+        category.name: expenseProvider.spendForCategoryInMonth(category.id, prevMonthDate),
+    };
+    final totalSaved = computeMonthlySavings(spendByName);
+    await _monthlySavingsResults.put(
+      id,
+      MonthlySavingsResult(
+        id: id,
+        year: prevMonthDate.year,
+        month: prevMonthDate.month,
+        totalSaved: totalSaved,
+        evaluatedAt: now,
+      ),
+    );
+    if (totalSaved > 0) {
+      // Event name only — never the actual dollar figure, same rule as
+      // every other analytics call in this app.
+      AnalyticsService.instance.capture('monthly_savings_positive');
+    }
+  }
+
+  /// A positive monthly savings recap that hasn't been shown yet — mirrors
+  /// [pendingCelebration]/[pendingCategoryCelebration]. A $0-saved month
+  /// (nothing beat the benchmark, or no comparable categories tracked) is
+  /// never pending — there's nothing worth celebrating in that case.
+  MonthlySavingsResult? get pendingMonthlySavingsCelebration {
+    for (final result in _monthlySavingsResults.values) {
+      if (result.totalSaved > 0 && !result.celebrationShown) return result;
+    }
+    return null;
+  }
+
+  Future<void> markMonthlySavingsCelebrationShown(String resultId) async {
+    final result = _monthlySavingsResults.get(resultId);
+    if (result == null) return;
+    await _monthlySavingsResults.put(resultId, result.copyWith(celebrationShown: true));
+    notifyListeners();
   }
 
   // --- Buddy weekly mini-challenge (Layer 2, local scaffold only) ---

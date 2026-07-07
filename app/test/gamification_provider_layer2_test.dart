@@ -5,6 +5,7 @@ import 'package:abacus/config/constants.dart';
 import 'package:abacus/models/badge_record.dart';
 import 'package:abacus/models/owl_state.dart';
 import 'package:abacus/models/complete_log_day_mark.dart';
+import 'package:abacus/models/monthly_savings_result.dart';
 import 'package:abacus/models/category.dart';
 import 'package:abacus/models/category_challenge_result.dart';
 import 'package:abacus/models/daily_log_completion.dart';
@@ -45,6 +46,9 @@ void main() {
     if (!Hive.isAdapterRegistered(HiveTypeIds.completeLogDay)) {
       Hive.registerAdapter(CompleteLogDayMarkAdapter());
     }
+    if (!Hive.isAdapterRegistered(HiveTypeIds.monthlySavingsResult)) {
+      Hive.registerAdapter(MonthlySavingsResultAdapter());
+    }
     await Hive.openBox<Expense>(HiveBoxes.expenses);
     await Hive.openBox<ExpenseCategory>(HiveBoxes.categories);
     await Hive.openBox<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
@@ -53,6 +57,7 @@ void main() {
     await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
     await Hive.openBox<OwlState>(HiveBoxes.owlState);
     await Hive.openBox<CompleteLogDayMark>(HiveBoxes.completeLogDays);
+    await Hive.openBox<MonthlySavingsResult>(HiveBoxes.monthlySavingsResults);
     await Hive.openBox(HiveBoxes.settings);
 
     expenseProvider = ExpenseProvider()..load();
@@ -163,6 +168,56 @@ void main() {
       final wins = await gamification.evaluateMonthBoundaryIfNeeded();
       expect(wins, isEmpty);
       expect(gamification.categoryChallengeResults, isEmpty);
+    });
+  });
+
+  group('monthly savings recap (evaluated alongside the month boundary)', () {
+    test('a positive-savings month arms pendingMonthlySavingsCelebration', () async {
+      final now = DateTime.now();
+      final settings = Hive.box(HiveBoxes.settings);
+      await settings.put(
+        SettingsKeys.lastMonthBoundaryCheck,
+        DateTime(now.year, now.month - 1, 15).toIso8601String(),
+      );
+      // A "Dining Out" category with zero logged spend in the (unlogged)
+      // previous month — the full benchmark counts as saved.
+      await _addCategory(categoryProvider, 'Dining Out', limit: 200.0);
+      await gamification.evaluateMonthBoundaryIfNeeded();
+
+      final pending = gamification.pendingMonthlySavingsCelebration;
+      expect(pending, isNotNull);
+      expect(pending!.totalSaved, greaterThan(0));
+
+      await gamification.markMonthlySavingsCelebrationShown(pending.id);
+      expect(gamification.pendingMonthlySavingsCelebration, isNull);
+    });
+
+    test('calling again within the same month does not re-evaluate savings', () async {
+      final now = DateTime.now();
+      final settings = Hive.box(HiveBoxes.settings);
+      await settings.put(
+        SettingsKeys.lastMonthBoundaryCheck,
+        DateTime(now.year, now.month - 1, 15).toIso8601String(),
+      );
+      await _addCategory(categoryProvider, 'Dining Out', limit: 200.0);
+      await gamification.evaluateMonthBoundaryIfNeeded();
+      final pending = gamification.pendingMonthlySavingsCelebration!;
+      await gamification.markMonthlySavingsCelebrationShown(pending.id);
+
+      await gamification.evaluateMonthBoundaryIfNeeded(); // same month, no-op
+      expect(gamification.pendingMonthlySavingsCelebration, isNull);
+    });
+
+    test('a category with no matching benchmark never produces a pending celebration on its own', () async {
+      final now = DateTime.now();
+      final settings = Hive.box(HiveBoxes.settings);
+      await settings.put(
+        SettingsKeys.lastMonthBoundaryCheck,
+        DateTime(now.year, now.month - 1, 15).toIso8601String(),
+      );
+      await _addCategory(categoryProvider, 'Subscriptions', limit: 50.0);
+      await gamification.evaluateMonthBoundaryIfNeeded();
+      expect(gamification.pendingMonthlySavingsCelebration, isNull);
     });
   });
 }

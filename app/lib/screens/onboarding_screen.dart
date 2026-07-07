@@ -21,7 +21,10 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pageController = PageController();
-  final _selectedCategories = <int>{0, 1, 2, 3};
+  // All presets pre-selected by default — with only 6, all of them are
+  // worth tracking under the "beyond survival spending" philosophy rather
+  // than making the user prune a long list on Day 1.
+  final _selectedCategories = Set<int>.from(List.generate(StarterCategories.presets.length, (i) => i));
   bool _firstExpenseLogged = false;
 
   void _next() {
