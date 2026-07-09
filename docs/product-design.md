@@ -26,13 +26,24 @@ must be a guaranteed-achievable win, not a setup chore.
    "Track spending without connecting your bank. Ever." Single CTA:
    "Get Started." (No email/account wall here — that's a documented
    drop-off point for budgeting apps; delay auth until after first value.)
-2. **Screen 2 — Pick 4 starter categories** from a preset list (Food,
-   Transport, Fun, Everything Else) with emoji icons, tap to select,
-   editable later. Deliberately not YNAB's "give every dollar a job"
-   zero-based setup — that's the exact complexity this product is
-   positioned against.
+2. **Screen 2 — Pick starter categories** from a preset list (Dining Out,
+   Snacks & Drinks, Taxi & Rideshare, Clothing & Shopping, Subscriptions,
+   Fun & Entertainment — see "Categories & Budgets" below for why these
+   six specifically), all pre-selected by default, with emoji icons, tap
+   to deselect, editable later. A trailing **"Add custom"** chip opens a
+   name+emoji dialog for anything that doesn't fit the presets — added
+   2026-07-06 after the founder noticed the copy ("you can add... anytime")
+   wasn't actually backed by an add flow here. Deliberately not YNAB's
+   "give every dollar a job" zero-based setup — that's the exact
+   complexity this product is positioned against.
 3. **Screen 3 — Log your first expense right now**: a pre-filled example
-   ("Coffee, $5, Food") the user edits and confirms — not a blank form.
+   ("Coffee, $5") the user edits and confirms — not a blank form. The
+   preview card's category label/emoji dynamically match whatever the user
+   actually selected on Screen 2 (preferring "Snacks & Drinks" if picked,
+   since that's the clearest real-world fit for a coffee purchase) — this
+   used to be hardcoded to a stale "Food" category left over from an
+   earlier category set, which meant what the card showed and what
+   actually got logged didn't match; fixed alongside the "Add custom" chip.
    Completing this fires the Day-1 win: a full-screen animated confirmation
    ("Day 1 🔥 — you're on your way") and starts the streak at 1.
 4. **Screen 4 — Notification permission**, asked *after* the first win

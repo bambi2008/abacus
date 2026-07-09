@@ -25,18 +25,58 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // worth tracking under the "beyond survival spending" philosophy rather
   // than making the user prune a long list on Day 1.
   final _selectedCategories = Set<int>.from(List.generate(StarterCategories.presets.length, (i) => i));
+  // Categories the user typed in themselves on the picker page — the copy
+  // there ("you can add... anytime") wasn't actually backed by an add flow
+  // until 2026-07-06, so this exists specifically to make that claim true.
+  final _customCategories = <(String name, String emoji, int colorValue)>[];
   bool _firstExpenseLogged = false;
 
   void _next() {
     _pageController.nextPage(duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
   }
 
+  void _addCustomCategory(String name, String emoji, int colorValue) {
+    setState(() => _customCategories.add((name, emoji, colorValue)));
+  }
+
+  void _removeCustomCategory(int index) {
+    setState(() => _customCategories.removeAt(index));
+  }
+
+  /// The preset/custom category the Day-1 example expense gets attached
+  /// to. Prefers "Snacks & Drinks" specifically — a coffee purchase is the
+  /// clearest real-world fit for it among the discretionary categories —
+  /// falling back to whatever the user actually picked if that one wasn't
+  /// selected. Used by both the preview card (before anything's created)
+  /// and the real category lookup on confirm, so the two always agree.
+  (String name, String emoji, int colorValue) get _exampleCategory {
+    final snacksIndex = StarterCategories.presets.indexWhere((p) => p.$1 == 'Snacks & Drinks');
+    if (snacksIndex != -1 && _selectedCategories.contains(snacksIndex)) {
+      return StarterCategories.presets[snacksIndex];
+    }
+    if (_selectedCategories.isNotEmpty) {
+      final firstIndex = (_selectedCategories.toList()..sort()).first;
+      return StarterCategories.presets[firstIndex];
+    }
+    if (_customCategories.isNotEmpty) return _customCategories.first;
+    // Unreachable in practice ("Continue" is disabled while both are
+    // empty) — kept total rather than throwing.
+    return StarterCategories.presets.first;
+  }
+
   Future<void> _confirmFirstExpense() async {
     final categoryProvider = context.read<CategoryProvider>();
     final expenseProvider = context.read<ExpenseProvider>();
     await categoryProvider.seedFromPresets(_selectedCategories.toList()..sort());
-    final foodCategory = categoryProvider.all.first;
-    await expenseProvider.addExpense(amount: 5.00, categoryId: foodCategory.id, note: 'Coffee');
+    for (final custom in _customCategories) {
+      await categoryProvider.add(custom.$1, custom.$2, custom.$3, 200.0);
+    }
+    final exampleName = _exampleCategory.$1;
+    final exampleCategory = categoryProvider.all.firstWhere(
+      (c) => c.name == exampleName,
+      orElse: () => categoryProvider.all.first,
+    );
+    await expenseProvider.addExpense(amount: 5.00, categoryId: exampleCategory.id, note: 'Coffee');
     AnalyticsService.instance.capture('onboarding_first_expense_logged');
     setState(() => _firstExpenseLogged = true);
   }
@@ -52,13 +92,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             _PositioningPage(onNext: _next),
             _PickCategoriesPage(
               selected: _selectedCategories,
+              custom: _customCategories,
               onToggle: (i) => setState(() {
                 _selectedCategories.contains(i) ? _selectedCategories.remove(i) : _selectedCategories.add(i);
               }),
+              onAddCustom: _addCustomCategory,
+              onRemoveCustom: _removeCustomCategory,
               onNext: _next,
             ),
             _FirstExpensePage(
               logged: _firstExpenseLogged,
+              exampleCategory: _exampleCategory,
               onConfirm: _confirmFirstExpense,
               onNext: _next,
             ),
@@ -108,10 +152,56 @@ class _PositioningPage extends StatelessWidget {
 
 class _PickCategoriesPage extends StatelessWidget {
   final Set<int> selected;
+  final List<(String name, String emoji, int colorValue)> custom;
   final void Function(int) onToggle;
+  final void Function(String name, String emoji, int colorValue) onAddCustom;
+  final void Function(int index) onRemoveCustom;
   final VoidCallback onNext;
 
-  const _PickCategoriesPage({required this.selected, required this.onToggle, required this.onNext});
+  const _PickCategoriesPage({
+    required this.selected,
+    required this.custom,
+    required this.onToggle,
+    required this.onAddCustom,
+    required this.onRemoveCustom,
+    required this.onNext,
+  });
+
+  Future<void> _showAddCustomDialog(BuildContext context) async {
+    final nameController = TextEditingController();
+    final emojiController = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add a category'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              decoration: const InputDecoration(labelText: 'Name'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: emojiController,
+              decoration: const InputDecoration(labelText: 'Emoji (optional)'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, nameController.text.trim()), child: const Text('Add')),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+    final emoji = emojiController.text.trim().isEmpty ? '📌' : emojiController.text.trim();
+    // A neutral, unopinionated color for anything the user names
+    // themselves — the six presets each get a deliberate color, a custom
+    // one doesn't need to mean anything.
+    onAddCustom(name, emoji, 0xFF546E7A);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,22 +217,37 @@ class _PickCategoriesPage extends StatelessWidget {
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: List.generate(StarterCategories.presets.length, (i) {
-              final (name, emoji, colorValue) = StarterCategories.presets[i];
-              final isSelected = selected.contains(i);
-              return FilterChip(
-                label: Text('$emoji $name'),
-                selected: isSelected,
-                selectedColor: Color(colorValue).withValues(alpha: 0.25),
-                onSelected: (_) => onToggle(i),
-              );
-            }),
+            children: [
+              ...List.generate(StarterCategories.presets.length, (i) {
+                final (name, emoji, colorValue) = StarterCategories.presets[i];
+                final isSelected = selected.contains(i);
+                return FilterChip(
+                  label: Text('$emoji $name'),
+                  selected: isSelected,
+                  selectedColor: Color(colorValue).withValues(alpha: 0.25),
+                  onSelected: (_) => onToggle(i),
+                );
+              }),
+              ...List.generate(custom.length, (i) {
+                final (name, emoji, colorValue) = custom[i];
+                return InputChip(
+                  label: Text('$emoji $name'),
+                  backgroundColor: Color(colorValue).withValues(alpha: 0.25),
+                  onDeleted: () => onRemoveCustom(i),
+                );
+              }),
+              ActionChip(
+                avatar: const Icon(Icons.add, size: 18),
+                label: const Text('Add custom'),
+                onPressed: () => _showAddCustomDialog(context),
+              ),
+            ],
           ),
           const Spacer(),
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton(
-              onPressed: selected.isEmpty ? null : onNext,
+              onPressed: (selected.isEmpty && custom.isEmpty) ? null : onNext,
               child: const Text('Continue'),
             ),
           ),
@@ -154,10 +259,16 @@ class _PickCategoriesPage extends StatelessWidget {
 
 class _FirstExpensePage extends StatelessWidget {
   final bool logged;
+  final (String name, String emoji, int colorValue) exampleCategory;
   final VoidCallback onConfirm;
   final VoidCallback onNext;
 
-  const _FirstExpensePage({required this.logged, required this.onConfirm, required this.onNext});
+  const _FirstExpensePage({
+    required this.logged,
+    required this.exampleCategory,
+    required this.onConfirm,
+    required this.onNext,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -189,9 +300,9 @@ class _FirstExpensePage extends StatelessWidget {
           const SizedBox(height: 24),
           Card(
             child: ListTile(
-              leading: const Text('🍔', style: TextStyle(fontSize: 28)),
+              leading: Text(exampleCategory.$2, style: const TextStyle(fontSize: 28)),
               title: const Text('Coffee'),
-              subtitle: const Text('Food'),
+              subtitle: Text(exampleCategory.$1),
               trailing: Text('\$5.00', style: Theme.of(context).textTheme.titleMedium),
             ),
           ),
