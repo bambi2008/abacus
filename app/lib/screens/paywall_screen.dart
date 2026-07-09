@@ -50,11 +50,55 @@ class _PaywallScreenState extends State<PaywallScreen> {
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Unlimited streak freezes, buddy streaks, spending insights, '
-            'and full budget history.',
-            textAlign: TextAlign.center,
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              const Expanded(flex: 3, child: SizedBox.shrink()),
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Text('Free', style: Theme.of(context).textTheme.labelLarge),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Text(
+                    'Pro',
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge
+                        ?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 16),
+          // Deliberately only lists what's actually gated (verified against
+          // the code, not aspirational): buddy streaks and full history are
+          // free for everyone, always — an earlier version of this screen
+          // listed them as Pro perks, which didn't match what free users
+          // actually saw and was a real source of confusion.
+          const _ComparisonRow(
+            label: 'Manual expense logging, streaks, and the owl',
+            free: true,
+            pro: true,
+          ),
+          const _ComparisonRow(
+            label: 'Buddy streaks and full budget history',
+            free: true,
+            pro: true,
+          ),
+          const _ComparisonRow(
+            label: 'Streak freezes if you miss a day',
+            free: '1 free',
+            pro: 'Unlimited',
+          ),
+          const _ComparisonRow(
+            label: 'Spending insights',
+            free: false,
+            pro: true,
           ),
           const SizedBox(height: 24),
           _PlanCard(
@@ -73,6 +117,48 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// A "what you keep for free" vs "what Pro adds" row — accepts either a
+/// bool (checkmark/nothing) or a short label (e.g. "1 free" / "Unlimited")
+/// per column, so the same row shape works for both binary features and
+/// ones with a real free-tier allowance.
+class _ComparisonRow extends StatelessWidget {
+  final String label;
+  final Object free;
+  final Object pro;
+
+  const _ComparisonRow({required this.label, required this.free, required this.pro});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(flex: 3, child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
+          Expanded(flex: 2, child: Center(child: _cell(context, free))),
+          Expanded(flex: 2, child: Center(child: _cell(context, pro, isPro: true))),
+        ],
+      ),
+    );
+  }
+
+  Widget _cell(BuildContext context, Object value, {bool isPro = false}) {
+    if (value is bool) {
+      return value
+          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary, size: 18)
+          : Icon(Icons.close, color: Theme.of(context).colorScheme.outline, size: 18);
+    }
+    return Text(
+      value as String,
+      style: Theme.of(context)
+          .textTheme
+          .bodySmall
+          ?.copyWith(fontWeight: isPro ? FontWeight.bold : FontWeight.normal),
+      textAlign: TextAlign.center,
     );
   }
 }

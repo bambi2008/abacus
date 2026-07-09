@@ -31,7 +31,7 @@ class SettingsScreen extends StatelessWidget {
             title: Text(subscription.isPro ? 'Abacus Pro' : 'Free plan'),
             subtitle: Text(
               subscription.isPro
-                  ? 'Unlimited streak freezes, buddy streaks, and spending insights.'
+                  ? 'Unlimited streak freezes and spending insights.'
                   : 'Upgrade for unlimited streak freezes and spending insights.',
             ),
             trailing: subscription.isPro

@@ -28,15 +28,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // Categories the user typed in themselves on the picker page — the copy
   // there ("you can add... anytime") wasn't actually backed by an add flow
   // until 2026-07-06, so this exists specifically to make that claim true.
-  final _customCategories = <(String name, String emoji, int colorValue)>[];
+  final _customCategories = <(String name, String emoji, int colorValue, double monthlyLimit)>[];
   bool _firstExpenseLogged = false;
 
   void _next() {
     _pageController.nextPage(duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
   }
 
-  void _addCustomCategory(String name, String emoji, int colorValue) {
-    setState(() => _customCategories.add((name, emoji, colorValue)));
+  void _addCustomCategory(String name, String emoji, int colorValue, double monthlyLimit) {
+    setState(() => _customCategories.add((name, emoji, colorValue, monthlyLimit)));
   }
 
   void _removeCustomCategory(int index) {
@@ -75,7 +75,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final expenseProvider = context.read<ExpenseProvider>();
     await categoryProvider.seedFromPresets(_selectedCategories.toList()..sort());
     for (final custom in _customCategories) {
-      await categoryProvider.add(custom.$1, custom.$2, custom.$3, 200.0);
+      await categoryProvider.add(custom.$1, custom.$2, custom.$3, custom.$4);
     }
     final exampleName = _exampleCategory.$1;
     final exampleCategory = categoryProvider.all.firstWhere(
@@ -158,9 +158,9 @@ class _PositioningPage extends StatelessWidget {
 
 class _PickCategoriesPage extends StatelessWidget {
   final Set<int> selected;
-  final List<(String name, String emoji, int colorValue)> custom;
+  final List<(String name, String emoji, int colorValue, double monthlyLimit)> custom;
   final void Function(int) onToggle;
-  final void Function(String name, String emoji, int colorValue) onAddCustom;
+  final void Function(String name, String emoji, int colorValue, double monthlyLimit) onAddCustom;
   final void Function(int index) onRemoveCustom;
   final VoidCallback onNext;
 
@@ -176,7 +176,8 @@ class _PickCategoriesPage extends StatelessWidget {
   Future<void> _showAddCustomDialog(BuildContext context) async {
     final nameController = TextEditingController();
     final emojiController = TextEditingController();
-    final name = await showDialog<String>(
+    final limitController = TextEditingController(text: '100');
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Add a category'),
@@ -193,20 +194,33 @@ class _PickCategoriesPage extends StatelessWidget {
               controller: emojiController,
               decoration: const InputDecoration(labelText: 'Emoji (optional)'),
             ),
+            const SizedBox(height: 12),
+            // Asked here, not silently defaulted — a $200 limit baked in
+            // with zero visibility was the exact confusion a real-device
+            // tester hit: the boss-battle bar's 100% didn't correspond to
+            // any number they'd ever seen or chosen.
+            TextField(
+              controller: limitController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Monthly limit', prefixText: '\$'),
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, nameController.text.trim()), child: const Text('Add')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Add')),
         ],
       ),
     );
-    if (name == null || name.isEmpty) return;
+    if (confirmed != true) return;
+    final name = nameController.text.trim();
+    if (name.isEmpty) return;
     final emoji = emojiController.text.trim().isEmpty ? '📌' : emojiController.text.trim();
+    final limit = double.tryParse(limitController.text.trim()) ?? 100.0;
     // A neutral, unopinionated color for anything the user names
     // themselves — the six presets each get a deliberate color, a custom
     // one doesn't need to mean anything.
-    onAddCustom(name, emoji, 0xFF546E7A);
+    onAddCustom(name, emoji, 0xFF546E7A, limit);
   }
 
   @override
@@ -235,9 +249,9 @@ class _PickCategoriesPage extends StatelessWidget {
                 );
               }),
               ...List.generate(custom.length, (i) {
-                final (name, emoji, colorValue) = custom[i];
+                final (name, emoji, colorValue, monthlyLimit) = custom[i];
                 return InputChip(
-                  label: Text('$emoji $name'),
+                  label: Text('$emoji $name (\$${monthlyLimit.toStringAsFixed(0)}/mo)'),
                   backgroundColor: Color(colorValue).withValues(alpha: 0.25),
                   onDeleted: () => onRemoveCustom(i),
                 );

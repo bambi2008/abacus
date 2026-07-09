@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../models/category.dart';
+import '../models/receipt_scan_result.dart';
 import '../models/voice_expense_result.dart';
 import '../providers/buddy_provider.dart';
 import '../providers/category_provider.dart';
@@ -89,9 +90,17 @@ class _TodayScreenState extends State<TodayScreen> {
       appBar: AppBar(
         title: const Text('Today'),
         actions: [
-          if (expenses.freeStreakFreezesAvailable > 0)
+          // Pro users are unlimited and never decrement the free-tier
+          // counter (see ExpenseProvider.checkAndApplyStreakFreeze), so
+          // this can't just gate on the counter being > 0 — a Pro user who
+          // used their one free freeze before upgrading would otherwise
+          // never see this icon again despite now having real unlimited
+          // freezes.
+          if (expenses.freeStreakFreezesAvailable > 0 || context.watch<SubscriptionProvider>().isPro)
             IconButton(
-              tooltip: '${expenses.freeStreakFreezesAvailable} streak freeze available',
+              tooltip: context.watch<SubscriptionProvider>().isPro
+                  ? 'Unlimited streak freezes (Pro)'
+                  : '${expenses.freeStreakFreezesAvailable} streak freeze available',
               icon: const Icon(Icons.shield_outlined),
               onPressed: () => _showStreakFreezeInfo(context),
             ),
@@ -207,7 +216,11 @@ class _TodayScreenState extends State<TodayScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            Text('You have $freezes free streak freeze${freezes == 1 ? '' : 's'} available.'),
+            Text(
+              isPro
+                  ? 'Unlimited — Pro never runs out of streak freezes.'
+                  : 'You have $freezes free streak freeze${freezes == 1 ? '' : 's'} available.',
+            ),
             const SizedBox(height: 8),
             const Text(
               'If you miss a day with an active streak, a freeze is applied automatically the '
@@ -353,9 +366,12 @@ class _CategoryBar extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
+                    // The dollar limit is spelled out here, not just the
+                    // percentage — a real-device tester couldn't tell what
+                    // number the bar's 100% actually represented.
                     shieldBroken
-                        ? 'The ${category.name} boss broke your shield — you\'re over budget this month'
-                        : '🛡️ ${(shieldHealth * 100).round()}% shield left vs. this month\'s ${category.name} boss',
+                        ? 'The ${category.name} boss broke your \$${category.monthlyLimit.toStringAsFixed(0)} shield — you\'re over budget this month'
+                        : '🛡️ ${(shieldHealth * 100).round()}% shield left (\$${(category.monthlyLimit - spentThisMonth).clamp(0, category.monthlyLimit).toStringAsFixed(0)} of \$${category.monthlyLimit.toStringAsFixed(0)}) vs. this month\'s ${category.name} boss',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -401,8 +417,16 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
   }
 
   Future<void> _scanReceipt() async {
+    // useRootNavigator: true so this chooser presents at the root level
+    // instead of nested inside the log-expense sheet's own modal route —
+    // on a real iPhone, presenting the native camera/photo-library UI
+    // immediately after dismissing a *nested* Flutter modal route can
+    // leave UIKit's presentation chain confused enough that "Use Photo"
+    // never calls back and the picker just hangs with no error. A real
+    // device tester hit exactly that: tapping "Use Photo" did nothing.
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) => SafeArea(
         child: Wrap(
           children: [
@@ -421,11 +445,32 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
       ),
     );
     if (source == null || !mounted) return;
+    // Let this sheet's own dismiss animation finish before presenting
+    // another modal (the native camera/library UI) on top of it — part of
+    // the same fix as useRootNavigator above.
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
     final picker = ImagePicker();
-    final photo = await picker.pickImage(source: source, imageQuality: 85);
+    XFile? photo;
+    try {
+      photo = await picker.pickImage(source: source, imageQuality: 85).timeout(const Duration(seconds: 60));
+    } catch (e) {
+      debugPrint('_scanReceipt: pickImage failed or timed out: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open the camera — enter the expense manually.')),
+        );
+      }
+      return;
+    }
     if (photo == null || !mounted) return;
     setState(() => _scanning = true);
-    final result = await ReceiptOcrService.scan(photo.path);
+    ReceiptScanResult? result;
+    try {
+      result = await ReceiptOcrService.scan(photo.path).timeout(const Duration(seconds: 20));
+    } catch (e) {
+      debugPrint('_scanReceipt: OCR failed or timed out: $e');
+    }
     if (!mounted) return;
     setState(() => _scanning = false);
     if (result == null) {
@@ -436,14 +481,26 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
     }
     AnalyticsService.instance.capture('receipt_scanned');
     setState(() {
-      if (result.amount != null) _amountController.text = result.amount!.toStringAsFixed(2);
+      if (result!.amount != null) _amountController.text = result.amount!.toStringAsFixed(2);
       if (result.vendor != null && _noteController.text.isEmpty) _noteController.text = result.vendor!;
     });
   }
 
   Future<void> _startVoiceInput() async {
     setState(() => _listening = true);
-    final transcript = await VoiceInputService.listenOnce();
+    String? transcript;
+    try {
+      // A real-device tester hit the mic button spinning forever — the
+      // underlying speech_to_text plugin's initialize() can fail to ever
+      // resolve (e.g. a stuck permission dialog) with no error callback,
+      // which had nothing bounding this await. This timeout is the
+      // recovery path for that, on top of VoiceInputService's own
+      // internal timeout on initialize() itself.
+      transcript = await VoiceInputService.listenOnce().timeout(const Duration(seconds: 20));
+    } catch (e) {
+      debugPrint('_startVoiceInput: listenOnce failed or timed out: $e');
+      transcript = null;
+    }
     if (!mounted) return;
     setState(() => _listening = false);
     if (transcript == null) {

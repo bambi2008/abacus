@@ -112,7 +112,14 @@ class ExpenseProvider extends ChangeNotifier {
   /// auto-consumes a freeze rather than letting the streak zero out — this
   /// is the "what-the-hell effect" fix, and it's friction-free by design
   /// (no user action required).
-  Future<bool> checkAndApplyStreakFreeze() async {
+  ///
+  /// [isPro] must be threaded in from the caller (see main.dart) — this
+  /// provider has no direct dependency on SubscriptionProvider. Without it,
+  /// "unlimited streak freezes" (the paywall's actual headline Pro benefit)
+  /// silently did nothing: the free-tier counter started at 1 and nothing
+  /// anywhere ever replenished or bypassed it for Pro subscribers, so a
+  /// paying user got exactly the same one freeze as a free user, forever.
+  Future<bool> checkAndApplyStreakFreeze({required bool isPro}) async {
     final today = _dateOnly(DateTime.now());
     final yesterday = today.subtract(const Duration(days: 1));
     final dayBefore = yesterday.subtract(const Duration(days: 1));
@@ -120,12 +127,14 @@ class ExpenseProvider extends ChangeNotifier {
     final dayBeforeCompletion = completionOn(dayBefore);
     final hadActiveStreak =
         dayBeforeCompletion != null && (dayBeforeCompletion.loggedAnyExpense || dayBeforeCompletion.usedStreakFreeze);
-    if (!hadActiveStreak || freeStreakFreezesAvailable <= 0) return false;
+    if (!hadActiveStreak || (!isPro && freeStreakFreezesAvailable <= 0)) return false;
     await _completionBox.put(
       _key(yesterday),
       DailyLogCompletion(date: yesterday, loggedAnyExpense: false, withinBudget: true, usedStreakFreeze: true),
     );
-    await setFreeStreakFreezesAvailable(freeStreakFreezesAvailable - 1);
+    // Pro is truly unlimited — the counter is a free-tier-only concept, so
+    // it's never decremented (and never goes negative) for Pro users.
+    if (!isPro) await setFreeStreakFreezesAvailable(freeStreakFreezesAvailable - 1);
     AnalyticsService.instance.capture('streak_freeze_used');
     notifyListeners();
     return true;

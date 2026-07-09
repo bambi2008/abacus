@@ -70,8 +70,15 @@ void main() async {
   await AnalyticsService.instance.init();
   AnalyticsService.instance.capture('app_opened');
 
+  // Constructed early (not inside the MultiProvider's create:) so isPro is
+  // readable before the streak-freeze check below — without this, Pro
+  // subscribers got the exact same one-time freeze as free users, since
+  // nothing ever threaded isPro into checkAndApplyStreakFreeze.
+  final subscriptionProvider = SubscriptionProvider()..load();
+  subscriptionProvider.init(); // not awaited — matches the prior fire-and-forget behavior
+
   final expenseProvider = ExpenseProvider()..load();
-  await expenseProvider.checkAndApplyStreakFreeze();
+  await expenseProvider.checkAndApplyStreakFreeze(isPro: subscriptionProvider.isPro);
   final categoryProvider = CategoryProvider()..load();
   final gamificationProvider = GamificationProvider()..load();
   gamificationProvider.bind(expenseProvider, categoryProvider);
@@ -104,7 +111,7 @@ void main() async {
         ChangeNotifierProvider.value(value: expenseProvider),
         ChangeNotifierProvider.value(value: gamificationProvider),
         ChangeNotifierProvider.value(value: buddyProvider),
-        ChangeNotifierProvider(create: (_) => SubscriptionProvider()..load()..init()),
+        ChangeNotifierProvider.value(value: subscriptionProvider),
       ],
       child: const AbacusApp(),
     ),

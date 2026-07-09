@@ -28,9 +28,15 @@ class VoiceInputService {
     if (kIsWeb) return false;
     if (_available != null) return _available!;
     try {
-      _available = await _speech.initialize(onError: (e) => debugPrint('VoiceInputService: $e'));
+      // initialize() has no guaranteed completion on every device/OS
+      // combination — a real-device tester hit the mic button spinning
+      // forever, which traced back to this Future never resolving (no
+      // error either). Bounded here so the caller always gets an answer.
+      _available = await _speech
+          .initialize(onError: (e) => debugPrint('VoiceInputService: $e'))
+          .timeout(const Duration(seconds: 10));
     } catch (e) {
-      debugPrint('VoiceInputService: initialize failed: $e');
+      debugPrint('VoiceInputService: initialize failed or timed out: $e');
       _available = false;
     }
     return _available!;
