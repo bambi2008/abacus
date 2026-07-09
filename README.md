@@ -55,10 +55,11 @@ Full evaluation done (customer/market, technical architecture, promotion,
   competitor teardown, and the financial model's results.
 - [`docs/technical-architecture.md`](docs/technical-architecture.md) —
   reuses the HeelEase/Regimen Provider+Hive+PostHog+IAP stack (the core loop
-  needs no cloud AI at all; an on-device Vision OCR receipt-scan assist was
-  added later purely to speed up manual entry, never a step toward bank
-  sync), the Duolingo gamification mechanics translated into specific
-  features, and an honest flag on the unvalidated second revenue engine.
+  needs no cloud AI at all; an on-device OCR receipt-scan assist (Vision on
+  iOS, ML Kit on Android) was added later purely to speed up manual entry,
+  never a step toward bank sync), the Duolingo gamification mechanics
+  translated into specific features, and an honest flag on the unvalidated
+  second revenue engine.
 - [`docs/promotion-plan.md`](docs/promotion-plan.md) — content strategy
   around the ongoing "Mint alternative" search demand.
 - [`docs/financial-model-year1-3.xlsx`](docs/financial-model-year1-3.xlsx) —

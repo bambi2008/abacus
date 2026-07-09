@@ -34,9 +34,12 @@ We do collect a few narrow, opt-in exceptions to that rule:
   note, or anything else about what you spent. If you never use the buddy
   streak feature, nothing about your account is ever created or synced.
 - **Receipt scanning**, only if you tap the camera icon to scan a receipt.
-  Text recognition runs entirely on your device using Apple's Vision
-  framework — the photo is processed locally and is never uploaded
-  anywhere, and is discarded once the scan completes.
+  Text recognition runs entirely on your device — Apple's Vision framework
+  on iOS, Google's ML Kit on Android — the photo is processed locally and
+  is never uploaded anywhere, and is discarded once the scan completes. (On
+  Android, ML Kit's on-device model may need a one-time download of a few
+  megabytes from Google Play Services the first time you scan — that
+  download contains no data of yours, only the recognition model itself.)
 - **Voice input**, only if you tap the microphone icon to speak an expense.
   Speech recognition is requested on-device where your iPhone supports it.
   On some devices, if the on-device language model isn't already

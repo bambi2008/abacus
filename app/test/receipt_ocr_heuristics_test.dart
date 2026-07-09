@@ -2,10 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:abacus/models/receipt_scan_result.dart';
 
-// The native Vision recognition itself can't run in CI (it's an iOS-only
-// on-device call) — what IS pure and testable is the heuristic parsing of
-// whatever text lines Vision returns. These tests pin that behavior against
-// realistic (hand-typed) receipt text shapes.
+// The native recognition itself (Vision on iOS, ML Kit on Android) can't
+// run in CI — it's an on-device platform call. What IS pure and testable
+// is the heuristic parsing of whatever text lines it returns. These tests
+// pin that behavior against realistic (hand-typed) receipt text shapes.
 
 void main() {
   group('parseReceiptText', () {

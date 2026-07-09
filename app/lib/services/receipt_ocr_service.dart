@@ -5,8 +5,9 @@ import 'package:flutter/services.dart';
 
 import '../models/receipt_scan_result.dart';
 
-/// On-device receipt OCR via Apple's Vision framework (see
-/// ios/Runner/ReceiptOcrPlugin.swift). Purely an entry-speed assist for
+/// On-device receipt OCR — Apple's Vision framework on iOS
+/// (ios/Runner/ReceiptOcrPlugin.swift), Google ML Kit on Android
+/// (android/.../ReceiptOcrPlugin.kt). Purely an entry-speed assist for
 /// Abacus's manual-first core loop — it never syncs to a bank, never sends
 /// the photo anywhere (recognition runs entirely on-device), and every
 /// extracted field still lands in the normal log-expense sheet for the user
@@ -15,10 +16,9 @@ import '../models/receipt_scan_result.dart';
 class ReceiptOcrService {
   static const _channel = MethodChannel('com.abacus.app/receipt_ocr');
 
-  /// Vision's receipt recognition is iOS-only for v1 (no Android/desktop
-  /// equivalent wired up yet) — checked so the UI can hide the "Scan
-  /// receipt" entry point entirely on platforms where it would just fail.
-  static bool get isAvailable => !kIsWeb && Platform.isIOS;
+  /// Checked so the UI can hide the "Scan receipt" entry point entirely on
+  /// platforms with no native recognition plugin wired up (web, desktop).
+  static bool get isAvailable => !kIsWeb && (Platform.isIOS || Platform.isAndroid);
 
   /// Runs on-device text recognition on the photo at [imagePath] and returns
   /// a best-guess amount/vendor/date, or null if recognition produced

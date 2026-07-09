@@ -43,3 +43,10 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // On-device text recognition for ReceiptOcrPlugin.kt — the Android
+    // counterpart to iOS's Vision framework plugin. Runs entirely on-device;
+    // no image data is ever sent to Google's servers.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+}

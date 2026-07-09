@@ -17,21 +17,27 @@ The single biggest lever on the "will people actually do fully-manual entry"
 question isn't automating it away — that's Copilot/Monarch's territory and
 conceding it would erase Abacus's whole positioning — it's making each
 manual entry faster. `ReceiptOcrService` (`lib/services/receipt_ocr_service.dart`)
-lets the user snap a photo of a receipt from the log-expense sheet; Apple's
-**Vision framework** (`VNRecognizeTextRequest`, `ios/Runner/ReceiptOcrPlugin.swift`)
-recognizes the text entirely on-device — the photo is never uploaded anywhere,
-matching the "no cloud, no bank credentials" positioning. Recognized lines
-cross a method channel back to Dart, where a pure, independently-unit-tested
-heuristic (`parseReceiptText` in `lib/models/receipt_scan_result.dart`) guesses
-an amount (prefers a "Total" line, falls back to the largest amount on the
-receipt), a vendor (first substantial text line), and a date. Every guessed
-field only **pre-fills** the existing manual log-expense sheet — the user
-still confirms or edits it before it becomes a real Expense, so OCR assists
-entry speed without ever silently creating a transaction on its own.
+lets the user snap a photo of a receipt from the log-expense sheet; on iOS,
+Apple's **Vision framework** (`VNRecognizeTextRequest`,
+`ios/Runner/ReceiptOcrPlugin.swift`) recognizes the text; on Android,
+**Google ML Kit's** on-device text recognizer
+(`android/.../ReceiptOcrPlugin.kt`) does the same job behind an identical
+method-channel contract (`com.abacus.app/receipt_ocr`, `recognizeText` →
+`{"lines": [...]}`) so the Dart side needs zero platform branching beyond
+`ReceiptOcrService.isAvailable`. Both run entirely on-device — the photo is
+never uploaded anywhere, matching the "no cloud, no bank credentials"
+positioning. Recognized lines cross the method channel back to Dart, where a
+pure, independently-unit-tested heuristic (`parseReceiptText` in
+`lib/models/receipt_scan_result.dart`) guesses an amount (prefers a "Total"
+line, falls back to the largest amount on the receipt), a vendor (first
+substantial text line), and a date. Every guessed field only **pre-fills**
+the existing manual log-expense sheet — the user still confirms or edits it
+before it becomes a real Expense, so OCR assists entry speed without ever
+silently creating a transaction on its own.
 
-iOS-only for v1 (`ReceiptOcrService.isAvailable`); the "Scan receipt" button
-is hidden on other platforms rather than shown broken, since there's no
-Android/desktop text-recognition plugin wired up yet. Tapping it offers a
+iOS and Android only (`ReceiptOcrService.isAvailable`); the "Scan receipt"
+button is hidden on other platforms (web, desktop) rather than shown broken,
+since there's no text-recognition plugin wired up there. Tapping it offers a
 choice of camera or photo library (`image_picker`'s `ImageSource`) — needed
 for testing on the iOS Simulator (no camera hardware), and a real convenience
 for real users who already have a receipt photo saved.
