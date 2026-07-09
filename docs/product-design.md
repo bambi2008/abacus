@@ -198,6 +198,13 @@ the kind of spending this app exists to catch.
   milestone badges (a retention/motivation hook, not a monetization
   lever). See `docs/technical-architecture.md` for exactly which
   categories are compared and why two are deliberately excluded.
+  **A "Monthly savings" history list was added to Progress the same
+  day** — the celebration only ever fires once per month, and until
+  this existed that was the *only* place the number was ever visible;
+  afterward it was computed, persisted, and effectively invisible
+  forever. The list shows every evaluated month, including $0 ones —
+  showing only the wins would make it decorative rather than an honest
+  record.
 
 ## Paywall
 

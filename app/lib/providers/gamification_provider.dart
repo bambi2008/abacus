@@ -250,6 +250,20 @@ class GamificationProvider extends ChangeNotifier {
     return null;
   }
 
+  /// Every evaluated month, most recent first — including $0 months. The
+  /// celebration screen only ever shows the positive-savings moment once;
+  /// this is what makes that data visible again afterward (previously it
+  /// was computed, persisted, shown once, and then effectively invisible —
+  /// no UI anywhere let you look back and ask "how did last month go?").
+  /// Showing $0 months too, not just wins, is a deliberate honesty choice:
+  /// cherry-picking only the good months would make this decorative
+  /// rather than a real record.
+  List<MonthlySavingsResult> get monthlySavingsHistory {
+    final results = _monthlySavingsResults.values.toList();
+    results.sort((a, b) => b.id.compareTo(a.id)); // "yyyy-MM" sorts correctly as a string
+    return results;
+  }
+
   Future<void> markMonthlySavingsCelebrationShown(String resultId) async {
     final result = _monthlySavingsResults.get(resultId);
     if (result == null) return;

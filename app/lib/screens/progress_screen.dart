@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/monthly_savings_result.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
@@ -16,6 +17,7 @@ class ProgressScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final expenses = context.watch<ExpenseProvider>();
     final categories = context.watch<CategoryProvider>();
+    final gamification = context.watch<GamificationProvider>();
     final isPro = context.watch<SubscriptionProvider>().isPro;
     final now = DateTime.now();
     final spendByCategory = expenses.spendByCategoryInMonth(now);
@@ -95,6 +97,15 @@ class ProgressScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _NoSpendCalendar(month: now),
           const SizedBox(height: 24),
+          Text('Monthly savings', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(
+            'Vs. real U.S. averages for dining out, shopping, and entertainment (BLS).',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          _MonthlySavingsHistory(results: gamification.monthlySavingsHistory),
+          const SizedBox(height: 24),
           Text('Recent entries', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           ..._recentEntries(context, expenses, categories),
@@ -132,6 +143,52 @@ class ProgressScreen extends StatelessWidget {
       ));
     }
     return entries;
+  }
+}
+
+/// Added 2026-07-06: the monthly savings recap used to be computed,
+/// persisted, shown once as a full-screen celebration, and then
+/// effectively invisible forever — there was no way anywhere in the app to
+/// look back and ask "how did last month go?" This makes that history
+/// visible. Deliberately shows $0 months too, not just wins — cherry-
+/// picking only the good months would make this decorative rather than an
+/// honest record.
+class _MonthlySavingsHistory extends StatelessWidget {
+  final List<MonthlySavingsResult> results;
+  const _MonthlySavingsHistory({required this.results});
+
+  @override
+  Widget build(BuildContext context) {
+    if (results.isEmpty) {
+      return const Text('Your first monthly recap appears here after your first full month of tracking.');
+    }
+    return Column(
+      children: results.map((r) {
+        final saved = r.totalSaved;
+        return ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Text(saved > 0 ? '💰' : '➖', style: const TextStyle(fontSize: 20)),
+          title: Text('${_monthName(r.month)} ${r.year}'),
+          trailing: Text(
+            saved > 0 ? 'Saved \$${saved.toStringAsFixed(0)}' : 'No savings that month',
+            style: TextStyle(
+              fontWeight: saved > 0 ? FontWeight.bold : FontWeight.normal,
+              color: saved > 0
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  String _monthName(int month) {
+    const names = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return names[month - 1];
   }
 }
 

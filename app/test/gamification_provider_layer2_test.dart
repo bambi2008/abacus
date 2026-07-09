@@ -219,6 +219,23 @@ void main() {
       await gamification.evaluateMonthBoundaryIfNeeded();
       expect(gamification.pendingMonthlySavingsCelebration, isNull);
     });
+
+    test('monthlySavingsHistory surfaces every evaluated month, including \$0 ones', () async {
+      final now = DateTime.now();
+      final settings = Hive.box(HiveBoxes.settings);
+      await settings.put(
+        SettingsKeys.lastMonthBoundaryCheck,
+        DateTime(now.year, now.month - 1, 15).toIso8601String(),
+      );
+      expect(gamification.monthlySavingsHistory, isEmpty);
+      // No benchmark matches "Subscriptions" (see NationalSpendingBenchmarks)
+      // — this month should still show up in history, just at $0, not be
+      // silently dropped the way it's excluded from pendingCelebration.
+      await _addCategory(categoryProvider, 'Subscriptions', limit: 50.0);
+      await gamification.evaluateMonthBoundaryIfNeeded();
+      expect(gamification.monthlySavingsHistory, hasLength(1));
+      expect(gamification.monthlySavingsHistory.first.totalSaved, 0);
+    });
   });
 }
 
