@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
+import '../config/constants.dart';
 import '../models/expense.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
@@ -136,21 +138,33 @@ class _NotificationTimeTile extends StatefulWidget {
 }
 
 class _NotificationTimeTileState extends State<_NotificationTimeTile> {
+  late Box _settings;
+  late TimeOfDay _time;
+
+  @override
+  void initState() {
+    super.initState();
+    _settings = Hive.box(HiveBoxes.settings);
+    _time = TimeOfDay(
+      hour: _settings.get(SettingsKeys.reminderHour, defaultValue: 20) as int,
+      minute: _settings.get(SettingsKeys.reminderMinute, defaultValue: 0) as int,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.schedule_outlined),
       title: const Text('Reminder time'),
       subtitle: const Text('When to nudge you if a streak is at risk.'),
-      trailing: const Text('8:00 PM'),
+      trailing: Text(_time.format(context)),
       onTap: () async {
-        final time = await showTimePicker(
-          context: context,
-          initialTime: const TimeOfDay(hour: 20, minute: 0),
-        );
-        if (time != null) {
-          AnalyticsService.instance.capture('reminder_time_changed');
-        }
+        final time = await showTimePicker(context: context, initialTime: _time);
+        if (time == null || !mounted) return;
+        await _settings.put(SettingsKeys.reminderHour, time.hour);
+        await _settings.put(SettingsKeys.reminderMinute, time.minute);
+        setState(() => _time = time);
+        AnalyticsService.instance.capture('reminder_time_changed');
       },
     );
   }

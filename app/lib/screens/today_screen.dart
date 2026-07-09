@@ -10,6 +10,7 @@ import '../providers/buddy_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
+import '../providers/subscription_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/receipt_ocr_service.dart';
 import '../services/voice_input_service.dart';
@@ -19,6 +20,7 @@ import 'category_challenge_win_screen.dart';
 import 'milestone_celebration_screen.dart';
 import 'monthly_savings_celebration_screen.dart';
 import 'owl_evolution_celebration_screen.dart';
+import 'paywall_screen.dart';
 
 class TodayScreen extends StatefulWidget {
   const TodayScreen({super.key});
@@ -88,14 +90,10 @@ class _TodayScreenState extends State<TodayScreen> {
         title: const Text('Today'),
         actions: [
           if (expenses.freeStreakFreezesAvailable > 0)
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Center(
-                child: Tooltip(
-                  message: '${expenses.freeStreakFreezesAvailable} streak freeze available',
-                  child: const Icon(Icons.shield_outlined),
-                ),
-              ),
+            IconButton(
+              tooltip: '${expenses.freeStreakFreezesAvailable} streak freeze available',
+              icon: const Icon(Icons.shield_outlined),
+              onPressed: () => _showStreakFreezeInfo(context),
             ),
         ],
       ),
@@ -184,6 +182,51 @@ class _TodayScreenState extends State<TodayScreen> {
       isScrollControlled: true,
       builder: (_) => const _LogExpenseSheet(),
     ).then((_) => _showPendingCelebrationsIfAny());
+  }
+
+  // The shield icon used to be an inert Tooltip — it looked like every
+  // other tappable AppBar icon in the app but a tap (as opposed to a
+  // long-press, which is how Tooltip actually surfaces its message) did
+  // nothing. Now it opens the same info a tap on any other icon here would.
+  void _showStreakFreezeInfo(BuildContext context) {
+    final freezes = context.read<ExpenseProvider>().freeStreakFreezesAvailable;
+    final isPro = context.read<SubscriptionProvider>().isPro;
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.shield_outlined, size: 28),
+                const SizedBox(width: 12),
+                Text('Streak freeze', style: Theme.of(sheetContext).textTheme.titleLarge),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text('You have $freezes free streak freeze${freezes == 1 ? '' : 's'} available.'),
+            const SizedBox(height: 8),
+            const Text(
+              'If you miss a day with an active streak, a freeze is applied automatically the '
+              'next time you open the app — your streak stays alive instead of resetting to zero.',
+            ),
+            if (!isPro) ...[
+              const SizedBox(height: 16),
+              FilledButton.tonal(
+                onPressed: () {
+                  Navigator.of(sheetContext).pop();
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PaywallScreen()));
+                },
+                child: const Text('Get unlimited freezes with Pro'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 

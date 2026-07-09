@@ -68,6 +68,7 @@ class SettingsKeys {
   static const analyticsEnabled = 'analytics_enabled';
   static const freeStreakFreezesAvailable = 'free_streak_freezes_available';
   static const reminderHour = 'reminder_hour';
+  static const reminderMinute = 'reminder_minute';
   static const buddyStreakCode = 'buddy_streak_code';
   static const buddyStreakPartnerName = 'buddy_streak_partner_name';
   static const lastMonthBoundaryCheck = 'last_month_boundary_check';
