@@ -67,6 +67,10 @@ Full evaluation done (customer/market, technical architecture, promotion,
   **paid-acquisition engine (Apple Search Ads specifically)**. **Base Case
   Year 3: $217,186 revenue, $30,616 ad spend, 1,299 paying customers,
   $166,488 net profit, 76.7% net margin.**
+- [`docs/legal/privacy-policy.md`](docs/legal/privacy-policy.md) — what the
+  app actually collects (almost nothing — local-first by design) and the
+  narrow, disclosed exceptions: anonymous analytics, opt-in savings-buddy
+  sync, on-device OCR/voice input.
   **Honest finding on paid acquisition**: the rigorous LTV:CAC ratio (value
   per install vs. cost per install) is **0.96:1 in Year 1 and 1.77:1 in
   Year 3 — below the industry-healthy 3:1 benchmark**. Switching from
