@@ -6,6 +6,7 @@ import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
 import '../providers/subscription_provider.dart';
+import 'category_management_screen.dart';
 import 'paywall_screen.dart';
 
 class ProgressScreen extends StatelessWidget {
@@ -20,7 +21,17 @@ class ProgressScreen extends StatelessWidget {
     final spendByCategory = expenses.spendByCategoryInMonth(now);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Progress')),
+      appBar: AppBar(
+        title: const Text('Progress'),
+        actions: [
+          IconButton(
+            tooltip: 'Manage categories',
+            icon: const Icon(Icons.tune),
+            onPressed: () =>
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CategoryManagementScreen())),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

@@ -146,11 +146,26 @@ must be a guaranteed-achievable win, not a setup chore.
 
 ## Categories & Budgets (setup screen, not a daily destination)
 
-Reached from Progress → "Edit Budgets." List of categories, each with a
-monthly limit (numeric input) and an emoji/color picker. Add/remove/reorder.
-Deliberately no zero-based-budgeting requirement (categories can be
-under- or over-allocated relative to income — that rigor is exactly what
-YNAB owns and what this product is *not* trying to compete on).
+Reached from Progress → the tune icon → "Manage categories"
+(`CategoryManagementScreen`). List of categories, each with a monthly
+limit and an emoji, tap to edit, swipe to delete (a confirmation is honest
+that past expenses aren't deleted, just show as "Uncategorized" — the
+Progress screen's recent-entries list already handled a missing category
+gracefully before this screen existed to ever trigger it). A trailing "+"
+in the app bar adds a new one. Deliberately no zero-based-budgeting
+requirement (categories can be under- or over-allocated relative to
+income — that rigor is exactly what YNAB owns and what this product is
+*not* trying to compete on).
+
+**This screen didn't exist until 2026-07-06** — onboarding was the only
+place a category could ever be created; nothing after that could add,
+edit, or delete one, despite this doc describing the screen since the
+original design pass. Built alongside a fix to the starter presets'
+default monthly limits: every category used to get the same flat $200,
+which (once the categories became discretionary-specific, see below)
+made limits like "Subscriptions: $200" meaningless — `StarterCategories.presets`
+now carries a distinct starting limit per category
+(`config/constants.dart`), all still freely editable here.
 
 **2026-07-06: starter categories redefined around "beyond survival"
 spending** — Dining Out, Snacks & Drinks, Taxi & Rideshare, Clothing &

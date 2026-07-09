@@ -110,13 +110,20 @@ class SupabaseConfig {
 /// spending this app is trying to catch, and users can still add a custom
 /// category any time via Settings if they genuinely want one.
 class StarterCategories {
+  /// (name, emoji, color, default monthly limit). The limit is a starting
+  /// point, not a claim about what's "right" for any given category —
+  /// deliberately varies by category rather than one flat number for
+  /// everything (the flat $200 default used until 2026-07-06 made the boss
+  /// battle mechanic meaningless: a $50/mo subscriptions habit and a
+  /// $200/mo dining-out habit aren't the same kind of "limit"). Editable
+  /// any time from Progress → Manage categories.
   static const presets = [
-    ('Dining Out', '🍽️', 0xFFEF6C00),
-    ('Snacks & Drinks', '🍿', 0xFFFFB300),
-    ('Taxi & Rideshare', '🚕', 0xFF1E88E5),
-    ('Clothing & Shopping', '👕', 0xFF8E24AA),
-    ('Subscriptions', '📺', 0xFF43A047),
-    ('Fun & Entertainment', '🎬', 0xFFD81B60),
+    ('Dining Out', '🍽️', 0xFFEF6C00, 150.0),
+    ('Snacks & Drinks', '🍿', 0xFFFFB300, 60.0),
+    ('Taxi & Rideshare', '🚕', 0xFF1E88E5, 50.0),
+    ('Clothing & Shopping', '👕', 0xFF8E24AA, 100.0),
+    ('Subscriptions', '📺', 0xFF43A047, 50.0),
+    ('Fun & Entertainment', '🎬', 0xFFD81B60, 80.0),
   ];
 }
 

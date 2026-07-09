@@ -32,13 +32,13 @@ class CategoryProvider extends ChangeNotifier {
   /// each starts with a modest default limit, editable later.
   Future<void> seedFromPresets(List<int> selectedIndices) async {
     for (final i in selectedIndices) {
-      final (name, emoji, colorValue) = StarterCategories.presets[i];
+      final (name, emoji, colorValue, monthlyLimit) = StarterCategories.presets[i];
       final category = ExpenseCategory(
         id: _uuid.v4(),
         name: name,
         emoji: emoji,
         colorValue: colorValue,
-        monthlyLimit: 200.0,
+        monthlyLimit: monthlyLimit,
       );
       await _box.put(category.id, category);
     }

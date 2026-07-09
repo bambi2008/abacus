@@ -49,19 +49,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   /// falling back to whatever the user actually picked if that one wasn't
   /// selected. Used by both the preview card (before anything's created)
   /// and the real category lookup on confirm, so the two always agree.
-  (String name, String emoji, int colorValue) get _exampleCategory {
+  (String name, String emoji) get _exampleCategory {
     final snacksIndex = StarterCategories.presets.indexWhere((p) => p.$1 == 'Snacks & Drinks');
     if (snacksIndex != -1 && _selectedCategories.contains(snacksIndex)) {
-      return StarterCategories.presets[snacksIndex];
+      final preset = StarterCategories.presets[snacksIndex];
+      return (preset.$1, preset.$2);
     }
     if (_selectedCategories.isNotEmpty) {
       final firstIndex = (_selectedCategories.toList()..sort()).first;
-      return StarterCategories.presets[firstIndex];
+      final preset = StarterCategories.presets[firstIndex];
+      return (preset.$1, preset.$2);
     }
-    if (_customCategories.isNotEmpty) return _customCategories.first;
+    if (_customCategories.isNotEmpty) {
+      final custom = _customCategories.first;
+      return (custom.$1, custom.$2);
+    }
     // Unreachable in practice ("Continue" is disabled while both are
     // empty) — kept total rather than throwing.
-    return StarterCategories.presets.first;
+    final preset = StarterCategories.presets.first;
+    return (preset.$1, preset.$2);
   }
 
   Future<void> _confirmFirstExpense() async {
@@ -219,7 +225,7 @@ class _PickCategoriesPage extends StatelessWidget {
             runSpacing: 12,
             children: [
               ...List.generate(StarterCategories.presets.length, (i) {
-                final (name, emoji, colorValue) = StarterCategories.presets[i];
+                final (name, emoji, colorValue, _) = StarterCategories.presets[i];
                 final isSelected = selected.contains(i);
                 return FilterChip(
                   label: Text('$emoji $name'),
@@ -259,7 +265,7 @@ class _PickCategoriesPage extends StatelessWidget {
 
 class _FirstExpensePage extends StatelessWidget {
   final bool logged;
-  final (String name, String emoji, int colorValue) exampleCategory;
+  final (String name, String emoji) exampleCategory;
   final VoidCallback onConfirm;
   final VoidCallback onNext;
 
