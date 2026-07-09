@@ -39,9 +39,6 @@ class ExpenseProvider extends ChangeNotifier {
 
   double get todaySpend => todayExpenses.fold(0.0, (sum, e) => sum + e.amount);
 
-  double spendForCategoryToday(String categoryId) =>
-      todayExpenses.where((e) => e.categoryId == categoryId).fold(0.0, (s, e) => s + e.amount);
-
   List<Expense> expensesOn(DateTime date) {
     final d = _dateOnly(date);
     return _expenseBox.values.where((e) => _dateOnly(e.date) == d).toList()

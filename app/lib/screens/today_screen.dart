@@ -149,7 +149,6 @@ class _TodayScreenState extends State<TodayScreen> {
             const SizedBox(height: 16),
             ...categories.all.map((c) => _CategoryBar(
                   category: c,
-                  spentToday: expenses.spendForCategoryToday(c.id),
                   spentThisMonth: expenses.spendForCategoryInMonth(c.id, now),
                 )),
             const SizedBox(height: 96),
@@ -256,14 +255,11 @@ class _StreakCard extends StatelessWidget {
 
 class _CategoryBar extends StatelessWidget {
   final ExpenseCategory category;
-  final double spentToday;
   final double spentThisMonth;
-  const _CategoryBar({required this.category, required this.spentToday, required this.spentThisMonth});
+  const _CategoryBar({required this.category, required this.spentThisMonth});
 
   @override
   Widget build(BuildContext context) {
-    final dailyShare = category.monthlyLimit / 30;
-    final progress = dailyShare <= 0 ? 0.0 : (spentToday / dailyShare).clamp(0.0, 1.0);
     final hasBossBattle = category.monthlyLimit > 0;
     // This is YOUR shield against this month's boss for the category —
     // every dollar spent is the boss's attack chipping it away. An empty
@@ -296,17 +292,15 @@ class _CategoryBar extends StatelessWidget {
             children: [
               Text('${category.emoji} ${category.name}'),
               const Spacer(),
-              Text('\$${spentToday.toStringAsFixed(0)} of \$${dailyShare.toStringAsFixed(0)}'),
+              // Monthly, not daily — a "$6.67/day" pace never matched how
+              // discretionary spending actually happens (in occasional
+              // lumps, not a smooth daily drip), and it was silently
+              // derived from the same $200 flat default every category
+              // starts with, making the number look arbitrary. The boss
+              // battle bar below already gives the monthly picture, so
+              // this is just the raw total, not a second progress metric.
+              Text('\$${spentThisMonth.toStringAsFixed(0)} this month'),
             ],
-          ),
-          const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              color: Color(category.colorValue),
-            ),
           ),
           if (hasBossBattle) ...[
             const SizedBox(height: 8),

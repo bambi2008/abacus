@@ -83,9 +83,17 @@ must be a guaranteed-achievable win, not a setup chore.
   typing the amount. No date picker (always today; editing past days
   happens in Progress). Confirm → haptic tick → sheet dismisses → running
   total updates.
-- **Today's spending vs. budget**, a simple bar per category, not a
-  chart — "Food: $23 of $40." Deliberately terse; the daily screen is for
-  logging, not analysis (that's Progress's job).
+- **Category spend this month**, one line per category plus the boss
+  battle shield bar — no chart, terse by design. **2026-07-06: dropped
+  the original daily-pace bar** ("Food: $23 of $40" framing, where $40
+  was silently derived as monthlyLimit÷30) — the founder asked what "$0
+  of $7" meant and the honest answer was "an arbitrary number nobody set,
+  from a framing that never fit discretionary spending anyway" (nobody
+  budgets $6.67/day on snacks; that spending happens in occasional
+  lumps). Monthly is the natural unit for the new discretionary
+  categories, and the boss battle bar already covers it — showing a daily
+  pace *and* a monthly one was two progress metrics for the same
+  underlying number.
 - **Streak-freeze indicator**: a small shield icon next to the streak
   count when a freeze is available (see below), tapped to see remaining
   freeze count — visible but not intrusive, so it functions as a safety
