@@ -54,17 +54,24 @@ must be a guaranteed-achievable win, not a setup chore.
   streak"** per the Kahneman/Tversky framing already decided — never
   "Don't forget to log today," always loss-framed once the deadline is
   close.
-- **"Log an expense" button** — the single largest tappable element on
-  the screen. Opens a 3-field bottom sheet: amount (numeric keypad,
+- **"Log an expense" button** — the single most important tappable element
+  in the app (the entire core loop runs through it), styled with
+  full-saturation primary color and bold/larger text rather than Material
+  3's default muted FAB — deliberately no idle animation on it, since
+  unlike a one-time celebration this gets tapped many times a day and
+  constant motion on something that frequent would tire rather than draw
+  the eye. Opens a 3-field bottom sheet: amount (numeric keypad,
   auto-focused), category (horizontal chip picker, most-recently-used
-  first), optional note. Two entry-speed assists sit next to the sheet
-  title, both on-device and both "pre-fill only, never auto-submit" (see
-  `docs/technical-architecture.md`): a **mic icon** (any non-web platform)
-  that transcribes a spoken amount/category via on-device speech-to-text,
-  and a **camera icon** (iOS only — see "Receipt OCR") that lets the user
-  snap a receipt instead of typing the amount. No date picker (always
-  today; editing past days happens in Progress). Confirm → haptic tick →
-  sheet dismisses → running total updates.
+  first), optional note. Two entry-speed assists sit directly under the
+  amount field, not up in the sheet header — one-handed thumb reach is
+  better lower in the sheet than at its very top — both on-device and both
+  "pre-fill only, never auto-submit" (see `docs/technical-architecture.md`):
+  a **mic icon** (any non-web platform) that transcribes a spoken
+  amount/category via on-device speech-to-text, and a **camera icon** (iOS
+  only — see "Receipt OCR") that lets the user snap a receipt instead of
+  typing the amount. No date picker (always today; editing past days
+  happens in Progress). Confirm → haptic tick → sheet dismisses → running
+  total updates.
 - **Today's spending vs. budget**, a simple bar per category, not a
   chart — "Food: $23 of $40." Deliberately terse; the daily screen is for
   logging, not analysis (that's Progress's job).

@@ -156,10 +156,25 @@ class _TodayScreenState extends State<TodayScreen> {
           ],
         ),
       ),
+      // The single most important button in the app — logging an expense is
+      // the entire core loop, so it gets full-saturation primary color and
+      // bold/larger text rather than Material 3's default muted
+      // primaryContainer FAB styling, which read as too quiet for something
+      // this important. No idle animation on it though: unlike a one-time
+      // celebration, this is tapped many times a day, and a constantly
+      // moving element that frequently would get tiring rather than
+      // eye-catching — prominence comes from color/size, not motion.
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showLogExpenseSheet(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Log an expense'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        elevation: 6,
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 24),
+        icon: const Icon(Icons.add, size: 28),
+        label: const Text(
+          'Log an expense',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -457,29 +472,7 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(child: Text('Log an expense', style: Theme.of(context).textTheme.titleLarge)),
-              if (VoiceInputService.isSupportedPlatform)
-                IconButton.filledTonal(
-                  tooltip: 'Speak an expense',
-                  iconSize: 26,
-                  onPressed: _listening ? null : _startVoiceInput,
-                  icon: _listening
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.mic_none_outlined),
-                ),
-              if (ReceiptOcrService.isAvailable)
-                IconButton.filledTonal(
-                  tooltip: 'Scan a receipt',
-                  iconSize: 26,
-                  onPressed: _scanning ? null : _scanReceipt,
-                  icon: _scanning
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.photo_camera_outlined),
-                ),
-            ],
-          ),
+          Text('Log an expense', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
           TextField(
             controller: _amountController,
@@ -487,6 +480,38 @@ class _LogExpenseSheetState extends State<_LogExpenseSheet> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(labelText: 'Amount', prefixText: '\$'),
           ),
+          // Placed directly under the field they fill, not up in the header
+          // — this is the zone a thumb can already reach one-handed
+          // (holding the phone with the same hand you're using to tap),
+          // instead of making you stretch up to the top of the sheet.
+          if (VoiceInputService.isSupportedPlatform || ReceiptOcrService.isAvailable) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text('Or fill in automatically:', style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(width: 4),
+                if (VoiceInputService.isSupportedPlatform)
+                  IconButton.filledTonal(
+                    tooltip: 'Speak an expense',
+                    iconSize: 24,
+                    onPressed: _listening ? null : _startVoiceInput,
+                    icon: _listening
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.mic_none_outlined),
+                  ),
+                if (ReceiptOcrService.isAvailable)
+                  IconButton.filledTonal(
+                    tooltip: 'Scan a receipt',
+                    iconSize: 24,
+                    onPressed: _scanning ? null : _scanReceipt,
+                    icon: _scanning
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.photo_camera_outlined),
+                  ),
+              ],
+            ),
+          ],
           const SizedBox(height: 16),
           Wrap(
             spacing: 8,
