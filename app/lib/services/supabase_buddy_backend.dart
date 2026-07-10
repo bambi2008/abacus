@@ -31,14 +31,22 @@ class SupabaseBuddyBackend implements BuddyBackend {
   Future<void> init() async {
     if (!isConfigured) return;
     try {
-      await Supabase.initialize(url: SupabaseConfig.url, publishableKey: SupabaseConfig.anonKey);
-      _client = Supabase.instance.client;
-      if (_client!.auth.currentUser == null) {
-        await _client!.auth.signInAnonymously();
-      }
+      // Both calls below touch the network — bounded so a flaky connection
+      // can't hang app startup indefinitely (init() is awaited from
+      // main.dart before runApp). Same fix already applied to
+      // VoiceInputService.isAvailable this session.
+      await _initAndSignIn().timeout(const Duration(seconds: 10));
     } catch (e) {
-      debugPrint('SupabaseBuddyBackend: init failed, buddy sync disabled: $e');
+      debugPrint('SupabaseBuddyBackend: init failed or timed out, buddy sync disabled: $e');
       _client = null;
+    }
+  }
+
+  Future<void> _initAndSignIn() async {
+    await Supabase.initialize(url: SupabaseConfig.url, publishableKey: SupabaseConfig.anonKey);
+    _client = Supabase.instance.client;
+    if (_client!.auth.currentUser == null) {
+      await _client!.auth.signInAnonymously();
     }
   }
 

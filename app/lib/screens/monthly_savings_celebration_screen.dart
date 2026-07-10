@@ -54,12 +54,17 @@ class _MonthlySavingsCelebrationScreenState extends State<MonthlySavingsCelebrat
 
   Future<void> _share() async {
     AnalyticsService.instance.capture('monthly_savings_shared');
-    await ShareCaptureService.captureAndShare(
+    final ok = await ShareCaptureService.captureAndShare(
       key: _shareCardKey,
       filename: 'abacus_monthly_savings_${widget.result.id}',
       text: 'I spent \$${widget.result.totalSaved.toStringAsFixed(0)} less than the average American '
           'on discretionary spending this month, on Abacus 💰',
     );
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+      );
+    }
   }
 
   void _continue(BuildContext context) {

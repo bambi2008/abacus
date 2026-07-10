@@ -11,19 +11,30 @@ import 'package:share_plus/share_plus.dart';
 /// (streak milestones, category challenge wins) so the capture logic isn't
 /// duplicated per screen.
 class ShareCaptureService {
-  static Future<void> captureAndShare({
+  /// Returns true on success, false if anything failed or the native share
+  /// sheet hung — Share.shareXFiles is a platform-channel call with no
+  /// built-in bound, the same risk class as the image_picker hang fixed
+  /// earlier this session. Callers should show a snackbar on false rather
+  /// than leaving the tap looking like it did nothing.
+  static Future<bool> captureAndShare({
     required GlobalKey key,
     required String filename,
     required String text,
   }) async {
     final boundary = key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary == null) return;
+    if (boundary == null) return false;
     final image = await boundary.toImage(pixelRatio: 3.0);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData == null) return;
+    if (byteData == null) return false;
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$filename.png');
     await file.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    await Share.shareXFiles([XFile(file.path)], text: text);
+    try {
+      await Share.shareXFiles([XFile(file.path)], text: text).timeout(const Duration(seconds: 15));
+      return true;
+    } catch (e) {
+      debugPrint('ShareCaptureService: share failed or timed out: $e');
+      return false;
+    }
   }
 }

@@ -49,11 +49,16 @@ class _MilestoneCelebrationScreenState extends State<MilestoneCelebrationScreen>
 
   Future<void> _share() async {
     AnalyticsService.instance.capture('milestone_shared', properties: {'milestone_day': widget.badge.milestoneDay});
-    await ShareCaptureService.captureAndShare(
+    final ok = await ShareCaptureService.captureAndShare(
       key: _shareCardKey,
       filename: 'abacus_milestone_${widget.badge.milestoneDay}',
       text: 'I hit a ${widget.badge.milestoneDay}-day streak on Abacus 🔥',
     );
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+      );
+    }
   }
 
   void _continue(BuildContext context) {

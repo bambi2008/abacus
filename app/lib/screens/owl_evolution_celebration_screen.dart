@@ -45,11 +45,16 @@ class _OwlEvolutionCelebrationScreenState extends State<OwlEvolutionCelebrationS
 
   Future<void> _share() async {
     AnalyticsService.instance.capture('owl_evolution_shared', properties: {'new_stage': widget.newStage});
-    await ShareCaptureService.captureAndShare(
+    final ok = await ShareCaptureService.captureAndShare(
       key: _shareCardKey,
       filename: 'abacus_owl_evolution_${widget.newStage}',
       text: 'My Abacus owl evolved into a ${EvolutionStages.names[widget.newStage]}! 🦉',
     );
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+      );
+    }
   }
 
   void _continue(BuildContext context) {

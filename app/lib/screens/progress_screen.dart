@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/monthly_savings_result.dart';
+import '../models/spending_insight.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/gamification_provider.dart';
@@ -21,6 +22,16 @@ class ProgressScreen extends StatelessWidget {
     final isPro = context.watch<SubscriptionProvider>().isPro;
     final now = DateTime.now();
     final spendByCategory = expenses.spendByCategoryInMonth(now);
+    // Only computed for Pro — free users see the paywall prompt instead,
+    // and the comparison is cheap either way (in-memory Hive box scan) but
+    // there's no reason to build it when it won't be shown.
+    final insight = isPro
+        ? computeSpendingInsight(
+            thisMonthSpend: spendByCategory,
+            lastMonthSpend: expenses.spendByCategoryInMonth(DateTime(now.year, now.month - 1, 1)),
+            categories: [for (final c in categories.all) (id: c.id, name: c.name, emoji: c.emoji)],
+          )
+        : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +48,7 @@ class ProgressScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _InsightCard(isPro: isPro),
+          _InsightCard(isPro: isPro, insight: insight),
           const SizedBox(height: 24),
           Text('This month by category', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
@@ -192,24 +203,50 @@ class _MonthlySavingsHistory extends StatelessWidget {
   }
 }
 
+/// Previously this card unlocked for Pro but had no real content behind
+/// it — `onTap: null` and generic filler text regardless of the user's
+/// actual data. A paying customer got nothing for the app's one remaining
+/// real Pro benefit. Now shows an actual computed insight (see
+/// models/spending_insight.dart) when there's enough data, and an honest
+/// "not enough data yet" state rather than fabricating one when there isn't.
 class _InsightCard extends StatelessWidget {
   final bool isPro;
-  const _InsightCard({required this.isPro});
+  final SpendingInsight? insight;
+  const _InsightCard({required this.isPro, required this.insight});
 
   @override
   Widget build(BuildContext context) {
+    if (!isPro) {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.lock_outline),
+          title: const Text('Unlock spending insights'),
+          subtitle: const Text('See how this month compares to your average, generated from your own data.'),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PaywallScreen())),
+        ),
+      );
+    }
+    if (insight == null) {
+      return const Card(
+        child: ListTile(
+          leading: Icon(Icons.insights),
+          title: Text('Spending insight'),
+          subtitle: Text('Log a few expenses this month to see your first insight here.'),
+        ),
+      );
+    }
+    final change = insight!.changeFraction;
+    final subtitle = change == null
+        ? '\$${insight!.thisMonthAmount.toStringAsFixed(0)} so far this month — no comparison yet, '
+            'this is the first month you\'ve logged this category.'
+        : '\$${insight!.thisMonthAmount.toStringAsFixed(0)} so far this month, '
+            '${change >= 0 ? 'up' : 'down'} ${(change.abs() * 100).round()}% from last month '
+            '(\$${insight!.lastMonthAmount.toStringAsFixed(0)}).';
     return Card(
       child: ListTile(
-        leading: Icon(isPro ? Icons.insights : Icons.lock_outline),
-        title: Text(isPro ? 'Spending insight' : 'Unlock spending insights'),
-        subtitle: Text(
-          isPro
-              ? 'You\'ve been logging consistently — keep an eye on your top category this month.'
-              : 'See how this month compares to your average, generated from your own data.',
-        ),
-        onTap: isPro
-            ? null
-            : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PaywallScreen())),
+        leading: Text(insight!.categoryEmoji, style: const TextStyle(fontSize: 24)),
+        title: Text('${insight!.categoryName} is your top category'),
+        subtitle: Text(subtitle),
       ),
     );
   }

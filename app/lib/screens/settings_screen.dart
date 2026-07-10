@@ -70,15 +70,24 @@ class SettingsScreen extends StatelessWidget {
             leading: const Icon(Icons.download_outlined),
             title: const Text('Export as CSV'),
             subtitle: const Text('Your data, not ours — take it with you anytime.'),
-            onTap: () {
+            onTap: () async {
               final expenses = context.read<ExpenseProvider>();
               final categories = context.read<CategoryProvider>();
               final all = <Expense>[];
               for (var i = 0; i < 365; i++) {
                 all.addAll(expenses.expensesOn(DateTime.now().subtract(Duration(days: i))));
               }
-              ExportService.exportExpenses(all, categories.all);
-              AnalyticsService.instance.capture('data_exported');
+              // Previously fire-and-forget with no error path at all — if
+              // the share sheet failed or timed out, nothing told the user.
+              final ok = await ExportService.exportExpenses(all, categories.all);
+              if (!context.mounted) return;
+              if (ok) {
+                AnalyticsService.instance.capture('data_exported');
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Could not export — try again.')),
+                );
+              }
             },
           ),
           const _NotificationTimeTile(),

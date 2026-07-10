@@ -9,6 +9,24 @@ import '../providers/buddy_provider.dart';
 import '../providers/gamification_provider.dart';
 import '../services/analytics_service.dart';
 
+/// Share.share() is a native platform-channel call — if the system share
+/// sheet's presentation stalls (the same class of issue that hung
+/// image_picker's camera UI earlier this session), an unguarded await
+/// hangs forever with no feedback. Bounded here and used by every share
+/// call site in this file instead of calling Share.share directly.
+Future<void> _shareOrWarn(BuildContext context, String text) async {
+  try {
+    await Share.share(text).timeout(const Duration(seconds: 15));
+  } catch (e) {
+    debugPrint('buddy_streak_card: share failed or timed out: $e');
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+      );
+    }
+  }
+}
+
 /// "省钱搭子" (savings buddy) — the third main-line card on Today, parallel
 /// in visual weight to the streak card and the companion owl card. This is
 /// the social/relational pillar: the streak card is the individual habit
@@ -53,8 +71,17 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
   Future<void> _manualRefresh() async {
     if (_refreshing) return;
     setState(() => _refreshing = true);
-    await buddy.refresh();
-    if (mounted) setState(() => _refreshing = false);
+    try {
+      await buddy.refresh();
+    } catch (e) {
+      // Without this, a single failed refresh (offline, unreachable
+      // backend) left _refreshing stuck true forever — the re-entry
+      // guard above then blocked every future tap, so the only way out
+      // was restarting the app.
+      debugPrint('buddy_streak_card: refresh failed: $e');
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
+    }
   }
 
   Future<void> _invite(BuildContext context) async {
@@ -67,7 +94,8 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
       }
       return;
     }
-    await Share.share('Join my Abacus savings-buddy streak! Use code $code in the app.');
+    if (!context.mounted) return;
+    await _shareOrWarn(context, 'Join my Abacus savings-buddy streak! Use code $code in the app.');
   }
 
   Future<void> _join(BuildContext context) async {
@@ -127,7 +155,7 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
             _refreshButton(),
             IconButton(
               icon: const Icon(Icons.share_outlined),
-              onPressed: () => Share.share('Join my Abacus savings-buddy streak! Use code ${buddy.code} in the app.'),
+              onPressed: () => _shareOrWarn(context, 'Join my Abacus savings-buddy streak! Use code ${buddy.code} in the app.'),
             ),
           ],
         ),
@@ -214,7 +242,8 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
     await _settings.put(SettingsKeys.buddyStreakCode, code);
     AnalyticsService.instance.capture('buddy_streak_invite_sent');
     setState(() => _inviteSent = true);
-    await Share.share('Join my Abacus savings-buddy streak! Use code $code in the app.');
+    if (!mounted) return;
+    await _shareOrWarn(context, 'Join my Abacus savings-buddy streak! Use code $code in the app.');
   }
 
   @override

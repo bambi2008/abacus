@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:csv/csv.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -12,7 +13,12 @@ import '../models/expense.dart';
 /// fall back on if a user wants their history elsewhere. See
 /// docs/product-design.md.
 class ExportService {
-  static Future<void> exportExpenses(List<Expense> expenses, List<ExpenseCategory> categories) async {
+  /// Returns true on success. Share.shareXFiles is a native platform-
+  /// channel call — if the system share sheet's presentation stalls, an
+  /// unguarded await hangs forever. This was previously also called
+  /// fire-and-forget from Settings with no error path at all; the return
+  /// value lets the caller show a snackbar on failure instead.
+  static Future<bool> exportExpenses(List<Expense> expenses, List<ExpenseCategory> categories) async {
     final categoryNames = {for (final c in categories) c.id: c.name};
     final rows = [
       ['Date', 'Category', 'Amount', 'Note'],
@@ -28,6 +34,12 @@ class ExportService {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/abacus_export.csv');
     await file.writeAsString(csv);
-    await Share.shareXFiles([XFile(file.path)], text: 'Abacus expense export');
+    try {
+      await Share.shareXFiles([XFile(file.path)], text: 'Abacus expense export').timeout(const Duration(seconds: 15));
+      return true;
+    } catch (e) {
+      debugPrint('ExportService: share failed or timed out: $e');
+      return false;
+    }
   }
 }

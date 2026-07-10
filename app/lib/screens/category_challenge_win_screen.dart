@@ -46,11 +46,16 @@ class _CategoryChallengeWinScreenState extends State<CategoryChallengeWinScreen>
 
   Future<void> _share() async {
     AnalyticsService.instance.capture('category_challenge_shared', properties: {'category_id': widget.category.id});
-    await ShareCaptureService.captureAndShare(
+    final ok = await ShareCaptureService.captureAndShare(
       key: _shareCardKey,
       filename: 'abacus_boss_${widget.result.id}',
       text: 'I stayed under budget in ${widget.category.name} on Abacus 🛡️',
     );
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+      );
+    }
   }
 
   void _continue(BuildContext context) {
