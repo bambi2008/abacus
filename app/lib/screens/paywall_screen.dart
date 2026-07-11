@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../config/constants.dart';
 import '../providers/subscription_provider.dart';
@@ -115,9 +116,47 @@ class _PaywallScreenState extends State<PaywallScreen> {
             subtitle: 'Not sure yet? Try it month to month',
             onTap: () => _purchase(context, ProductIds.monthly),
           ),
+          const SizedBox(height: 24),
+          // App Store requires auto-renewable subscriptions to disclose the
+          // renewal terms and cancellation path in the binary, plus reachable
+          // links to the Terms/EULA and Privacy Policy (Guideline 3.1.2).
+          Text(
+            'The monthly plan is an auto-renewing subscription: it renews each '
+            'month at the price shown above unless you cancel at least 24 hours '
+            'before the period ends. Manage or cancel anytime in your device '
+            'Settings → Apple ID → Subscriptions. The Lifetime plan is a '
+            'one-time purchase, not a subscription.',
+            style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () => _openLink(context, LegalLinks.termsOfUse),
+                child: const Text('Terms of Use'),
+              ),
+              const Text('·'),
+              TextButton(
+                onPressed: () => _openLink(context, LegalLinks.privacyPolicy),
+                child: const Text('Privacy Policy'),
+              ),
+            ],
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _openLink(BuildContext context, String url) async {
+    final ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the link — check your connection.')),
+      );
+    }
   }
 }
 

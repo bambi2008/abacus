@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../config/constants.dart';
 import '../models/expense.dart';
@@ -90,7 +90,6 @@ class SettingsScreen extends StatelessWidget {
               }
             },
           ),
-          const _NotificationTimeTile(),
           const Divider(),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -107,9 +106,35 @@ class SettingsScreen extends StatelessWidget {
             subtitle: const Text('Optional — we only suggest this if it seems useful.'),
             onTap: () => AnalyticsService.instance.capture('referral_settings_tapped'),
           ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text('Legal', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacy Policy'),
+            trailing: const Icon(Icons.open_in_new, size: 18),
+            onTap: () => _openLink(context, LegalLinks.privacyPolicy),
+          ),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Terms of Use'),
+            trailing: const Icon(Icons.open_in_new, size: 18),
+            onTap: () => _openLink(context, LegalLinks.termsOfUse),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _openLink(BuildContext context, String url) async {
+    final ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open the link — check your connection.')),
+      );
+    }
   }
 }
 
@@ -134,46 +159,6 @@ class _AnalyticsToggleState extends State<_AnalyticsToggle> {
       onChanged: (v) {
         setState(() => _enabled = v);
         AnalyticsService.instance.setEnabled(v);
-      },
-    );
-  }
-}
-
-class _NotificationTimeTile extends StatefulWidget {
-  const _NotificationTimeTile();
-
-  @override
-  State<_NotificationTimeTile> createState() => _NotificationTimeTileState();
-}
-
-class _NotificationTimeTileState extends State<_NotificationTimeTile> {
-  late Box _settings;
-  late TimeOfDay _time;
-
-  @override
-  void initState() {
-    super.initState();
-    _settings = Hive.box(HiveBoxes.settings);
-    _time = TimeOfDay(
-      hour: _settings.get(SettingsKeys.reminderHour, defaultValue: 20) as int,
-      minute: _settings.get(SettingsKeys.reminderMinute, defaultValue: 0) as int,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.schedule_outlined),
-      title: const Text('Reminder time'),
-      subtitle: const Text('When to nudge you if a streak is at risk.'),
-      trailing: Text(_time.format(context)),
-      onTap: () async {
-        final time = await showTimePicker(context: context, initialTime: _time);
-        if (time == null || !mounted) return;
-        await _settings.put(SettingsKeys.reminderHour, time.hour);
-        await _settings.put(SettingsKeys.reminderMinute, time.minute);
-        setState(() => _time = time);
-        AnalyticsService.instance.capture('reminder_time_changed');
       },
     );
   }

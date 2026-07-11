@@ -1,6 +1,6 @@
 # Abacus Privacy Policy
 
-_Last updated: [DATE]_
+_Last updated: July 11, 2026_
 
 ## 1. Introduction
 
@@ -17,7 +17,15 @@ comparison you see in the app is stored locally on your device using
 on-device storage (Hive). Abacus does not operate a central account system
 and cannot see this data — there is nothing for us to see it in.
 
-We do collect a few narrow, opt-in exceptions to that rule:
+**The current App Store version of Abacus collects nothing at all** —
+anonymous analytics and cloud savings-buddy sync are disabled in this
+release, so no data of any kind leaves your device. The sections below
+describe what those features would handle _if a future version enables
+them_; we describe them here so this policy stays accurate and complete
+either way.
+
+Subject to that, the only exceptions to the "stays on your device" rule
+are:
 
 - **Anonymous, aggregate usage analytics** (via PostHog), to understand
   which parts of the app are used and where people get stuck. These events

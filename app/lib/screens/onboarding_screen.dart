@@ -113,7 +113,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               onConfirm: _confirmFirstExpense,
               onNext: _next,
             ),
-            _NotificationPermissionPage(
+            _AllSetPage(
               onFinish: () => context.read<OnboardingProvider>().complete(),
             ),
           ],
@@ -338,9 +338,16 @@ class _FirstExpensePage extends StatelessWidget {
   }
 }
 
-class _NotificationPermissionPage extends StatelessWidget {
+/// Honest completion page. This slot used to be a "Get a nudge before your
+/// streak resets" reminder-permission screen whose "Enable Reminders" and
+/// "Not Now" buttons did the exact same thing (just finish onboarding) —
+/// the app schedules no notifications at all, so it promised a feature that
+/// doesn't exist. Reminders are a deliberate post-launch (v1.1) fast-follow
+/// that needs real on-device scheduling + permission work; until then this
+/// stays an honest "you're set up" summary rather than a false promise.
+class _AllSetPage extends StatelessWidget {
   final VoidCallback onFinish;
-  const _NotificationPermissionPage({required this.onFinish});
+  const _AllSetPage({required this.onFinish});
 
   @override
   Widget build(BuildContext context) {
@@ -349,21 +356,21 @@ class _NotificationPermissionPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.notifications_active_outlined, size: 72),
+          const Text('🧮', style: TextStyle(fontSize: AppIconSizes.xlarge)),
           const SizedBox(height: 24),
           Text(
-            'Get a nudge before your streak resets',
+            'You\'re all set',
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           const Text(
-            'We\'ll only remind you when a streak is actually at risk — not every day.',
+            'Log an expense each day to build your streak. Everything stays on '
+            'your device — no account, no bank linking.',
             textAlign: TextAlign.center,
           ),
           const Spacer(),
-          FilledButton(onPressed: onFinish, child: const Text('Enable Reminders')),
-          TextButton(onPressed: onFinish, child: const Text('Not Now')),
+          FilledButton(onPressed: onFinish, child: const Text('Start budgeting')),
         ],
       ),
     );

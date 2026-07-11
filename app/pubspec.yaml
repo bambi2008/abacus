@@ -51,6 +51,7 @@ dependencies:
   supabase_flutter: ^2.5.0
   image_picker: ^1.1.0
   speech_to_text: ^7.0.0
+  url_launcher: ^6.3.0 # opens the App-Store-required Terms / Privacy links from the paywall
 
 dev_dependencies:
   flutter_test:

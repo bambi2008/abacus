@@ -4,6 +4,12 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- Abacus uses only standard HTTPS (App Store, and — when configured —
+	     Supabase/PostHog), which is exempt from U.S. export regulations.
+	     Declaring this here auto-answers the encryption question at every
+	     submission so it never blocks an upload. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

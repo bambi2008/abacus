@@ -81,6 +81,20 @@ class ProductIds {
   static const lifetime = 'com.abacus.pro.lifetime';
 }
 
+/// Public URLs for the legal pages the App Store requires to be reachable
+/// from inside the app (auto-renewable subscriptions must link to both an
+/// EULA/Terms and a Privacy Policy). The markdown sources live in
+/// docs/legal/; these must point at a *hosted* rendering of them.
+///
+/// TODO(launch): before submitting, host docs/legal/*.md somewhere public
+/// (GitHub Pages from a public repo/branch is the zero-cost option) and set
+/// these to the real URLs. The pattern below assumes GitHub Pages under the
+/// existing account — enable Pages and publish the two pages to make it real.
+class LegalLinks {
+  static const privacyPolicy = 'https://bambi2008.github.io/abacus/privacy-policy.html';
+  static const termsOfUse = 'https://bambi2008.github.io/abacus/terms-of-use.html';
+}
+
 /// Empty key disables the feature entirely (safe default) — see
 /// AnalyticsService.
 class RemoteConfig {
