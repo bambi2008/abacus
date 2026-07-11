@@ -78,6 +78,16 @@ class BuddyProvider extends ChangeNotifier {
     await refresh();
   }
 
+  /// Deletes all of this user's synced buddy data and their anonymous
+  /// identity (App Store Guideline 5.1.1(v)). Resets to unlinked so the UI
+  /// returns to the "find a buddy" state.
+  Future<void> deleteMyData() async {
+    if (!_backend.isConfigured) return;
+    await _backend.deleteMyData();
+    _state = const BuddyRemoteState.unlinked();
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _changesSubscription?.cancel();

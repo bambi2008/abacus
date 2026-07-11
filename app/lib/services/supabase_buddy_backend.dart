@@ -190,6 +190,24 @@ class SupabaseBuddyBackend implements BuddyBackend {
   }
 
   @override
+  Future<void> deleteMyData() async {
+    final client = _client;
+    if (client == null) return;
+    try {
+      await client.rpc('delete_my_buddy_data');
+      // Drop the live subscription and the anonymous identity itself, so the
+      // next buddy action starts fresh with a brand-new anonymous user.
+      if (_channel != null) await client.removeChannel(_channel!);
+      _channel = null;
+      _subscribedLinkId = null;
+      await client.auth.signOut();
+    } catch (e) {
+      debugPrint('SupabaseBuddyBackend: deleteMyData failed: $e');
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> dispose() async {
     final client = _client;
     if (client != null && _channel != null) {

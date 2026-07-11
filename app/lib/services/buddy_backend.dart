@@ -45,6 +45,13 @@ abstract class BuddyBackend {
   /// [BuddyProvider.refresh] for the manual-refresh fallback).
   Stream<void> get changes;
 
+  /// Deletes everything this device has synced (the user's marks, links they
+  /// created, and detaches them from any link they joined), then drops the
+  /// anonymous identity. This is the in-app "delete my data" path App Store
+  /// Guideline 5.1.1(v) requires once the app creates accounts — even
+  /// anonymous ones. Safe no-op when unconfigured.
+  Future<void> deleteMyData();
+
   /// Releases any live subscription. Safe to call even if never subscribed.
   Future<void> dispose();
 }
@@ -131,6 +138,8 @@ class NoopBuddyBackend implements BuddyBackend {
   Future<void> markDay(DateTime date, {required bool logged}) async {}
   @override
   Future<BuddyRemoteState> fetchState() async => const BuddyRemoteState.unlinked();
+  @override
+  Future<void> deleteMyData() async {}
   @override
   Stream<void> get changes => const Stream.empty();
   @override

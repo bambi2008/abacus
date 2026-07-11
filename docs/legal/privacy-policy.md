@@ -17,15 +17,13 @@ comparison you see in the app is stored locally on your device using
 on-device storage (Hive). Abacus does not operate a central account system
 and cannot see this data — there is nothing for us to see it in.
 
-**The current App Store version of Abacus collects nothing at all** —
-anonymous analytics and cloud savings-buddy sync are disabled in this
-release, so no data of any kind leaves your device. The sections below
-describe what those features would handle _if a future version enables
-them_; we describe them here so this policy stays accurate and complete
-either way.
+**Nothing leaves your device unless you opt into the savings-buddy
+feature.** Anonymous usage analytics are turned OFF in the current App
+Store release, so we collect no analytics of any kind. The only thing
+that can ever leave your device is the savings-buddy sync described below,
+and only if you choose to start or join a buddy streak.
 
-Subject to that, the only exceptions to the "stays on your device" rule
-are:
+The exceptions to the "stays on your device" rule are:
 
 - **Anonymous, aggregate usage analytics** (via PostHog), to understand
   which parts of the app are used and where people get stuck. These events
@@ -36,11 +34,14 @@ are:
   personal identifier. You can turn this off anytime in Settings →
   Anonymous usage analytics.
 - **Savings-buddy sync**, only if you choose to start or join a buddy
-  streak. This feature syncs exactly three things per person per day: an
-  anonymous device identifier, a calendar date, and whether you logged
-  anything that day (true/false). It never syncs an amount, a category, a
-  note, or anything else about what you spent. If you never use the buddy
-  streak feature, nothing about your account is ever created or synced.
+  streak. To connect two devices we create an anonymous account for you
+  (no email, no password, no name — just an anonymous identifier). The
+  feature then syncs exactly three things per person per day: that
+  anonymous identifier, a calendar date, and whether you logged anything
+  that day (true/false). It never syncs an amount, a category, a note, or
+  anything else about what you spent. If you never use the buddy streak
+  feature, nothing about your account is ever created or synced. You can
+  delete all of this anytime in Settings → Delete my savings-buddy data.
 - **Receipt scanning**, only if you tap the camera icon to scan a receipt.
   Text recognition runs entirely on your device — Apple's Vision framework
   on iOS, Google's ML Kit on Android — the photo is processed locally and
@@ -102,9 +103,10 @@ directly:
 - **Export**: get a CSV copy of your data anytime via Settings → Export as
   CSV.
 - **Delete**: uninstalling the app deletes all local data immediately.
-- **Buddy sync**: if you've started or joined a buddy streak, that link and
-  its associated sync data can be abandoned by no longer using the feature;
-  contact us (Section 11) if you'd like it deleted sooner.
+- **Buddy sync**: if you've started or joined a buddy streak, delete the
+  link, all synced logging days, and the anonymous account anytime, right
+  in the app, via Settings → Delete my savings-buddy data. You can also
+  contact us (Section 11).
 - **Analytics opt-out**: Settings → Anonymous usage analytics, off anytime.
 
 ## 7. Data Retention

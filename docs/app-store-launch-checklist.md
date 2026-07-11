@@ -40,13 +40,20 @@ owner and are what actually gate submission now.
       assume GitHub Pages under `bambi2008.github.io/abacus/`. Zero-cost
       path: render the two markdown files to HTML, publish via GitHub Pages
       from a public repo/branch, confirm both URLs load in a browser.
-- [ ] **Confirm v1 ships with analytics + cloud buddy-sync OFF** (the
-      recommended default). This is automatic as long as the release build
-      does **not** pass `--dart-define=POSTHOG_API_KEY=...` or
+- [ ] **Analytics OFF, Supabase buddy-sync ON for v1** (decided). PostHog
+      stays off (don't pass `POSTHOG_API_KEY`). The savings-buddy feature
+      ships live, so the release build MUST pass
       `--dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`.
-      Shipping off means: App Privacy nutrition label = "Data Not
-      Collected", no anonymous accounts created, no account-deletion
-      obligation (5.1.1(v)). Buddy sync degrades to its local-only mode.
+      Consequences handled in code: an in-app "Delete my savings-buddy
+      data" control exists (Settings) for Guideline 5.1.1(v); the privacy
+      policy discloses the anonymous account + the three synced fields.
+- [ ] **Set up the Supabase project** (see `app/supabase/schema.sql`):
+      create a project → SQL Editor → paste and run `schema.sql` (creates
+      the two tables, RLS policies, the join + delete RPCs, and Realtime) →
+      Authentication → Providers → **enable Anonymous sign-ins** → copy the
+      Project URL and the anon/publishable key into the release build's
+      dart-defines above. Verify buddy create/join/sync works two-device in
+      TestFlight before submitting.
 
 ## App Store Connect — account owner steps
 
@@ -64,8 +71,11 @@ owner and are what actually gate submission now.
       without them.
 - [ ] Set the "License Agreement" field to your Terms of Use (or use
       Apple's standard EULA), and add the Privacy Policy URL.
-- [ ] App Privacy nutrition label — with v1 shipping keys-off, declare
-      "Data Not Collected".
+- [ ] App Privacy nutrition label — analytics is off, but buddy-sync is on,
+      so declare the buddy data: an "Identifier" (the anonymous user id)
+      plus the coarse usage signal (date + logged-or-not boolean), used for
+      "App Functionality", **not linked to identity** and **not used for
+      tracking**. Nothing financial. Note the in-app account-deletion path.
 - [ ] Metadata: name, subtitle, promotional text, description, keywords,
       support URL, category (Finance), age rating, and screenshots (6.7"
       is mandatory; 6.5"/5.5" as needed). ASO copy drafts: see
@@ -100,6 +110,6 @@ owner and are what actually gate submission now.
 
 - Local reminder notifications (needs on-device scheduling + permission
   flow, built and tested on a real device).
-- Optional: re-enable PostHog analytics / Supabase buddy-sync once you're
-  ready to take on the App Privacy disclosures and account-deletion UI
-  that come with them.
+- Optional: enable PostHog analytics later, once you want the funnel data
+  and are ready to add it to the App Privacy disclosures. (Supabase
+  buddy-sync is now IN v1, with its disclosures + in-app deletion done.)
