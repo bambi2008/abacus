@@ -3,7 +3,7 @@
 _Last updated: July 11, 2026_
 
 These Terms of Use ("Terms") govern your use of the Abacus mobile
-application ("Abacus", "the app"), published by [YOUR NAME / COMPANY NAME]
+application ("Abacus", "the app"), published by Mao Qin
 ("we", "our", "us"). By downloading or using Abacus, you agree to these
 Terms. If you do not agree, do not use the app.
 
@@ -88,4 +88,4 @@ updated Terms.
 
 ## 10. Contact
 
-Questions about these Terms: [YOUR CONTACT EMAIL]
+Questions about these Terms: mao8teen@gmail.com

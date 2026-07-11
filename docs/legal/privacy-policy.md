@@ -5,7 +5,7 @@ _Last updated: July 11, 2026_
 ## 1. Introduction
 
 Abacus ("we", "our", "the app") is a manual, privacy-first budgeting app,
-published by [YOUR NAME / COMPANY NAME]. Abacus never connects to your bank
+published by Mao Qin. Abacus never connects to your bank
 — this policy explains exactly what information the app does handle, and
 how.
 
@@ -136,4 +136,4 @@ release notes.
 
 ## 11. Contact
 
-Questions about this policy: [YOUR CONTACT EMAIL]
+Questions about this policy: mao8teen@gmail.com
