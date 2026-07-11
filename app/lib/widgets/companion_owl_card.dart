@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 
 import '../config/constants.dart';
+import '../config/theme.dart';
 import '../models/owl_mood.dart';
 import '../providers/gamification_provider.dart';
 
@@ -24,9 +25,15 @@ class CompanionOwlCard extends StatelessWidget {
     final mood = gamification.currentMood;
     final stage = gamification.evolutionStage;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.6),
+      // AppColors.growth directly, not colorScheme.secondaryContainer —
+      // that role is also what NavigationBar's selected-tab indicator and
+      // ChoiceChip's selected state pull from by default, so overriding
+      // it in the theme leaked the owl's purple into unrelated
+      // components app-wide. See config/theme.dart.
+      color: (isDark ? AppColors.growthContainerDark : AppColors.growthContainer).withValues(alpha: 0.6),
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: () => _showDetailSheet(context, gamification),
@@ -108,6 +115,7 @@ class _StagedOwl extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = 32.0 + stage * 6;
     final auraAlpha = 0.05 + stage * 0.05;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       width: size + 20,
       height: size + 20,
@@ -120,12 +128,12 @@ class _StagedOwl extends StatelessWidget {
             height: size + 14,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: auraAlpha),
+              color: (isDark ? AppColors.growthDark : AppColors.growth).withValues(alpha: auraAlpha),
             ),
           ),
           _AnimatedMoodEmoji(mood: mood, size: size),
           if (stage >= EvolutionStages.names.length - 1)
-            const Positioned(top: -6, right: -6, child: Text('👑', style: TextStyle(fontSize: 18))),
+            const Positioned(top: -6, right: -6, child: Text('👑', style: TextStyle(fontSize: AppIconSizes.small))),
         ],
       ),
     );

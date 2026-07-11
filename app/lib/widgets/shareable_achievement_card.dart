@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../config/theme.dart';
+
 /// A fixed-aspect-ratio branded card for sharing an achievement — props-
 /// driven so both streak milestones and (later) category-challenge wins can
 /// reuse this exact widget with different text instead of duplicating it.
@@ -33,7 +35,7 @@ class ShareableAchievementCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 72)),
+            Text(emoji, style: const TextStyle(fontSize: AppIconSizes.xlarge)),
             const SizedBox(height: 16),
             Text(
               title,

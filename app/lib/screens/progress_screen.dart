@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../config/theme.dart';
 import '../models/monthly_savings_result.dart';
 import '../models/spending_insight.dart';
 import '../providers/category_provider.dart';
@@ -71,7 +72,7 @@ class ProgressScreen extends StatelessWidget {
                               if (i < 0 || i >= categories.all.length) return const SizedBox.shrink();
                               return Padding(
                                 padding: const EdgeInsets.only(top: 4),
-                                child: Text(categories.all[i].emoji, style: const TextStyle(fontSize: 16)),
+                                child: Text(categories.all[i].emoji, style: const TextStyle(fontSize: AppIconSizes.small)),
                               );
                             },
                           ),
@@ -139,7 +140,7 @@ class ProgressScreen extends StatelessWidget {
           background: Container(color: Theme.of(context).colorScheme.errorContainer),
           onDismissed: (_) => expenses.deleteExpense(e.id),
           child: ListTile(
-            leading: Text(category?.emoji ?? '❓', style: const TextStyle(fontSize: 24)),
+            leading: Text(category?.emoji ?? '❓', style: const TextStyle(fontSize: AppIconSizes.medium)),
             title: Text(e.note.isEmpty ? (category?.name ?? 'Uncategorized') : e.note),
             subtitle: Text('${day.month}/${day.day}'),
             trailing: Text('\$${e.amount.toStringAsFixed(2)}'),
@@ -178,7 +179,7 @@ class _MonthlySavingsHistory extends StatelessWidget {
         final saved = r.totalSaved;
         return ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: Text(saved > 0 ? '💰' : '➖', style: const TextStyle(fontSize: 20)),
+          leading: Text(saved > 0 ? '💰' : '➖', style: const TextStyle(fontSize: AppIconSizes.small)),
           title: Text('${_monthName(r.month)} ${r.year}'),
           trailing: Text(
             saved > 0 ? 'Saved \$${saved.toStringAsFixed(0)}' : 'No savings that month',
@@ -244,7 +245,7 @@ class _InsightCard extends StatelessWidget {
             '(\$${insight!.lastMonthAmount.toStringAsFixed(0)}).';
     return Card(
       child: ListTile(
-        leading: Text(insight!.categoryEmoji, style: const TextStyle(fontSize: 24)),
+        leading: Text(insight!.categoryEmoji, style: const TextStyle(fontSize: AppIconSizes.medium)),
         title: Text('${insight!.categoryName} is your top category'),
         subtitle: Text(subtitle),
       ),
@@ -280,17 +281,23 @@ class _NoSpendCalendar extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              // A no-spend day is a budget win, not a social/buddy signal —
+              // uses AppColors.budgetGood directly rather than
+              // colorScheme.tertiary, which now means "buddy/trust" (blue)
+              // after the color-system redesign.
               color: isFuture
                   ? Colors.transparent
                   : marked
-                      ? Theme.of(context).colorScheme.tertiary
+                      ? (Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.budgetGoodDark
+                          : AppColors.budgetGood)
                       : Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             child: Text(
               marked ? '💚' : '${i + 1}',
               style: TextStyle(
-                fontSize: marked ? 12 : 10,
-                color: marked ? Theme.of(context).colorScheme.onTertiary : null,
+                fontSize: marked ? AppIconSizes.micro + 2 : AppIconSizes.micro,
+                color: marked ? Colors.white : null,
               ),
             ),
           ),
@@ -349,7 +356,7 @@ class _StreakCalendar extends StatelessWidget {
           child: Text(
             '${i + 1}',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: AppIconSizes.micro,
               color: filled ? Theme.of(context).colorScheme.onPrimary : null,
             ),
           ),

@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../config/theme.dart';
 import '../models/category.dart';
 import '../models/receipt_scan_result.dart';
 import '../models/voice_expense_result.dart';
@@ -270,7 +271,7 @@ class _StreakCard extends StatelessWidget {
               child: Text(
                 streak > 0 ? '🔥' : '🔒',
                 key: ValueKey(streak),
-                style: const TextStyle(fontSize: 40),
+                style: const TextStyle(fontSize: AppIconSizes.large),
               )
                   .animate(onPlay: (c) => c.repeat(reverse: true))
                   .scale(
@@ -328,11 +329,16 @@ class _CategoryBar extends StatelessWidget {
     // combat game uses the word.
     final shieldHealth = hasBossBattle ? (1 - (spentThisMonth / category.monthlyLimit)).clamp(0.0, 1.0) : 0.0;
     final shieldBroken = hasBossBattle && spentThisMonth > category.monthlyLimit;
+    // The app's one shared good/warning/danger convention (AppColors) —
+    // previously this was the only place status color was used
+    // deliberately at all, via one-off Colors.green/orange/red that
+    // nothing else in the app matched.
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final shieldColor = shieldHealth > 0.5
-        ? Colors.green
+        ? (isDark ? AppColors.budgetGoodDark : AppColors.budgetGood)
         : shieldHealth > 0.2
-            ? Colors.orange
-            : Colors.red;
+            ? (isDark ? AppColors.budgetWarningDark : AppColors.budgetWarning)
+            : (isDark ? AppColors.budgetDangerDark : AppColors.budgetDanger);
     final bossEmoji = shieldHealth > 0.5
         ? '😈'
         : shieldHealth > 0.2
@@ -362,7 +368,7 @@ class _CategoryBar extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                Text(shieldBroken ? '💥' : bossEmoji, style: const TextStyle(fontSize: 14)),
+                Text(shieldBroken ? '💥' : bossEmoji, style: const TextStyle(fontSize: AppIconSizes.tiny)),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(

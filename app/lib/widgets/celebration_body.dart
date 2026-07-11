@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../config/theme.dart';
 import 'shareable_achievement_card.dart';
 
 /// Shared visual layout for every full-screen celebration (streak
@@ -34,7 +35,7 @@ class CelebrationBody extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 96))
+            Text(emoji, style: const TextStyle(fontSize: AppIconSizes.hero))
                 .animate()
                 .scale(begin: const Offset(0.4, 0.4), duration: 500.ms, curve: Curves.elasticOut)
                 .fadeIn(duration: 300.ms)

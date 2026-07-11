@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../config/theme.dart';
 import '../models/category.dart';
 import '../providers/category_provider.dart';
 
@@ -46,7 +47,7 @@ class CategoryManagementScreen extends StatelessWidget {
                           child: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.onErrorContainer),
                         ),
                         child: ListTile(
-                          leading: Text(c.emoji, style: const TextStyle(fontSize: 28)),
+                          leading: Text(c.emoji, style: const TextStyle(fontSize: AppIconSizes.medium)),
                           title: Text(c.name),
                           subtitle: Text('\$${c.monthlyLimit.toStringAsFixed(0)}/month limit'),
                           trailing: const Icon(Icons.chevron_right),

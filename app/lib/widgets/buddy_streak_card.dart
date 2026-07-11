@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../config/constants.dart';
+import '../config/theme.dart';
 import '../providers/buddy_provider.dart';
 import '../providers/gamification_provider.dart';
 import '../services/analytics_service.dart';
@@ -127,8 +128,11 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
+    // AppColors.trust directly, not colorScheme.tertiaryContainer — see
+    // config/theme.dart for why that role isn't overridden app-wide.
+    final trustContainer =
+        (theme.brightness == Brightness.dark ? AppColors.trustContainerDark : AppColors.trustContainer);
 
     Widget body;
     if (!buddy.linked) {
@@ -173,7 +177,7 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      color: scheme.tertiaryContainer.withValues(alpha: 0.6),
+      color: trustContainer.withValues(alpha: 0.6),
       child: Padding(padding: const EdgeInsets.all(16), child: body),
     );
   }
@@ -198,7 +202,7 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
   Widget _row(ThemeData theme, {required String title, required String subtitle, Widget? trailing}) {
     return Row(
       children: [
-        const Text('🤝', style: TextStyle(fontSize: 40)),
+        const Text('🤝', style: TextStyle(fontSize: AppIconSizes.large)),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
@@ -248,16 +252,20 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    // AppColors.trust directly, not colorScheme.tertiaryContainer — see
+    // config/theme.dart for why that role isn't overridden app-wide.
+    final trustContainer = (Theme.of(context).brightness == Brightness.dark
+        ? AppColors.trustContainerDark
+        : AppColors.trustContainer);
     if (!_inviteSent) {
       return Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        color: scheme.tertiaryContainer.withValues(alpha: 0.6),
+        color: trustContainer.withValues(alpha: 0.6),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              const Text('🤝', style: TextStyle(fontSize: 40)),
+              const Text('🤝', style: TextStyle(fontSize: AppIconSizes.large)),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -291,12 +299,12 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
     final selfCount = context.watch<GamificationProvider>().currentWeekLoggedDaysCount;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      color: scheme.tertiaryContainer.withValues(alpha: 0.6),
+      color: trustContainer.withValues(alpha: 0.6),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            const Text('🤝', style: TextStyle(fontSize: 40)),
+            const Text('🤝', style: TextStyle(fontSize: AppIconSizes.large)),
             const SizedBox(width: 16),
             Expanded(
               child: Column(

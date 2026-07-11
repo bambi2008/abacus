@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../config/constants.dart';
+import '../config/theme.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/onboarding_provider.dart';
@@ -133,7 +134,7 @@ class _PositioningPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('🧮', style: TextStyle(fontSize: 72)),
+          const Text('🧮', style: TextStyle(fontSize: AppIconSizes.xlarge)),
           const SizedBox(height: 24),
           Text(
             'Track spending without connecting your bank. Ever.',
@@ -298,7 +299,7 @@ class _FirstExpensePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('🔥', style: TextStyle(fontSize: 96)),
+            const Text('🔥', style: TextStyle(fontSize: AppIconSizes.hero)),
             const SizedBox(height: 16),
             Text('Day 1', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),
@@ -320,7 +321,7 @@ class _FirstExpensePage extends StatelessWidget {
           const SizedBox(height: 24),
           Card(
             child: ListTile(
-              leading: Text(exampleCategory.$2, style: const TextStyle(fontSize: 28)),
+              leading: Text(exampleCategory.$2, style: const TextStyle(fontSize: AppIconSizes.medium)),
               title: const Text('Coffee'),
               subtitle: Text(exampleCategory.$1),
               trailing: Text('\$5.00', style: Theme.of(context).textTheme.titleMedium),

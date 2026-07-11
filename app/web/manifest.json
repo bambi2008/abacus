@@ -1,11 +1,11 @@
 {
-    "name": "abacus",
-    "short_name": "abacus",
+    "name": "Abacus",
+    "short_name": "Abacus",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1FA971",
+    "theme_color": "#1FA971",
+    "description": "A gamified, privacy-first budgeting app — no bank account linking, ever.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
