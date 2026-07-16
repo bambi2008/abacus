@@ -25,7 +25,7 @@
 <body>
 <a class="home" href="./">&larr; Abacus</a>
 <h1>Abacus Privacy Policy</h1>
-<p><em>Last updated: July 11, 2026</em></p>
+<p><em>Last updated: July 17, 2026</em></p>
 <h2>1. Introduction</h2>
 <p>Abacus ("we", "our", "the app") is a manual, privacy-first budgeting app,
 published by Mao Qin. Abacus never connects to your bank
@@ -37,37 +37,25 @@ budget limit, streak, badge, owl state, no-spend day, and monthly savings
 comparison you see in the app is stored locally on your device using
 on-device storage (Hive). Abacus does not operate a central account system
 and cannot see this data — there is nothing for us to see it in.</p>
-<p><strong>Nothing leaves your device unless you opt into the savings-buddy
-feature.</strong> Anonymous usage analytics are turned OFF in the current App
-Store release, so we collect no analytics of any kind. The only thing
-that can ever leave your device is the savings-buddy sync described below,
-and only if you choose to start or join a buddy streak.</p>
+<p><strong>Nothing leaves your device unless you opt into the savings-buddy feature,
+use an Apple service such as speech recognition, or the app checks or
+validates an App Store purchase entitlement.</strong> Usage analytics are not
+included in the current App Store release.</p>
 <p>The exceptions to the "stays on your device" rule are:</p>
 <ul>
-<li><strong>Anonymous, aggregate usage analytics</strong> (via PostHog), to understand
-  which parts of the app are used and where people get stuck. These events
-  record that an action happened — e.g. "an expense was logged," "a
-  milestone was reached," "the paywall was viewed" — <strong>never the content of
-  that action</strong>: not the amount, not the category, not any note you wrote.
-  Analytics events are not linked to your name, email, or any other
-  personal identifier. You can turn this off anytime in Settings →
-  Anonymous usage analytics.</li>
 <li><strong>Savings-buddy sync</strong>, only if you choose to start or join a buddy
-  streak. To connect two devices we create an anonymous account for you
+  streak. To connect two devices we create a pseudonymous account for you
   (no email, no password, no name — just an anonymous identifier). The
   feature then syncs exactly three things per person per day: that
-  anonymous identifier, a calendar date, and whether you logged anything
-  that day (true/false). It never syncs an amount, a category, a note, or
+  anonymous identifier, a calendar date, and whether you completed your
+  daily check-in (true/false). It never syncs an amount, a category, a note, or
   anything else about what you spent. If you never use the buddy streak
   feature, nothing about your account is ever created or synced. You can
   delete all of this anytime in Settings → Delete my savings-buddy data.</li>
 <li><strong>Receipt scanning</strong>, only if you tap the camera icon to scan a receipt.
-  Text recognition runs entirely on your device — Apple's Vision framework
-  on iOS, Google's ML Kit on Android — the photo is processed locally and
-  is never uploaded anywhere, and is discarded once the scan completes. (On
-  Android, ML Kit's on-device model may need a one-time download of a few
-  megabytes from Google Play Services the first time you scan — that
-  download contains no data of yours, only the recognition model itself.)</li>
+  Text recognition runs entirely on your iPhone using Apple's Vision
+  framework. The photo is processed locally, is never uploaded by Abacus,
+  and is discarded once the scan completes.</li>
 <li><strong>Voice input</strong>, only if you tap the microphone icon to speak an expense.
   Speech recognition is requested on-device where your iPhone supports it.
   On some devices, if the on-device language model isn't already
@@ -76,35 +64,37 @@ and only if you choose to start or join a buddy streak.</p>
   don't control and can't fully guarantee against, so we're disclosing it
   rather than overpromising. We never store or transmit an audio
   recording ourselves.</li>
-<li><strong>Purchase processing</strong>: Apple handles your payment details directly
-  when you buy Abacus Pro; we receive only a purchase confirmation (no
-  card details) to unlock Pro features.</li>
+<li><strong>Purchase processing</strong>: Apple handles your payment details directly.
+  RevenueCat receives App Store transaction and app-user identifiers to
+  validate and restore your Pro entitlement. Neither Abacus nor RevenueCat
+  receives your card details from the app.</li>
 </ul>
 <h2>3. How Information Is Used</h2>
 <p>Your financial data (expenses, categories, budgets, streaks, and everything
 else in Section 2's first paragraph) stays on your device and is used
 solely to power the app's features for you — logging, budget tracking,
 streaks, and the monthly savings comparison. We have no access to this
-data and no way to reconstruct it. Anonymous analytics events and buddy-sync
-signals (see Section 2) are used only in aggregate, to improve the app and
-to make the savings-buddy feature work.</p>
+data and no way to reconstruct it. Buddy-sync signals (see Section 2) are
+used only to make the savings-buddy feature work.</p>
 <h2>4. Data Storage</h2>
 <p>Your financial data is stored locally on your device (Hive). If you delete
 the app, this data is deleted with it. Abacus does not back up your data to
 any server; if you want to keep a copy, use the in-app CSV export feature
 (Settings → Export as CSV) before uninstalling.</p>
 <p>The savings-buddy sync data described in Section 2 (anonymous id + date +
-logged/not-logged boolean) is stored on Supabase, a third-party database
+daily-check-in boolean) is stored on Supabase, a third-party database
 provider, for as long as your buddy link stays active. This is the only
-category of data Abacus stores off your device, and it's never anything
-financial.</p>
+category of app-content data Abacus stores off your device, and it is never
+financial. App Store purchase validation records are separately handled by
+Apple and RevenueCat.</p>
 <h2>5. Data Sharing</h2>
 <p>We do not sell or rent your data. We do not use advertising SDKs. Two
 processors handle the narrow exceptions in Section 2 on our behalf:</p>
 <ul>
-<li><strong>PostHog</strong> (analytics) — anonymous, aggregate event names only.</li>
 <li><strong>Supabase</strong> (savings-buddy sync) — anonymous id + date + boolean only,
   and only for users who opt into a buddy streak.</li>
+<li><strong>RevenueCat</strong> (purchase validation) — App Store transaction and app-user
+  identifiers needed to unlock and restore Pro.</li>
 </ul>
 <p>Neither processor ever receives an expense amount, category, or note.</p>
 <h2>6. Your Rights</h2>
@@ -118,12 +108,13 @@ directly:</p>
   link, all synced logging days, and the anonymous account anytime, right
   in the app, via Settings → Delete my savings-buddy data. You can also
   contact us (Section 11).</li>
-<li><strong>Analytics opt-out</strong>: Settings → Anonymous usage analytics, off anytime.</li>
 </ul>
 <h2>7. Data Retention</h2>
 <p>Financial data persists on your device until you delete it or uninstall the
-app. Savings-buddy sync data (Section 2/4) persists on Supabase for as long
-as the buddy link is active.</p>
+app. Savings-buddy sync data (Section 2/4) persists on Supabase until you
+delete it in Settings. Purchase records may be retained by Apple and
+RevenueCat as needed for entitlement restoration, fraud prevention, legal,
+and accounting obligations.</p>
 <h2>8. Children's Privacy</h2>
 <p>Abacus is not directed at children under 13 and we do not knowingly collect
 information from children.</p>

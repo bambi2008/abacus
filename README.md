@@ -32,17 +32,16 @@ Full evaluation done (customer/market, technical architecture, promotion,
 `flutter test` passing.
 
 - `app/` — MVP core loop implemented per `docs/product-design.md`:
-  Provider+Hive+PostHog+IAP stack (identical to HeelEase/Regimen). 4-step
+  Provider+Hive local-first stack with RevenueCat-verified iOS purchases. 4-step
   onboarding (positioning → pick categories → log first expense → notification
   ask), Today screen (streak counter with loss-aversion copy, log-expense
   bottom sheet, per-category budget bars, auto-applying streak freeze),
   Progress screen (category bar chart via `fl_chart`, streak calendar,
   swipe-to-delete recent entries, locked Pro insight card), Settings
-  (buddy-streak invite via `share_plus`, CSV export via `csv`, analytics
-  opt-out, low-key referral placement), and a lifetime-led Paywall
-  ($89.99 primary / $7.99 monthly, no weekly billing). Buddy-streak is a
-  local/share-only stub in this scaffold — real two-way sync needs a
-  lightweight backend, deliberately out of scope for the local-first MVP.
+  (opt-in buddy streak, complete CSV export, legal and data-deletion controls,
+  low-key referral placement), and a single Founding Lifetime paywall
+  (US$19.99 launch recommendation; no subscription). Buddy sync uses Supabase
+  only after explicit user consent.
 
 - [`docs/product-design.md`](docs/product-design.md) — screen inventory,
   onboarding flow (Day-1 guaranteed win, paywall delayed to Day 5+), the
@@ -54,7 +53,7 @@ Full evaluation done (customer/market, technical architecture, promotion,
   three-factor framework, persona, YNAB/Monarch/Mint-shutdown market data,
   competitor teardown, and the financial model's results.
 - [`docs/technical-architecture.md`](docs/technical-architecture.md) —
-  reuses the HeelEase/Regimen Provider+Hive+PostHog+IAP stack (the core loop
+  uses a Provider+Hive local-first architecture (the core loop
   needs no cloud AI at all; an on-device OCR receipt-scan assist (Vision on
   iOS, ML Kit on Android) was added later purely to speed up manual entry,
   never a step toward bank sync), the Duolingo gamification mechanics
@@ -62,6 +61,11 @@ Full evaluation done (customer/market, technical architecture, promotion,
   second revenue engine.
 - [`docs/promotion-plan.md`](docs/promotion-plan.md) — content strategy
   around the ongoing "Mint alternative" search demand.
+- [`docs/ios-launch-risk-review-2026-07-17.md`](docs/ios-launch-risk-review-2026-07-17.md)
+  — current go/no-go verdict, corrected risks, and evidence required before
+  TestFlight/App Review.
+- [`docs/founding-lifetime-pricing-and-value.md`](docs/founding-lifetime-pricing-and-value.md)
+  — US$19.99 Founding Lifetime decision and the feature gates for later prices.
 - [`docs/financial-model-year1-3.xlsx`](docs/financial-model-year1-3.xlsx) —
   v6: four revenue engines (program, referral, add-on ARPU, B2B
   employer-benefit) + opex (support headcount, infra, Apple fee) + a
@@ -70,8 +74,8 @@ Full evaluation done (customer/market, technical architecture, promotion,
   $166,488 net profit, 76.7% net margin.**
 - [`docs/legal/privacy-policy.md`](docs/legal/privacy-policy.md) — what the
   app actually collects (almost nothing — local-first by design) and the
-  narrow, disclosed exceptions: anonymous analytics, opt-in savings-buddy
-  sync, on-device OCR/voice input.
+  narrow, disclosed exceptions: opt-in savings-buddy sync, RevenueCat purchase
+  validation, and Apple OCR/voice services invoked by the user.
   **Honest finding on paid acquisition**: the rigorous LTV:CAC ratio (value
   per install vs. cost per install) is **0.96:1 in Year 1 and 1.77:1 in
   Year 3 — below the industry-healthy 3:1 benchmark**. Switching from
@@ -92,11 +96,10 @@ Full evaluation done (customer/market, technical architecture, promotion,
 
 ## Next
 
-Core loop scaffold is done. Not yet wired: real App Store Connect/Play
-Console products (`ProductIds.lifetime`/`ProductIds.monthly` — falls back to
-a debug-only mock purchase per the established pattern), a real PostHog
-project key, and actual OS-level notification scheduling (the reminder-time
-picker in Settings is UI-only for now). West-first (China's trend is real
+Core loop scaffold is done. Before TestFlight, create the App Store
+non-consumable `com.abacus.pro.lifetime`, configure RevenueCat entitlement
+`pro`, deploy the Supabase schema, host the legal pages, and supply the release
+build keys. Reminder scheduling is a documented v1.1 item. West-first (China's trend is real
 but app payment-willingness there is weaker — see `customer-and-market.md`).
 B2B and add-on revenue engines stay documented-but-unbuilt until the MVP
 core loop is validated with real users; paid acquisition was modeled and

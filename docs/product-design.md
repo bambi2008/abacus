@@ -11,7 +11,7 @@ Reuses the HeelEase/Regimen `home_shell.dart` bottom-nav pattern, three tabs:
 
 1. **Today** — the core loop (log an expense, see today's status, streak)
 2. **Progress** — spending trends, category breakdown, streak history
-3. **Settings** — pricing, analytics opt-out, referral, account
+3. **Settings** — pricing, referral, buddy-data controls, legal links
 
 No separate "Categories" tab — category management lives inside the
 logging flow and a Progress sub-screen, not a top-level destination,
@@ -217,7 +217,8 @@ established across all three projects this session.
 - **Lifetime — $89.99**, visually primary/highlighted card ("Pay once,
   budget forever" — echoes the "no subscription trap" positioning against
   YNAB's no-free-tier $109/yr model).
-- **Monthly — $7.99**, secondary card.
+- **No recurring plan in v1.** Founding Lifetime launches at $19.99; see
+  `founding-lifetime-pricing-and-value.md` for the evidence and price gates.
 - Both unlock: unlimited streak freezes, buddy streaks, spending insights,
   budget history beyond 3 months.
 - "Restore Purchases" link, standard placement, bottom of screen.
@@ -233,7 +234,7 @@ established across all three projects this session.
   conversion assumption behind this revenue line is still unvalidated and
   an aggressive placement would be the wrong thing to ship before that's
   tested.
-- Analytics opt-out toggle (PostHog, same pattern as HeelEase/Regimen)
+- No analytics SDK in the privacy-first iOS launch.
 - Export data (CSV) — a genuine trust signal for the "your data, not
   ours" positioning; also functionally necessary since there's no bank
   sync to fall back on if a user wants their history elsewhere.

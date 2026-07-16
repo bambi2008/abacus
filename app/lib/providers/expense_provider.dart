@@ -21,7 +21,9 @@ class ExpenseProvider extends ChangeNotifier {
 
   void load() {
     _expenseBox = Hive.box<Expense>(HiveBoxes.expenses);
-    _completionBox = Hive.box<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
+    _completionBox = Hive.box<DailyLogCompletion>(
+      HiveBoxes.dailyLogCompletions,
+    );
     _categoryBox = Hive.box<ExpenseCategory>(HiveBoxes.categories);
     _settings = Hive.box(HiveBoxes.settings);
   }
@@ -37,12 +39,34 @@ class ExpenseProvider extends ChangeNotifier {
       ..sort((a, b) => b.date.compareTo(a.date));
   }
 
+  List<Expense> get allExpenses =>
+      _expenseBox.values.toList()..sort((a, b) => b.date.compareTo(a.date));
+
   double get todaySpend => todayExpenses.fold(0.0, (sum, e) => sum + e.amount);
 
   List<Expense> expensesOn(DateTime date) {
     final d = _dateOnly(date);
     return _expenseBox.values.where((e) => _dateOnly(e.date) == d).toList()
       ..sort((a, b) => b.date.compareTo(a.date));
+  }
+
+  bool hasExpensesOn(DateTime date) => expensesOn(date).isNotEmpty;
+
+  /// A deliberate no-spend confirmation is a valid daily check-in. It keeps
+  /// the habit honest without incentivizing a token purchase just to preserve
+  /// the streak.
+  Future<void> recordNoSpendCompletion(DateTime date) async {
+    final day = _dateOnly(date);
+    await _completionBox.put(
+      _key(day),
+      DailyLogCompletion(
+        date: day,
+        loggedAnyExpense: false,
+        withinBudget: true,
+        completedNoSpend: true,
+      ),
+    );
+    notifyListeners();
   }
 
   double get monthToDateSpend {
@@ -69,8 +93,18 @@ class ExpenseProvider extends ChangeNotifier {
     return spendByCategoryInMonth(month)[categoryId] ?? 0.0;
   }
 
-  Future<void> addExpense({required double amount, required String categoryId, String note = ''}) async {
-    final expense = Expense(id: _uuid.v4(), amount: amount, categoryId: categoryId, note: note, date: DateTime.now());
+  Future<void> addExpense({
+    required double amount,
+    required String categoryId,
+    String note = '',
+  }) async {
+    final expense = Expense(
+      id: _uuid.v4(),
+      amount: amount,
+      categoryId: categoryId,
+      note: note,
+      date: DateTime.now(),
+    );
     await _expenseBox.put(expense.id, expense);
     await _recordTodayCompletion();
     AnalyticsService.instance.capture('expense_logged');
@@ -78,11 +112,22 @@ class ExpenseProvider extends ChangeNotifier {
   }
 
   Future<void> deleteExpense(String id) async {
+    final deleted = _expenseBox.get(id);
     await _expenseBox.delete(id);
+    if (deleted != null) await _reconcileCompletionForDay(deleted.date);
     notifyListeners();
   }
 
-  double get _totalMonthlyBudget => _categoryBox.values.fold(0.0, (s, c) => s + c.monthlyLimit);
+  Future<void> updateExpense(Expense expense) async {
+    final previous = _expenseBox.get(expense.id);
+    await _expenseBox.put(expense.id, expense);
+    if (previous != null) await _reconcileCompletionForDay(previous.date);
+    await _reconcileCompletionForDay(expense.date);
+    notifyListeners();
+  }
+
+  double get _totalMonthlyBudget =>
+      _categoryBox.values.fold(0.0, (s, c) => s + c.monthlyLimit);
 
   Future<void> _recordTodayCompletion() async {
     final today = _dateOnly(DateTime.now());
@@ -90,18 +135,67 @@ class ExpenseProvider extends ChangeNotifier {
     final withinBudget = budget <= 0 || monthToDateSpend <= budget;
     await _completionBox.put(
       _key(today),
-      DailyLogCompletion(date: today, loggedAnyExpense: true, withinBudget: withinBudget),
+      DailyLogCompletion(
+        date: today,
+        loggedAnyExpense: true,
+        withinBudget: withinBudget,
+      ),
     );
+  }
+
+  /// Editing or deleting history must also repair the daily record that
+  /// powers streaks. Otherwise moving the only transaction off a day leaves
+  /// a phantom completion, while moving one onto another day fails to count.
+  Future<void> _reconcileCompletionForDay(DateTime date) async {
+    final day = _dateOnly(date);
+    final key = _key(day);
+    final existing = _completionBox.get(key);
+    final hasExpenses = hasExpensesOn(day);
+
+    if (hasExpenses) {
+      final budget = _totalMonthlyBudget;
+      final monthSpend = _expenseBox.values
+          .where((e) => e.date.year == day.year && e.date.month == day.month)
+          .fold(0.0, (sum, e) => sum + e.amount);
+      await _completionBox.put(
+        key,
+        DailyLogCompletion(
+          date: day,
+          loggedAnyExpense: true,
+          withinBudget: budget <= 0 || monthSpend <= budget,
+          usedStreakFreeze: existing?.usedStreakFreeze ?? false,
+        ),
+      );
+      return;
+    }
+
+    if (existing?.completedNoSpend == true ||
+        existing?.usedStreakFreeze == true) {
+      await _completionBox.put(
+        key,
+        DailyLogCompletion(
+          date: day,
+          loggedAnyExpense: false,
+          withinBudget: true,
+          usedStreakFreeze: existing?.usedStreakFreeze ?? false,
+          completedNoSpend: existing?.completedNoSpend ?? false,
+        ),
+      );
+    } else {
+      await _completionBox.delete(key);
+    }
   }
 
   // --- Streak & completions ---
 
-  DailyLogCompletion? completionOn(DateTime date) => _completionBox.get(_key(date));
+  DailyLogCompletion? completionOn(DateTime date) =>
+      _completionBox.get(_key(date));
 
   bool get loggedToday => completionOn(DateTime.now()) != null;
 
   int get freeStreakFreezesAvailable =>
-      _settings.get(SettingsKeys.freeStreakFreezesAvailable, defaultValue: 1) as int;
+      _settings.get(SettingsKeys.freeStreakFreezesAvailable, defaultValue: 1)
+          as int;
 
   Future<void> setFreeStreakFreezesAvailable(int value) async {
     await _settings.put(SettingsKeys.freeStreakFreezesAvailable, value);
@@ -126,15 +220,25 @@ class ExpenseProvider extends ChangeNotifier {
     if (completionOn(yesterday) != null) return false;
     final dayBeforeCompletion = completionOn(dayBefore);
     final hadActiveStreak =
-        dayBeforeCompletion != null && (dayBeforeCompletion.loggedAnyExpense || dayBeforeCompletion.usedStreakFreeze);
-    if (!hadActiveStreak || (!isPro && freeStreakFreezesAvailable <= 0)) return false;
+        dayBeforeCompletion != null &&
+        (dayBeforeCompletion.loggedAnyExpense ||
+            dayBeforeCompletion.completedNoSpend ||
+            dayBeforeCompletion.usedStreakFreeze);
+    if (!hadActiveStreak || (!isPro && freeStreakFreezesAvailable <= 0))
+      return false;
     await _completionBox.put(
       _key(yesterday),
-      DailyLogCompletion(date: yesterday, loggedAnyExpense: false, withinBudget: true, usedStreakFreeze: true),
+      DailyLogCompletion(
+        date: yesterday,
+        loggedAnyExpense: false,
+        withinBudget: true,
+        usedStreakFreeze: true,
+      ),
     );
     // Pro is truly unlimited — the counter is a free-tier-only concept, so
     // it's never decremented (and never goes negative) for Pro users.
-    if (!isPro) await setFreeStreakFreezesAvailable(freeStreakFreezesAvailable - 1);
+    if (!isPro)
+      await setFreeStreakFreezesAvailable(freeStreakFreezesAvailable - 1);
     AnalyticsService.instance.capture('streak_freeze_used');
     notifyListeners();
     return true;
@@ -152,7 +256,12 @@ class ExpenseProvider extends ChangeNotifier {
     }
     while (true) {
       final completion = completionOn(cursor);
-      if (completion == null || !(completion.loggedAnyExpense || completion.usedStreakFreeze)) break;
+      if (completion == null ||
+          !(completion.loggedAnyExpense ||
+              completion.completedNoSpend ||
+              completion.usedStreakFreeze)) {
+        break;
+      }
       count++;
       cursor = cursor.subtract(const Duration(days: 1));
     }
@@ -162,5 +271,6 @@ class ExpenseProvider extends ChangeNotifier {
   /// All-time count of days with a real log (excludes frozen days) — used
   /// by the companion owl's care-score accumulator. Not the same as
   /// [currentStreak], which only counts the *current* consecutive run.
-  int get totalLoggedDaysCount => _completionBox.values.where((c) => c.loggedAnyExpense).length;
+  int get totalLoggedDaysCount =>
+      _completionBox.values.where((c) => c.loggedAnyExpense).length;
 }

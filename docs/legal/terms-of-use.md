@@ -1,6 +1,6 @@
 # Abacus Terms of Use
 
-_Last updated: July 11, 2026_
+_Last updated: July 17, 2026_
 
 These Terms of Use ("Terms") govern your use of the Abacus mobile
 application ("Abacus", "the app"), published by Mao Qin
@@ -23,24 +23,21 @@ Abacus on Apple-branded devices you own or control, as permitted by the
 App Store Terms of Service. You may not copy, modify, reverse-engineer,
 resell, or redistribute the app except as allowed by law.
 
-## 3. Abacus Pro, subscriptions, and one-time purchases
+## 3. Abacus Pro and one-time purchases
 
 Abacus is free to use. Optional **Abacus Pro** unlocks additional features
-(such as unlimited streak freezes and spending insights). Pro is offered
-two ways:
+(such as unlimited streak freezes and spending insights). The iOS launch
+offers Pro as a **Founding Lifetime** one-time purchase:
 
-- **Lifetime** — a one-time purchase that unlocks Pro permanently. It is
-  not a subscription and does not renew.
-- **Monthly** — an auto-renewing subscription billed to your Apple ID at
-  the price shown in the app. It renews automatically each month unless you
-  cancel at least 24 hours before the current period ends. You can manage
-  or cancel it anytime in your device Settings → Apple ID → Subscriptions.
+- **Founding Lifetime** — a one-time purchase that unlocks the Pro features
+  included in this version and future compatible Pro updates for this app.
+  It is not a subscription and does not renew.
 
 All purchases are processed by Apple. Payment is charged to your Apple ID
 at confirmation. Refunds, where applicable, are handled by Apple under the
-App Store Terms of Service, not by us. Prices may change; any change to a
-subscription price will be disclosed and will apply only to future renewal
-periods.
+App Store Terms of Service, not by us. The price offered to new purchasers
+may change, but a later price change does not create a recurring charge for
+an existing Founding Lifetime purchaser.
 
 ## 4. Your data is your responsibility
 

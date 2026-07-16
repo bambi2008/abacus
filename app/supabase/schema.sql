@@ -5,7 +5,7 @@
 --
 -- PRIVACY BOUNDARY (load-bearing for Abacus's positioning): the only data
 -- that ever leaves a device is, per buddy per day, an anonymous auth user
--- id + a calendar date + a single boolean "logged something that day".
+-- id + a calendar date + a single boolean "completed the daily check-in".
 -- No amounts, no categories, no notes — nothing financial. Row-Level
 -- Security below enforces that a user can only ever read/write rows for a
 -- buddy link they are actually part of.
@@ -76,7 +76,19 @@ create policy buddy_marks_insert on public.buddy_marks
 
 drop policy if exists buddy_marks_update on public.buddy_marks;
 create policy buddy_marks_update on public.buddy_marks
-  for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+  for update using (
+    user_id = auth.uid()
+    and exists (
+      select 1 from public.buddy_links l
+      where l.id = link_id and (l.creator_id = auth.uid() or l.partner_id = auth.uid())
+    )
+  ) with check (
+    user_id = auth.uid()
+    and exists (
+      select 1 from public.buddy_links l
+      where l.id = link_id and (l.creator_id = auth.uid() or l.partner_id = auth.uid())
+    )
+  );
 
 -- ---------------------------------------------------------------------------
 -- RPCs
@@ -95,26 +107,25 @@ as $$
 declare
   target public.buddy_links%rowtype;
 begin
-  select * into target from public.buddy_links where code = upper(join_code);
-  if not found then
-    return null;
-  end if;
-  if target.creator_id = auth.uid() then
-    return null; -- can't be your own buddy
-  end if;
-  if target.partner_id is not null and target.partner_id <> auth.uid() then
-    return null; -- already claimed by someone else
-  end if;
-  update public.buddy_links set partner_id = auth.uid() where id = target.id;
-  return target.id;
+  -- One atomic claim prevents two devices entering the same code at nearly
+  -- the same time from both seeing success while only the last one remains.
+  update public.buddy_links
+  set partner_id = auth.uid()
+  where code = upper(join_code)
+    and auth.uid() is not null
+    and creator_id <> auth.uid()
+    and (partner_id is null or partner_id = auth.uid())
+  returning * into target;
+  return case when found then target.id else null end;
 end;
 $$;
 
+revoke all on function public.join_buddy_link(text) from public;
+grant execute on function public.join_buddy_link(text) to authenticated;
+
 -- Delete everything this (anonymous) user has synced — the in-app
 -- "delete my buddy data" path required by App Store Guideline 5.1.1(v).
--- Removes their marks, the links they created (marks cascade), and detaches
--- them from any link they joined as a partner. The anonymous auth user row
--- itself carries no personal data; the app signs out after calling this.
+-- Removes their marks, links and the underlying anonymous auth identity.
 create or replace function public.delete_my_buddy_data()
 returns void
 language plpgsql
@@ -125,12 +136,29 @@ begin
   delete from public.buddy_marks where user_id = auth.uid();
   delete from public.buddy_links where creator_id = auth.uid();
   update public.buddy_links set partner_id = null where partner_id = auth.uid();
+  delete from auth.users where id = auth.uid();
 end;
 $$;
+
+revoke all on function public.delete_my_buddy_data() from public;
+grant execute on function public.delete_my_buddy_data() to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- Realtime — both tables broadcast changes so partners update live.
 -- ---------------------------------------------------------------------------
 
-alter publication supabase_realtime add table public.buddy_links;
-alter publication supabase_realtime add table public.buddy_marks;
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'buddy_links'
+  ) then
+    alter publication supabase_realtime add table public.buddy_links;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'buddy_marks'
+  ) then
+    alter publication supabase_realtime add table public.buddy_marks;
+  end if;
+end $$;

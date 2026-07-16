@@ -14,6 +14,21 @@ class Expense {
     required this.note,
     required this.date,
   });
+
+  Expense copyWith({
+    double? amount,
+    String? categoryId,
+    String? note,
+    DateTime? date,
+  }) {
+    return Expense(
+      id: id,
+      amount: amount ?? this.amount,
+      categoryId: categoryId ?? this.categoryId,
+      note: note ?? this.note,
+      date: date ?? this.date,
+    );
+  }
 }
 
 class ExpenseAdapter extends TypeAdapter<Expense> {

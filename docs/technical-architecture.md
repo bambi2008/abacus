@@ -49,11 +49,10 @@ Same stack, same reasons, third time proven:
   only architecture isn't just a privacy nice-to-have, it's the literal
   product positioning ("no bank credentials, ever") in a category with a
   recent, well-known data-monetization scandal (Mint) to point at.
-- **Analytics**: PostHog, same no-op-until-configured pattern, opt-out
-  toggle, anonymous events only (log "expense_logged", never the amount or
-  category).
-- **Payments**: `in_app_purchase`, no weekly billing (same discipline as
-  HeelEase/Regimen).
+- **Analytics**: no analytics SDK in iOS v1. The event façade is deliberately
+  a no-op so instrumentation cannot silently expand the privacy surface.
+- **Payments**: RevenueCat-backed App Store validation and one non-consumable
+  Founding Lifetime product; the verified `pro` entitlement is authoritative.
 
 ## Savings-buddy backend (the one networked feature)
 
@@ -359,8 +358,8 @@ Four lines survive, each checked against a real precedent:
    C2C launch (month 10-15 depending on scenario) since a self-serve
    employer-benefit funnel needs a live product with organic traction to be
    credible in the first place.
-4. **Program purchase** (lifetime + subscription) — unchanged, the
-   best-anchored line (YNAB $109/yr, Monarch $99/yr).
+4. **Program purchase** — Founding Lifetime only in iOS v1. Launch price and
+   later value gates are documented in `founding-lifetime-pricing-and-value.md`.
 
 ## Operating costs — customer support, infra, and net profit (v3)
 

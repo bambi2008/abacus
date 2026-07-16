@@ -9,7 +9,7 @@ import '../services/analytics_service.dart';
 import '../services/share_capture_service.dart';
 import '../widgets/celebration_body.dart';
 
-/// Full-screen "you spent less than average" recap, shown once per calendar
+/// Full-screen selected-benchmark recap, shown once per calendar
 /// month at the same month-boundary evaluation point as the category boss
 /// battles. Reuses the same CelebrationBody/confetti/haptic machinery as
 /// every other celebration in the app. See
@@ -24,23 +24,21 @@ class MonthlySavingsCelebrationScreen extends StatefulWidget {
   const MonthlySavingsCelebrationScreen({super.key, required this.result});
 
   @override
-  State<MonthlySavingsCelebrationScreen> createState() => _MonthlySavingsCelebrationScreenState();
+  State<MonthlySavingsCelebrationScreen> createState() =>
+      _MonthlySavingsCelebrationScreenState();
 }
 
-class _MonthlySavingsCelebrationScreenState extends State<MonthlySavingsCelebrationScreen> {
+class _MonthlySavingsCelebrationScreenState
+    extends State<MonthlySavingsCelebrationScreen> {
   final _shareCardKey = GlobalKey();
   late final ConfettiController _confettiController;
-
-  // The standard "starter emergency fund" figure widely cited by consumer
-  // financial educators (e.g. CFPB) — a stable, round heuristic rather than
-  // a live market price, so it doesn't need upkeep the way a specific
-  // product price would.
-  static const _starterEmergencyFund = 500;
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
     HapticFeedback.heavyImpact();
     _confettiController.play();
     AnalyticsService.instance.capture('monthly_savings_celebration_shown');
@@ -57,30 +55,35 @@ class _MonthlySavingsCelebrationScreenState extends State<MonthlySavingsCelebrat
     final ok = await ShareCaptureService.captureAndShare(
       key: _shareCardKey,
       filename: 'abacus_monthly_savings_${widget.result.id}',
-      text: 'I spent \$${widget.result.totalSaved.toStringAsFixed(0)} less than the average American '
-          'on discretionary spending this month, on Abacus 💰',
+      text:
+          'My tracked discretionary spending was '
+          '\$${widget.result.totalSaved.toStringAsFixed(0)} below selected U.S. category benchmarks '
+          'this month, on Abacus.',
     );
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+        const SnackBar(
+          content: Text('Could not open the share sheet — try again.'),
+        ),
       );
     }
   }
 
   void _continue(BuildContext context) {
-    context.read<GamificationProvider>().markMonthlySavingsCelebrationShown(widget.result.id);
+    context.read<GamificationProvider>().markMonthlySavingsCelebrationShown(
+      widget.result.id,
+    );
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final saved = widget.result.totalSaved;
-    final headline = 'You spent \$${saved.toStringAsFixed(0)} less than average this month!';
-    final pctOfFund = saved / _starterEmergencyFund * 100;
-    final message = pctOfFund >= 100
-        ? 'That alone could cover a \$$_starterEmergencyFund starter emergency fund, with some left over.'
-        : 'That\'s ${pctOfFund.round()}% of the way to a \$$_starterEmergencyFund starter emergency fund — '
-            'vs. real 2024 U.S. averages for dining out, shopping, and entertainment (BLS).';
+    final headline = '\$${saved.toStringAsFixed(0)} below selected benchmarks';
+    const message =
+        'This comparison covers only the categories you chose to track. '
+        'It is not a measure of total savings. Benchmarks use 2024 U.S. BLS averages '
+        'for dining out, clothing, and entertainment.';
 
     return Scaffold(
       body: Stack(

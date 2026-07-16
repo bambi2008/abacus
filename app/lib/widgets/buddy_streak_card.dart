@@ -22,7 +22,9 @@ Future<void> _shareOrWarn(BuildContext context, String text) async {
     debugPrint('buddy_streak_card: share failed or timed out: $e');
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+        const SnackBar(
+          content: Text('Could not open the share sheet — try again.'),
+        ),
       );
     }
   }
@@ -86,17 +88,25 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
   }
 
   Future<void> _invite(BuildContext context) async {
+    if (!buddy.hasOptedIn && !await _confirmBuddySync(context)) return;
     final code = await buddy.createLink();
     if (code == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not start a buddy streak. Check your connection.')),
+          const SnackBar(
+            content: Text(
+              'Could not start a buddy streak. Check your connection.',
+            ),
+          ),
         );
       }
       return;
     }
     if (!context.mounted) return;
-    await _shareOrWarn(context, 'Join my Abacus savings-buddy streak! Use code $code in the app.');
+    await _shareOrWarn(
+      context,
+      'Join my Abacus savings-buddy streak! Use code $code in the app.',
+    );
   }
 
   Future<void> _join(BuildContext context) async {
@@ -109,21 +119,57 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
           controller: controller,
           autofocus: true,
           textCapitalization: TextCapitalization.characters,
-          decoration: const InputDecoration(hintText: 'Enter your buddy\'s code'),
+          decoration: const InputDecoration(
+            hintText: 'Enter your buddy\'s code',
+          ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, controller.text.trim()), child: const Text('Join')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Join'),
+          ),
         ],
       ),
     );
     if (code == null || code.isEmpty) return;
+    if (!buddy.hasOptedIn && !await _confirmBuddySync(context)) return;
     final ok = await buddy.joinLink(code);
     if (context.mounted && !ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('That code didn\'t work — it may be wrong or already claimed.')),
+        const SnackBar(
+          content: Text(
+            'That code didn\'t work — it may be wrong or already claimed.',
+          ),
+        ),
       );
     }
+  }
+
+  Future<bool> _confirmBuddySync(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Turn on buddy sync?'),
+        content: const Text(
+          'To connect two devices, Abacus will create a random anonymous ID and sync only the date and whether you checked in that day. Expense amounts, categories, and notes never leave your device. You can delete the synced data and anonymous ID in Settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Turn on sync'),
+          ),
+        ],
+      ),
+    );
+    return confirmed == true;
   }
 
   @override
@@ -131,20 +177,28 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
     final theme = Theme.of(context);
     // AppColors.trust directly, not colorScheme.tertiaryContainer — see
     // config/theme.dart for why that role isn't overridden app-wide.
-    final trustContainer =
-        (theme.brightness == Brightness.dark ? AppColors.trustContainerDark : AppColors.trustContainer);
+    final trustContainer = (theme.brightness == Brightness.dark
+        ? AppColors.trustContainerDark
+        : AppColors.trustContainer);
 
     Widget body;
     if (!buddy.linked) {
       body = _row(
         theme,
         title: 'Find a savings buddy',
-        subtitle: 'Both of you log an expense the same day to build a shared streak.',
+        subtitle:
+            'Both of you log an expense the same day to build a shared streak.',
         trailing: Wrap(
           spacing: 4,
           children: [
-            TextButton(onPressed: () => _join(context), child: const Text('Join')),
-            FilledButton.tonal(onPressed: () => _invite(context), child: const Text('Invite')),
+            TextButton(
+              onPressed: () => _join(context),
+              child: const Text('Join'),
+            ),
+            FilledButton.tonal(
+              onPressed: () => _invite(context),
+              child: const Text('Invite'),
+            ),
           ],
         ),
       );
@@ -152,14 +206,18 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
       body = _row(
         theme,
         title: 'Waiting for your buddy',
-        subtitle: 'Share code ${buddy.code} — your streak starts the day you both log.',
+        subtitle:
+            'Share code ${buddy.code} — your streak starts the day you both log.',
         trailing: Wrap(
           spacing: 4,
           children: [
             _refreshButton(),
             IconButton(
               icon: const Icon(Icons.share_outlined),
-              onPressed: () => _shareOrWarn(context, 'Join my Abacus savings-buddy streak! Use code ${buddy.code} in the app.'),
+              onPressed: () => _shareOrWarn(
+                context,
+                'Join my Abacus savings-buddy streak! Use code ${buddy.code} in the app.',
+              ),
             ),
           ],
         ),
@@ -170,7 +228,8 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
       body = _row(
         theme,
         title: '${buddy.jointStreak}-day buddy streak',
-        subtitle: 'Today — you $selfMark · buddy $partnerMark. Both must log to keep it alive.',
+        subtitle:
+            'Today — you $selfMark · buddy $partnerMark. Both must log to keep it alive.',
         trailing: _refreshButton(),
       );
     }
@@ -190,7 +249,11 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
     return _refreshing
         ? const Padding(
             padding: EdgeInsets.all(8),
-            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
           )
         : IconButton(
             tooltip: 'Refresh',
@@ -199,7 +262,12 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
           );
   }
 
-  Widget _row(ThemeData theme, {required String title, required String subtitle, Widget? trailing}) {
+  Widget _row(
+    ThemeData theme, {
+    required String title,
+    required String subtitle,
+    Widget? trailing,
+  }) {
     return Row(
       children: [
         const Text('🤝', style: TextStyle(fontSize: AppIconSizes.large)),
@@ -238,7 +306,9 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
   void initState() {
     super.initState();
     _settings = Hive.box(HiveBoxes.settings);
-    _inviteSent = (_settings.get(SettingsKeys.buddyStreakCode) as String?)?.isNotEmpty ?? false;
+    _inviteSent =
+        (_settings.get(SettingsKeys.buddyStreakCode) as String?)?.isNotEmpty ??
+        false;
   }
 
   Future<void> _sendInvite() async {
@@ -247,7 +317,10 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
     AnalyticsService.instance.capture('buddy_streak_invite_sent');
     setState(() => _inviteSent = true);
     if (!mounted) return;
-    await _shareOrWarn(context, 'Join my Abacus savings-buddy streak! Use code $code in the app.');
+    await _shareOrWarn(
+      context,
+      'Join my Abacus savings-buddy streak! Use code $code in the app.',
+    );
   }
 
   @override
@@ -271,7 +344,10 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Find a savings buddy', style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      'Find a savings buddy',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       'Both of you log an expense the same day to keep it alive.',
@@ -280,23 +356,27 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
                     const SizedBox(height: 2),
                     Text(
                       'Sync isn\'t enabled in this build — inviting won\'t actually connect two devices yet.',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: Theme.of(context).colorScheme.error),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              FilledButton.tonal(onPressed: _sendInvite, child: const Text('Invite')),
+              FilledButton.tonal(
+                onPressed: _sendInvite,
+                child: const Text('Invite'),
+              ),
             ],
           ),
         ),
       );
     }
 
-    final selfCount = context.watch<GamificationProvider>().currentWeekLoggedDaysCount;
+    final selfCount = context
+        .watch<GamificationProvider>()
+        .currentWeekLoggedDaysCount;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       color: trustContainer.withValues(alpha: 0.6),
@@ -310,14 +390,16 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('This week: $selfCount/7 days', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'This week: $selfCount/7 days',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 2),
                   Text(
                     'Sync isn\'t enabled in this build — your buddy\'s side won\'t actually connect.',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Theme.of(context).colorScheme.error),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ],
               ),

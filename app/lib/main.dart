@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +63,9 @@ void main() async {
   await Hive.openBox<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
   await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
   await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
-  await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
+  await Hive.openBox<CategoryChallengeResult>(
+    HiveBoxes.categoryChallengeResults,
+  );
   await Hive.openBox<BuddyWeeklyChallenge>(HiveBoxes.buddyWeeklyChallenges);
   await Hive.openBox<OwlState>(HiveBoxes.owlState);
   await Hive.openBox<CompleteLogDayMark>(HiveBoxes.completeLogDays);
@@ -74,18 +78,18 @@ void main() async {
   // readable before the streak-freeze check below — without this, Pro
   // subscribers got the exact same one-time freeze as free users, since
   // nothing ever threaded isPro into checkAndApplyStreakFreeze.
-  final subscriptionProvider = SubscriptionProvider()..load();
-  subscriptionProvider.init(); // not awaited — matches the prior fire-and-forget behavior
+  final subscriptionProvider = SubscriptionProvider();
 
   final expenseProvider = ExpenseProvider()..load();
-  await expenseProvider.checkAndApplyStreakFreeze(isPro: subscriptionProvider.isPro);
   final categoryProvider = CategoryProvider()..load();
   final gamificationProvider = GamificationProvider()..load();
   gamificationProvider.bind(expenseProvider, categoryProvider);
   // Catch a milestone reached while the app was closed — recorded silently
   // here, the celebration itself is shown on the next Today screen visit
   // (see GamificationProvider.pendingCelebration).
-  await gamificationProvider.checkForNewMilestone(expenseProvider.currentStreak);
+  await gamificationProvider.checkForNewMilestone(
+    expenseProvider.currentStreak,
+  );
   // Evaluate last month's category "boss battles" if a month boundary was
   // crossed while the app was closed — see evaluateMonthBoundaryIfNeeded.
   await gamificationProvider.evaluateMonthBoundaryIfNeeded();
@@ -98,11 +102,6 @@ void main() async {
   // Opt-in savings-buddy sync. Unconfigured (no Supabase --dart-defines) →
   // NoopBuddyBackend, and the buddy card keeps its local-only behavior.
   final buddyProvider = BuddyProvider(SupabaseBuddyBackend());
-  await buddyProvider.init();
-  // Push today's log status up front so the partner's board is current, then
-  // reflect it locally.
-  await buddyProvider.markTodayLogged(expenseProvider.loggedToday);
-
   runApp(
     MultiProvider(
       providers: [
@@ -114,6 +113,21 @@ void main() async {
         ChangeNotifierProvider.value(value: subscriptionProvider),
       ],
       child: const AbacusApp(),
+    ),
+  );
+
+  // Network-backed services start only after the first frame. A slow App
+  // Store/RevenueCat/Supabase connection must never hold the launch screen.
+  unawaited(
+    subscriptionProvider.init().then(
+      (_) => expenseProvider.checkAndApplyStreakFreeze(
+        isPro: subscriptionProvider.isPro,
+      ),
+    ),
+  );
+  unawaited(
+    buddyProvider.init().then(
+      (_) => buddyProvider.markTodayLogged(expenseProvider.loggedToday),
     ),
   );
 }

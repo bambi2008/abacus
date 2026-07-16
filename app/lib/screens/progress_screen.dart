@@ -11,6 +11,7 @@ import '../providers/gamification_provider.dart';
 import '../providers/subscription_provider.dart';
 import 'category_management_screen.dart';
 import 'paywall_screen.dart';
+import 'transaction_history_screen.dart';
 
 class ProgressScreen extends StatelessWidget {
   const ProgressScreen({super.key});
@@ -29,8 +30,13 @@ class ProgressScreen extends StatelessWidget {
     final insight = isPro
         ? computeSpendingInsight(
             thisMonthSpend: spendByCategory,
-            lastMonthSpend: expenses.spendByCategoryInMonth(DateTime(now.year, now.month - 1, 1)),
-            categories: [for (final c in categories.all) (id: c.id, name: c.name, emoji: c.emoji)],
+            lastMonthSpend: expenses.spendByCategoryInMonth(
+              DateTime(now.year, now.month - 1, 1),
+            ),
+            categories: [
+              for (final c in categories.all)
+                (id: c.id, name: c.name, emoji: c.emoji),
+            ],
           )
         : null;
 
@@ -39,10 +45,22 @@ class ProgressScreen extends StatelessWidget {
         title: const Text('Progress'),
         actions: [
           IconButton(
+            tooltip: 'Transaction history',
+            icon: const Icon(Icons.receipt_long_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const TransactionHistoryScreen(),
+              ),
+            ),
+          ),
+          IconButton(
             tooltip: 'Manage categories',
             icon: const Icon(Icons.tune),
-            onPressed: () =>
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CategoryManagementScreen())),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const CategoryManagementScreen(),
+              ),
+            ),
           ),
         ],
       ),
@@ -51,28 +69,48 @@ class ProgressScreen extends StatelessWidget {
         children: [
           _InsightCard(isPro: isPro, insight: insight),
           const SizedBox(height: 24),
-          Text('This month by category', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'This month by category',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
           SizedBox(
             height: 220,
             child: categories.all.isEmpty
-                ? const Center(child: Text('Add a category to see spending here.'))
+                ? const Center(
+                    child: Text('Add a category to see spending here.'),
+                  )
                 : BarChart(
                     BarChartData(
                       gridData: const FlGridData(show: true),
                       titlesData: FlTitlesData(
-                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 36)),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 36,
+                          ),
+                        ),
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: (value, meta) {
                               final i = value.toInt();
-                              if (i < 0 || i >= categories.all.length) return const SizedBox.shrink();
+                              if (i < 0 || i >= categories.all.length)
+                                return const SizedBox.shrink();
                               return Padding(
                                 padding: const EdgeInsets.only(top: 4),
-                                child: Text(categories.all[i].emoji, style: const TextStyle(fontSize: AppIconSizes.small)),
+                                child: Text(
+                                  categories.all[i].emoji,
+                                  style: const TextStyle(
+                                    fontSize: AppIconSizes.small,
+                                  ),
+                                ),
                               );
                             },
                           ),
@@ -96,7 +134,10 @@ class ProgressScreen extends StatelessWidget {
                   ),
           ),
           const SizedBox(height: 24),
-          Text('Streak history', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Streak history',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
           _StreakCalendar(month: now),
           const SizedBox(height: 24),
@@ -109,7 +150,10 @@ class ProgressScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _NoSpendCalendar(month: now),
           const SizedBox(height: 24),
-          Text('Monthly savings', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Monthly savings',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 4),
           Text(
             'Vs. real U.S. averages for dining out, shopping, and entertainment (BLS).',
@@ -118,7 +162,10 @@ class ProgressScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _MonthlySavingsHistory(results: gamification.monthlySavingsHistory),
           const SizedBox(height: 24),
-          Text('Recent entries', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Recent entries',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           ..._recentEntries(context, expenses, categories),
         ],
@@ -126,7 +173,11 @@ class ProgressScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _recentEntries(BuildContext context, ExpenseProvider expenses, CategoryProvider categories) {
+  List<Widget> _recentEntries(
+    BuildContext context,
+    ExpenseProvider expenses,
+    CategoryProvider categories,
+  ) {
     final today = DateTime.now();
     final entries = <Widget>[];
     for (var i = 0; i < 7; i++) {
@@ -134,25 +185,36 @@ class ProgressScreen extends StatelessWidget {
       final dayExpenses = expenses.expensesOn(day);
       for (final e in dayExpenses) {
         final category = categories.byId(e.categoryId);
-        entries.add(Dismissible(
-          key: ValueKey(e.id),
-          direction: DismissDirection.endToStart,
-          background: Container(color: Theme.of(context).colorScheme.errorContainer),
-          onDismissed: (_) => expenses.deleteExpense(e.id),
-          child: ListTile(
-            leading: Text(category?.emoji ?? '❓', style: const TextStyle(fontSize: AppIconSizes.medium)),
-            title: Text(e.note.isEmpty ? (category?.name ?? 'Uncategorized') : e.note),
-            subtitle: Text('${day.month}/${day.day}'),
-            trailing: Text('\$${e.amount.toStringAsFixed(2)}'),
+        entries.add(
+          Dismissible(
+            key: ValueKey(e.id),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              color: Theme.of(context).colorScheme.errorContainer,
+            ),
+            onDismissed: (_) => expenses.deleteExpense(e.id),
+            child: ListTile(
+              leading: Text(
+                category?.emoji ?? '❓',
+                style: const TextStyle(fontSize: AppIconSizes.medium),
+              ),
+              title: Text(
+                e.note.isEmpty ? (category?.name ?? 'Uncategorized') : e.note,
+              ),
+              subtitle: Text('${day.month}/${day.day}'),
+              trailing: Text('\$${e.amount.toStringAsFixed(2)}'),
+            ),
           ),
-        ));
+        );
       }
     }
     if (entries.isEmpty) {
-      entries.add(const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        child: Text('No expenses logged yet.'),
-      ));
+      entries.add(
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          child: Text('No expenses logged yet.'),
+        ),
+      );
     }
     return entries;
   }
@@ -172,17 +234,24 @@ class _MonthlySavingsHistory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (results.isEmpty) {
-      return const Text('Your first monthly recap appears here after your first full month of tracking.');
+      return const Text(
+        'Your first monthly recap appears here after your first full month of tracking.',
+      );
     }
     return Column(
       children: results.map((r) {
         final saved = r.totalSaved;
         return ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: Text(saved > 0 ? '💰' : '➖', style: const TextStyle(fontSize: AppIconSizes.small)),
+          leading: Text(
+            saved > 0 ? '💰' : '➖',
+            style: const TextStyle(fontSize: AppIconSizes.small),
+          ),
           title: Text('${_monthName(r.month)} ${r.year}'),
           trailing: Text(
-            saved > 0 ? 'Saved \$${saved.toStringAsFixed(0)}' : 'No savings that month',
+            saved > 0
+                ? '\$${saved.toStringAsFixed(0)} below benchmark'
+                : 'At or above benchmark',
             style: TextStyle(
               fontWeight: saved > 0 ? FontWeight.bold : FontWeight.normal,
               color: saved > 0
@@ -197,8 +266,18 @@ class _MonthlySavingsHistory extends StatelessWidget {
 
   String _monthName(int month) {
     const names = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return names[month - 1];
   }
@@ -222,8 +301,12 @@ class _InsightCard extends StatelessWidget {
         child: ListTile(
           leading: const Icon(Icons.lock_outline),
           title: const Text('Unlock spending insights'),
-          subtitle: const Text('See how this month compares to your average, generated from your own data.'),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PaywallScreen())),
+          subtitle: const Text(
+            'See how this month compares to your average, generated from your own data.',
+          ),
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const PaywallScreen())),
         ),
       );
     }
@@ -232,20 +315,25 @@ class _InsightCard extends StatelessWidget {
         child: ListTile(
           leading: Icon(Icons.insights),
           title: Text('Spending insight'),
-          subtitle: Text('Log a few expenses this month to see your first insight here.'),
+          subtitle: Text(
+            'Log a few expenses this month to see your first insight here.',
+          ),
         ),
       );
     }
     final change = insight!.changeFraction;
     final subtitle = change == null
         ? '\$${insight!.thisMonthAmount.toStringAsFixed(0)} so far this month — no comparison yet, '
-            'this is the first month you\'ve logged this category.'
+              'this is the first month you\'ve logged this category.'
         : '\$${insight!.thisMonthAmount.toStringAsFixed(0)} so far this month, '
-            '${change >= 0 ? 'up' : 'down'} ${(change.abs() * 100).round()}% from last month '
-            '(\$${insight!.lastMonthAmount.toStringAsFixed(0)}).';
+              '${change >= 0 ? 'up' : 'down'} ${(change.abs() * 100).round()}% from last month '
+              '(\$${insight!.lastMonthAmount.toStringAsFixed(0)}).';
     return Card(
       child: ListTile(
-        leading: Text(insight!.categoryEmoji, style: const TextStyle(fontSize: AppIconSizes.medium)),
+        leading: Text(
+          insight!.categoryEmoji,
+          style: const TextStyle(fontSize: AppIconSizes.medium),
+        ),
         title: Text('${insight!.categoryName} is your top category'),
         subtitle: Text(subtitle),
       ),
@@ -288,10 +376,10 @@ class _NoSpendCalendar extends StatelessWidget {
               color: isFuture
                   ? Colors.transparent
                   : marked
-                      ? (Theme.of(context).brightness == Brightness.dark
-                          ? AppColors.budgetGoodDark
-                          : AppColors.budgetGood)
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
+                  ? (Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.budgetGoodDark
+                        : AppColors.budgetGood)
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             child: Text(
               marked ? '💚' : '${i + 1}',
@@ -312,15 +400,32 @@ class _NoSpendCalendar extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text('Mark ${day.month}/${day.day} as a no-spend day?'),
-        content: const Text('This is a separate win from your logging streak — a deliberate day you chose not to spend.'),
+        content: const Text(
+          'Confirm that you had no discretionary spending that day. This counts as a daily check-in, so you never need to create an expense just to protect your streak.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Mark it')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Mark it'),
+          ),
         ],
       ),
     );
     if (confirmed == true) {
-      await gamification.markNoSpendDay(day);
+      final marked = await gamification.markNoSpendDay(day);
+      if (!marked && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'That day already has an expense, so it cannot be marked no-spend.',
+            ),
+          ),
+        );
+      }
     }
   }
 }
@@ -339,7 +444,11 @@ class _StreakCalendar extends StatelessWidget {
       children: List.generate(daysInMonth, (i) {
         final day = DateTime(month.year, month.month, i + 1);
         final completion = expenses.completionOn(day);
-        final filled = completion != null && (completion.loggedAnyExpense || completion.usedStreakFreeze);
+        final filled =
+            completion != null &&
+            (completion.loggedAnyExpense ||
+                completion.completedNoSpend ||
+                completion.usedStreakFreeze);
         final isFuture = day.isAfter(DateTime.now());
         return Container(
           width: 28,
@@ -350,8 +459,8 @@ class _StreakCalendar extends StatelessWidget {
             color: isFuture
                 ? Colors.transparent
                 : filled
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
           child: Text(
             '${i + 1}',
