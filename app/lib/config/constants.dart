@@ -89,7 +89,7 @@ class SettingsKeys {
 /// The iOS launch has one transparent, non-consumable purchase. There is no
 /// recurring subscription until the product supplies recurring value.
 class ProductIds {
-  static const lifetime = 'com.abacus.pro.lifetime';
+  static const lifetime = 'com.pocklume.pro.lifetime';
   static const proEntitlement = 'pro';
 }
 

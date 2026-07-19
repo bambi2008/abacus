@@ -1,4 +1,4 @@
-package com.abacus.abacus
+package com.pocklume.app
 
 import android.graphics.BitmapFactory
 import androidx.annotation.NonNull
@@ -23,7 +23,7 @@ class ReceiptOcrPlugin : FlutterPlugin, MethodCallHandler {
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
     override fun onAttachedToEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(binding.binaryMessenger, "com.abacus.app/receipt_ocr")
+        channel = MethodChannel(binding.binaryMessenger, "com.pocklume.app/receipt_ocr")
         channel.setMethodCallHandler(this)
     }
 

@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:abacus/config/constants.dart';
-import 'package:abacus/models/category.dart';
-import 'package:abacus/models/daily_log_completion.dart';
-import 'package:abacus/models/expense.dart';
-import 'package:abacus/providers/expense_provider.dart';
+import 'package:pocklume/config/constants.dart';
+import 'package:pocklume/models/category.dart';
+import 'package:pocklume/models/daily_log_completion.dart';
+import 'package:pocklume/models/expense.dart';
+import 'package:pocklume/providers/expense_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
@@ -13,7 +13,7 @@ void main() {
   late ExpenseProvider provider;
 
   setUp(() async {
-    directory = await Directory.systemTemp.createTemp('abacus_history_test_');
+    directory = await Directory.systemTemp.createTemp('pocklume_history_test_');
     Hive.init(directory.path);
     if (!Hive.isAdapterRegistered(HiveTypeIds.expense)) {
       Hive.registerAdapter(ExpenseAdapter());

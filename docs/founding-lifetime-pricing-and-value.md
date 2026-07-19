@@ -1,4 +1,4 @@
-# Abacus Founding Lifetime pricing and value decision
+# Pocklume Founding Lifetime pricing and value decision
 
 _Decision date: July 17, 2026 — iOS launch, United States_
 
@@ -9,14 +9,14 @@ _Decision date: July 17, 2026 — iOS launch, United States_
 - Keep the current core loop genuinely useful for free. Pro adds depth and
   resilience; it must not hold export, existing entries, or basic budgeting
   hostage.
-- Raise the price for new buyers to **US$29.99** only after Abacus ships at
+- Raise the price for new buyers to **US$29.99** only after Pocklume ships at
   least three P1 value items from the roadmap below and demonstrates 30-day
   retention. A later **US$39.99–49.99** price requires cross-device backup/
   sync plus mature automation. Existing lifetime buyers remain unlocked.
 
 ## Evidence and interpretation
 
-High-priced subscriptions are not direct price anchors for Abacus. YNAB is
+High-priced subscriptions are not direct price anchors for Pocklume. YNAB is
 US$109/year or US$14.99/month and includes account import, goals, debt tools,
 education, multi-device sync, and sharing. PocketGuard is US$74.99/year or
 US$12.99/month and includes bank connectivity, bills, subscriptions, debt,
@@ -24,12 +24,12 @@ goals, rules, and support. Monarch positions around a roughly US$99/year,
 connected household-finance product. Those prices pay for recurring data
 connectivity, infrastructure, support, and continuing financial workflows.
 
-Abacus currently competes more directly with privacy-first manual trackers.
+Pocklume currently competes more directly with privacy-first manual trackers.
 That market contains credible free products: MoneyNote advertises local,
 offline storage, no account, no bank connection, no subscription, budgets,
 reports, export, biometric lock, iCloud sync, and widgets. Expenses offers
 private manual tracking, receipt scan, CSV import/export, iCloud sync,
-collaboration, multi-platform support, widgets and Shortcuts. Abacus cannot
+collaboration, multi-platform support, widgets and Shortcuts. Pocklume cannot
 credibly charge US$89.99 lifetime for a narrower first release merely because
 the connected-budgeting category charges annual subscriptions.
 
@@ -41,7 +41,7 @@ aid, not sufficient recurring value by itself.
 The nearby manual-tracker market spans free products, a US$9.99/year product,
 and a simple competitor publicly offering US$14.99 lifetime; a more complete
 privacy-first daily-budget product has sold lifetime access around US$39.99.
-Abacus v1 sits between those products but its paid tier is still narrow.
+Pocklume v1 sits between those products but its paid tier is still narrow.
 
 US$19.99 is therefore an early-adopter price, not a claim that the mature
 product is worth only US$19.99. It is high enough to test willingness to pay
@@ -85,7 +85,7 @@ on stated willingness to pay.
 ## Pricing guardrails
 
 - Do not introduce a subscription merely to improve revenue optics. A
-  subscription becomes defensible only if Abacus operates costly, ongoing
+  subscription becomes defensible only if Pocklume operates costly, ongoing
   services users repeatedly receive: reliable family sync, hosted backup,
   bank connectivity, or continuously maintained premium intelligence.
 - Never subscription-lock CSV export or access to the user's existing data.

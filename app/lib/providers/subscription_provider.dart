@@ -158,7 +158,7 @@ class SubscriptionProvider extends ChangeNotifier {
       state = _isPro ? PurchaseFlowState.success : PurchaseFlowState.idle;
       errorMessage = _isPro
           ? null
-          : 'No previous Abacus Pro purchase was found for this Apple ID.';
+          : 'No previous Pocklume Pro purchase was found for this Apple ID.';
       if (_isPro) AnalyticsService.instance.capture('purchase_restored');
       notifyListeners();
       return _isPro;

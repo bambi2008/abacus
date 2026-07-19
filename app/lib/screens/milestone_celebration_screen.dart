@@ -21,24 +21,30 @@ class MilestoneCelebrationScreen extends StatefulWidget {
   const MilestoneCelebrationScreen({super.key, required this.badge});
 
   @override
-  State<MilestoneCelebrationScreen> createState() => _MilestoneCelebrationScreenState();
+  State<MilestoneCelebrationScreen> createState() =>
+      _MilestoneCelebrationScreenState();
 }
 
-class _MilestoneCelebrationScreenState extends State<MilestoneCelebrationScreen> {
+class _MilestoneCelebrationScreenState
+    extends State<MilestoneCelebrationScreen> {
   final _shareCardKey = GlobalKey();
   late final ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
     // Stronger haptic than the routine per-log tap — reserved for
     // milestones only, matching the "subtle for frequent, strong for
     // significant" calibration.
     HapticFeedback.heavyImpact();
     _confettiController.play();
-    AnalyticsService.instance
-        .capture('milestone_celebration_shown', properties: {'milestone_day': widget.badge.milestoneDay});
+    AnalyticsService.instance.capture(
+      'milestone_celebration_shown',
+      properties: {'milestone_day': widget.badge.milestoneDay},
+    );
   }
 
   @override
@@ -48,15 +54,20 @@ class _MilestoneCelebrationScreenState extends State<MilestoneCelebrationScreen>
   }
 
   Future<void> _share() async {
-    AnalyticsService.instance.capture('milestone_shared', properties: {'milestone_day': widget.badge.milestoneDay});
+    AnalyticsService.instance.capture(
+      'milestone_shared',
+      properties: {'milestone_day': widget.badge.milestoneDay},
+    );
     final ok = await ShareCaptureService.captureAndShare(
       key: _shareCardKey,
-      filename: 'abacus_milestone_${widget.badge.milestoneDay}',
-      text: 'I hit a ${widget.badge.milestoneDay}-day streak on Abacus 🔥',
+      filename: 'pocklume_milestone_${widget.badge.milestoneDay}',
+      text: 'I hit a ${widget.badge.milestoneDay}-day streak on Pocklume 🔥',
     );
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+        const SnackBar(
+          content: Text('Could not open the share sheet — try again.'),
+        ),
       );
     }
   }
@@ -68,7 +79,8 @@ class _MilestoneCelebrationScreenState extends State<MilestoneCelebrationScreen>
 
   @override
   Widget build(BuildContext context) {
-    final (emoji, headline, message) = MilestoneCatalog.data[widget.badge.milestoneDay]!;
+    final (emoji, headline, message) =
+        MilestoneCatalog.data[widget.badge.milestoneDay]!;
 
     return Scaffold(
       body: Stack(

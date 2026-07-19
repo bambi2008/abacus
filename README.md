@@ -1,4 +1,4 @@
-# Abacus
+# Pocklume
 
 A gamified, privacy-first (no bank-account linking) manual budgeting app.
 Third project this session, after HeelEase (plantar fasciitis recovery —
@@ -91,13 +91,13 @@ Full evaluation done (customer/market, technical architecture, promotion,
   See `customer-and-market.md` for full per-scenario tables and the
   YNAB-persona-gap research (price-sensitive under-$50K users,
   internationally-located users structurally underserved by YNAB's
-  bank-linking requirement — a segment Abacus's no-bank-sync architecture
+  bank-linking requirement — a segment Pocklume's no-bank-sync architecture
   already fits).
 
 ## Next
 
 Core loop scaffold is done. Before TestFlight, create the App Store
-non-consumable `com.abacus.pro.lifetime`, configure RevenueCat entitlement
+non-consumable `com.pocklume.pro.lifetime`, configure RevenueCat entitlement
 `pro`, deploy the Supabase schema, host the legal pages, and supply the release
 build keys. Reminder scheduling is a documented v1.1 item. West-first (China's trend is real
 but app payment-willingness there is weaker — see `customer-and-market.md`).

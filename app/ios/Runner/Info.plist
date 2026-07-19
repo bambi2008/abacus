@@ -4,8 +4,8 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<!-- Abacus uses only standard HTTPS (App Store, and — when configured —
-	     Supabase/PostHog), which is exempt from U.S. export regulations.
+	<!-- Pocklume uses only standard HTTPS (App Store/RevenueCat and, when
+	     configured, Supabase), which is exempt from U.S. export regulations.
 	     Declaring this here auto-answers the encryption question at every
 	     submission so it never blocks an upload. -->
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Abacus</string>
+	<string>Pocklume</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -21,7 +21,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>abacus</string>
+	<string>pocklume</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -33,13 +33,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Abacus uses your camera to scan receipts and pre-fill expense amounts. Photos are processed on your device and are never uploaded.</string>
+	<string>Pocklume uses your camera to scan receipts and pre-fill expense amounts. Photos are processed on your device and are never uploaded.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Abacus can scan a receipt photo from your library to pre-fill expense amounts. Photos are processed on your device and are never uploaded.</string>
+	<string>Pocklume can scan a receipt photo from your library to pre-fill expense amounts. Photos are processed on your device and are never uploaded.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Abacus uses your microphone so you can speak an expense instead of typing it. Audio is processed for recognition only and is never uploaded as a recording.</string>
+	<string>Pocklume uses your microphone so you can speak an expense instead of typing it. Audio is processed for recognition only and is never uploaded as a recording.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Abacus uses speech recognition to turn what you say into an amount and note, on-device where your iPhone supports it.</string>
+	<string>Pocklume uses speech recognition to turn what you say into an amount and note, on-device where your iPhone supports it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

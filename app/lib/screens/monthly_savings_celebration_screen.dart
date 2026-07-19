@@ -54,11 +54,11 @@ class _MonthlySavingsCelebrationScreenState
     AnalyticsService.instance.capture('monthly_savings_shared');
     final ok = await ShareCaptureService.captureAndShare(
       key: _shareCardKey,
-      filename: 'abacus_monthly_savings_${widget.result.id}',
+      filename: 'pocklume_monthly_savings_${widget.result.id}',
       text:
           'My tracked discretionary spending was '
           '\$${widget.result.totalSaved.toStringAsFixed(0)} below selected U.S. category benchmarks '
-          'this month, on Abacus.',
+          'this month, on Pocklume.',
     );
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

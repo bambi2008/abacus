@@ -105,7 +105,7 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
     if (!context.mounted) return;
     await _shareOrWarn(
       context,
-      'Join my Abacus savings-buddy streak! Use code $code in the app.',
+      'Join my Pocklume savings-buddy streak! Use code $code in the app.',
     );
   }
 
@@ -157,7 +157,7 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Turn on buddy sync?'),
         content: const Text(
-          'To connect two devices, Abacus will create a random anonymous ID and sync only the date and whether you checked in that day. Expense amounts, categories, and notes never leave your device. You can delete the synced data and anonymous ID in Settings.',
+          'To connect two devices, Pocklume will create a random anonymous ID and sync only the date and whether you checked in that day. Expense amounts, categories, and notes never leave your device. You can delete the synced data and anonymous ID in Settings.',
         ),
         actions: [
           TextButton(
@@ -218,7 +218,7 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
               icon: const Icon(Icons.share_outlined),
               onPressed: () => _shareOrWarn(
                 context,
-                'Join my Abacus savings-buddy streak! Use code ${buddy.code} in the app.',
+                'Join my Pocklume savings-buddy streak! Use code ${buddy.code} in the app.',
               ),
             ),
           ],
@@ -321,7 +321,7 @@ class _LocalBuddyCardState extends State<_LocalBuddyCard> {
     if (!mounted) return;
     await _shareOrWarn(
       context,
-      'Join my Abacus savings-buddy streak! Use code $code in the app.',
+      'Join my Pocklume savings-buddy streak! Use code $code in the app.',
     );
   }
 

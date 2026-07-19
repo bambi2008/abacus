@@ -19,7 +19,10 @@ class ReceiptScanResult {
 /// parser: receipts vary too much for anything stricter, and every field
 /// stays user-editable in the log sheet regardless.
 ReceiptScanResult parseReceiptText(List<String> lines) {
-  final cleaned = lines.map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
+  final cleaned = lines
+      .map((l) => l.trim())
+      .where((l) => l.isNotEmpty)
+      .toList();
   if (cleaned.isEmpty) return const ReceiptScanResult();
 
   final amount = _extractTotalAmount(cleaned);
@@ -56,7 +59,9 @@ double? _extractTotalAmount(List<String> lines) {
 String? _extractVendor(List<String> lines) {
   for (final line in lines) {
     if (line.length < 3) continue;
-    if (RegExp(r'^\$?\d').hasMatch(line)) continue; // skip lines that are just numbers/amounts
+    if (RegExp(r'^\$?\d').hasMatch(line)) {
+      continue; // skip lines that are just numbers/amounts
+    }
     return line;
   }
   return null;
@@ -72,7 +77,7 @@ DateTime? _extractDate(List<String> lines) {
     var year = int.parse(match.group(3)!);
     if (year < 100) year += 2000;
     // Receipts are printed locale-dependent (MM/DD vs DD/MM) — assume
-    // MM/DD/YYYY (US) since Abacus's initial market is US-first per
+    // MM/DD/YYYY (US) since Pocklume's initial market is US-first per
     // docs/customer-and-market.md, and fall back gracefully on invalid dates.
     try {
       return DateTime(year, a, b);

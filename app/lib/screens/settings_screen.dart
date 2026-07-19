@@ -30,7 +30,7 @@ class SettingsScreen extends StatelessWidget {
             leading: Icon(
               subscription.isPro ? Icons.workspace_premium : Icons.lock_outline,
             ),
-            title: Text(subscription.isPro ? 'Abacus Pro' : 'Free plan'),
+            title: Text(subscription.isPro ? 'Pocklume Pro' : 'Free plan'),
             subtitle: Text(
               subscription.isPro
                   ? 'Unlimited streak freezes and spending insights.'
@@ -53,7 +53,7 @@ class SettingsScreen extends StatelessWidget {
                     .restore();
                 if (!context.mounted) return;
                 final message = restored
-                    ? 'Abacus Pro was restored.'
+                    ? 'Pocklume Pro was restored.'
                     : context.read<SubscriptionProvider>().errorMessage ??
                           'No previous purchase was found.';
                 ScaffoldMessenger.of(

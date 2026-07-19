@@ -1,6 +1,6 @@
-# Abacus — App Store Launch Checklist
+# Pocklume — App Store Launch Checklist
 
-Status as of the iOS-first pre-submission audit (2026-07-17). Items are grouped by
+Status as of the Pocklume brand migration (2026-07-19). Items are grouped by
 who has to do them. Everything under "Code — done" is committed; the
 "Needs your input / account access" items can only be done by the account
 owner and are what actually gate submission now.
@@ -37,6 +37,10 @@ owner and are what actually gate submission now.
       -compliance question is auto-answered on every upload.
 - [x] Terms of Use written (`docs/legal/terms-of-use.md`); Privacy Policy
       dated and reconciled with the "v1 collects nothing" posture.
+- [x] Product identity migrated from the working name to **Pocklume**;
+      Apple App ID `com.pocklume.app` is registered and matches the project.
+- [x] RevenueCat dependency lock regenerated; `flutter analyze` is clean and
+      all 68 automated tests pass after the iOS purchase integration.
 
 ## Needs YOUR input (fill, then it's submittable)
 
@@ -63,11 +67,11 @@ owner and are what actually gate submission now.
 ## App Store Connect — account owner steps
 
 - [ ] Apple Developer Program membership active ($99/yr).
-- [ ] Create the app record in App Store Connect. Bundle ID
-      `com.abacus.abacus` is already set in the Xcode project.
+- [x] Register Apple App ID `com.pocklume.app`; it is already set in Xcode.
+- [ ] Create the Pocklume app record in App Store Connect using that Bundle ID.
 - [ ] Create one in-app purchase product matching
       `app/lib/config/constants.dart` → `ProductIds`:
-      - `com.abacus.pro.lifetime` — Non-Consumable, recommended launch price
+      - `com.pocklume.pro.lifetime` — Non-Consumable, recommended launch price
         **US$19.99**.
 - [ ] Create a RevenueCat project, connect App Store Connect, import the
       product above, create entitlement `pro`, attach the product, and pass
@@ -80,7 +84,7 @@ owner and are what actually gate submission now.
       Interaction (the buddy date/check-in signal), used for App Functionality,
       linked to the app's pseudonymous identity, and **not used for tracking**.
       Payment-card information is entered outside the app and is not collected
-      by Abacus. Note the in-app account-deletion path.
+      by Pocklume. Note the in-app account-deletion path.
 - [ ] Metadata: name, subtitle, promotional text, description, keywords,
       support URL, category (Finance), age rating, and screenshots (6.7"
       is mandatory; 6.5"/5.5" as needed). ASO copy drafts: see

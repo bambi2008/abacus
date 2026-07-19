@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:abacus/models/receipt_scan_result.dart';
+import 'package:pocklume/models/receipt_scan_result.dart';
 
 // The native recognition itself (Vision on iOS, ML Kit on Android) can't
 // run in CI — it's an on-device platform call. What IS pure and testable
@@ -14,18 +14,21 @@ void main() {
       expect(result.isEmpty, isTrue);
     });
 
-    test('picks the "Total" line amount over a larger subtotal or tax line', () {
-      final lines = [
-        'Joe\'s Coffee Shop',
-        '123 Main St',
-        'Latte              4.50',
-        'Subtotal          12.00',
-        'Tax                1.05',
-        'Total             13.05',
-      ];
-      final result = parseReceiptText(lines);
-      expect(result.amount, 13.05);
-    });
+    test(
+      'picks the "Total" line amount over a larger subtotal or tax line',
+      () {
+        final lines = [
+          'Joe\'s Coffee Shop',
+          '123 Main St',
+          'Latte              4.50',
+          'Subtotal          12.00',
+          'Tax                1.05',
+          'Total             13.05',
+        ];
+        final result = parseReceiptText(lines);
+        expect(result.amount, 13.05);
+      },
+    );
 
     test('falls back to the largest amount when no "Total" line exists', () {
       final lines = ['Corner Market', 'Bread    3.99', 'Milk     4.25'];

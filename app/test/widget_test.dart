@@ -3,25 +3,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
-import 'package:abacus/app.dart';
-import 'package:abacus/config/constants.dart';
-import 'package:abacus/models/badge_record.dart';
-import 'package:abacus/models/buddy_weekly_challenge.dart';
-import 'package:abacus/models/owl_state.dart';
-import 'package:abacus/models/complete_log_day_mark.dart';
-import 'package:abacus/models/monthly_savings_result.dart';
-import 'package:abacus/models/category.dart';
-import 'package:abacus/models/category_challenge_result.dart';
-import 'package:abacus/models/daily_log_completion.dart';
-import 'package:abacus/models/expense.dart';
-import 'package:abacus/models/no_spend_day_mark.dart';
-import 'package:abacus/providers/buddy_provider.dart';
-import 'package:abacus/providers/category_provider.dart';
-import 'package:abacus/providers/expense_provider.dart';
-import 'package:abacus/providers/gamification_provider.dart';
-import 'package:abacus/providers/onboarding_provider.dart';
-import 'package:abacus/providers/subscription_provider.dart';
-import 'package:abacus/services/buddy_backend.dart';
+import 'package:pocklume/app.dart';
+import 'package:pocklume/config/constants.dart';
+import 'package:pocklume/models/badge_record.dart';
+import 'package:pocklume/models/buddy_weekly_challenge.dart';
+import 'package:pocklume/models/owl_state.dart';
+import 'package:pocklume/models/complete_log_day_mark.dart';
+import 'package:pocklume/models/monthly_savings_result.dart';
+import 'package:pocklume/models/category.dart';
+import 'package:pocklume/models/category_challenge_result.dart';
+import 'package:pocklume/models/daily_log_completion.dart';
+import 'package:pocklume/models/expense.dart';
+import 'package:pocklume/models/no_spend_day_mark.dart';
+import 'package:pocklume/providers/buddy_provider.dart';
+import 'package:pocklume/providers/category_provider.dart';
+import 'package:pocklume/providers/expense_provider.dart';
+import 'package:pocklume/providers/gamification_provider.dart';
+import 'package:pocklume/providers/onboarding_provider.dart';
+import 'package:pocklume/providers/subscription_provider.dart';
+import 'package:pocklume/services/buddy_backend.dart';
 
 void main() {
   setUp(() async {
@@ -89,7 +89,7 @@ void main() {
           ),
           ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
         ],
-        child: const AbacusApp(),
+        child: const PocklumeApp(),
       ),
     );
     // Not pumpAndSettle: the streak card has an intentionally infinite

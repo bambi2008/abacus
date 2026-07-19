@@ -28,9 +28,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final success = await subscription.purchaseLifetime();
     if (!context.mounted) return;
     if (success) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Abacus Pro is unlocked.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pocklume Pro is unlocked.')),
+      );
       Navigator.of(context).pop();
     } else if (subscription.errorMessage != null) {
       ScaffoldMessenger.of(
@@ -46,7 +46,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Abacus Pro'),
+        title: const Text('Pocklume Pro'),
         actions: [
           TextButton(
             onPressed: () => context.read<SubscriptionProvider>().restore(),

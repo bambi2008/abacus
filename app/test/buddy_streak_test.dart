@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:abacus/services/buddy_backend.dart';
+import 'package:pocklume/services/buddy_backend.dart';
 
 // The joint-streak math is the one piece of the buddy backend that's pure
 // and therefore verifiable without a live Supabase project (real two-device
@@ -39,12 +39,15 @@ void main() {
       expect(computeJointStreak(self, partner, today), 1);
     });
 
-    test('yesterday-only overlap still counts (one-day grace, today not yet logged)', () {
-      final both = {d(2026, 7, 4), d(2026, 7, 3)};
-      // Neither logged today yet, but both logged 7/4 and 7/3 → streak of 2
-      // survives on the grace window rather than resetting to 0.
-      expect(computeJointStreak(both, both, today), 2);
-    });
+    test(
+      'yesterday-only overlap still counts (one-day grace, today not yet logged)',
+      () {
+        final both = {d(2026, 7, 4), d(2026, 7, 3)};
+        // Neither logged today yet, but both logged 7/4 and 7/3 → streak of 2
+        // survives on the grace window rather than resetting to 0.
+        expect(computeJointStreak(both, both, today), 2);
+      },
+    );
 
     test('overlap older than yesterday is already broken', () {
       final both = {d(2026, 7, 3), d(2026, 7, 2)};
@@ -54,7 +57,10 @@ void main() {
 
     test('normalizes timestamps to calendar days', () {
       final self = {DateTime(2026, 7, 5, 9, 30), DateTime(2026, 7, 4, 23, 59)};
-      final partner = {DateTime(2026, 7, 5, 20, 15), DateTime(2026, 7, 4, 0, 1)};
+      final partner = {
+        DateTime(2026, 7, 5, 20, 15),
+        DateTime(2026, 7, 4, 0, 1),
+      };
       expect(computeJointStreak(self, partner, DateTime(2026, 7, 5, 12)), 2);
     });
   });

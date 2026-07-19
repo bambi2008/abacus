@@ -112,7 +112,7 @@ void main() async {
         ChangeNotifierProvider.value(value: buddyProvider),
         ChangeNotifierProvider.value(value: subscriptionProvider),
       ],
-      child: const AbacusApp(),
+      child: const PocklumeApp(),
     ),
   );
 

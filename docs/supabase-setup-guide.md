@@ -14,7 +14,7 @@
 2. 用 GitHub 账号(`bambi2008`)或邮箱登录。
 3. 点绿色的 **New project**(新建项目)。
 4. 填几样:
-   - **Name**:随便填,比如 `abacus`。
+   - **Name**:随便填,比如 `pocklume`。
    - **Database Password**:点旁边 **Generate** 自动生成,复制存到自己的
      备忘录(以后基本用不到,但存着别丢)。
    - **Region**:选离用户近的,美国用户选 `West US` / `East US`。

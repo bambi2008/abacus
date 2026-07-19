@@ -1,6 +1,7 @@
-# Abacus iOS launch risk review
+# Pocklume iOS launch risk review
 
-_Reviewed July 17, 2026. Product/engineering review, not legal advice._
+_Reviewed July 17 and updated for the Pocklume migration on July 19, 2026.
+Product/engineering review, not legal advice._
 
 ## Launch decision
 
@@ -57,14 +58,12 @@ tested in this environment.
 
 ### P0 — before the first external TestFlight build
 
-1. Restore network access and run `flutter pub get`; commit the regenerated
-   `pubspec.lock`. The current lock still describes the removed IAP/PostHog
-   dependencies because dependency resolution could not reach pub.dev.
-2. Run `flutter analyze` and the full Flutter test suite, then build with the
-   release Flutter/Xcode versions. This review could validate plist/project
-   syntax but not compile the new RevenueCat integration.
-3. Configure App Store Connect non-consumable
-   `com.abacus.pro.lifetime`, RevenueCat entitlement `pro`, and the public iOS
+1. **Completed:** dependency resolution now uses RevenueCat, the lockfile is
+   current, `flutter analyze` reports no issues, and all 68 tests pass.
+2. Build and archive with the release Flutter/Xcode versions, then verify the
+   new RevenueCat integration on a physical iPhone through TestFlight.
+3. Configure the App Store Connect non-consumable
+   `com.pocklume.pro.lifetime`, RevenueCat entitlement `pro`, and the public iOS
    SDK key. Test purchase, cancel, Ask to Buy/pending, restore, reinstall,
    refund/revocation, offline launch, and a missing-product configuration.
 4. Deploy the reviewed Supabase schema in a fresh project and enable anonymous
@@ -78,9 +77,9 @@ tested in this environment.
 ### P0 — legal/product owner checks
 
 1. Have qualified counsel review Terms/Privacy for the actual storefronts.
-2. Run trademark/name clearance for “Abacus” and the icon before investing in
-   launch assets; the name is generic and crowded, so code review cannot clear
-   infringement risk.
+2. Run formal trademark/name clearance for the coined mark “Pocklume” and the
+   icon before investing further in launch assets; preliminary public searches
+   found no exact finance-app match, but code review is not legal clearance.
 3. Confirm rights/licenses for every icon, font, image, sound, and benchmark.
 4. Recheck the BLS benchmark year and category mapping before each release
    that displays the comparison. Avoid “save,” “average American,” or outcome

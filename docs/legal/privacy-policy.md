@@ -1,11 +1,11 @@
-# Abacus Privacy Policy
+# Pocklume Privacy Policy
 
 _Last updated: July 17, 2026_
 
 ## 1. Introduction
 
-Abacus ("we", "our", "the app") is a manual, privacy-first budgeting app,
-published by Mao Qin. Abacus never connects to your bank
+Pocklume ("we", "our", "the app") is a manual, privacy-first budgeting app,
+published by Mao Qin. Pocklume never connects to your bank
 — this policy explains exactly what information the app does handle, and
 how.
 
@@ -14,7 +14,7 @@ how.
 **Your financial data never leaves your device.** Every expense, category,
 budget limit, streak, badge, owl state, no-spend day, and monthly savings
 comparison you see in the app is stored locally on your device using
-on-device storage (Hive). Abacus does not operate a central account system
+on-device storage (Hive). Pocklume does not operate a central account system
 and cannot see this data — there is nothing for us to see it in.
 
 **Nothing leaves your device unless you opt into the savings-buddy feature,
@@ -35,7 +35,7 @@ The exceptions to the "stays on your device" rule are:
   delete all of this anytime in Settings → Delete my savings-buddy data.
 - **Receipt scanning**, only if you tap the camera icon to scan a receipt.
   Text recognition runs entirely on your iPhone using Apple's Vision
-  framework. The photo is processed locally, is never uploaded by Abacus,
+  framework. The photo is processed locally, is never uploaded by Pocklume,
   and is discarded once the scan completes.
 - **Voice input**, only if you tap the microphone icon to speak an expense.
   Speech recognition is requested on-device where your iPhone supports it.
@@ -47,7 +47,7 @@ The exceptions to the "stays on your device" rule are:
   recording ourselves.
 - **Purchase processing**: Apple handles your payment details directly.
   RevenueCat receives App Store transaction and app-user identifiers to
-  validate and restore your Pro entitlement. Neither Abacus nor RevenueCat
+  validate and restore your Pro entitlement. Neither Pocklume nor RevenueCat
   receives your card details from the app.
 
 ## 3. How Information Is Used
@@ -62,14 +62,14 @@ used only to make the savings-buddy feature work.
 ## 4. Data Storage
 
 Your financial data is stored locally on your device (Hive). If you delete
-the app, this data is deleted with it. Abacus does not back up your data to
+the app, this data is deleted with it. Pocklume does not back up your data to
 any server; if you want to keep a copy, use the in-app CSV export feature
 (Settings → Export as CSV) before uninstalling.
 
 The savings-buddy sync data described in Section 2 (anonymous id + date +
 daily-check-in boolean) is stored on Supabase, a third-party database
 provider, for as long as your buddy link stays active. This is the only
-category of app-content data Abacus stores off your device, and it is never
+category of app-content data Pocklume stores off your device, and it is never
 financial. App Store purchase validation records are separately handled by
 Apple and RevenueCat.
 
@@ -108,12 +108,12 @@ and accounting obligations.
 
 ## 8. Children's Privacy
 
-Abacus is not directed at children under 13 and we do not knowingly collect
+Pocklume is not directed at children under 13 and we do not knowingly collect
 information from children.
 
 ## 9. Financial Disclaimer
 
-Abacus is a budgeting and expense-tracking tool. It is not a financial
+Pocklume is a budgeting and expense-tracking tool. It is not a financial
 advisor, and nothing in the app — including the monthly savings comparison
 against national spending averages — constitutes financial, investment, or
 tax advice. Comparisons to published national averages (U.S. Bureau of

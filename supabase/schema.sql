@@ -1,9 +1,9 @@
--- Abacus savings-buddy sync — Supabase schema.
+-- Pocklume savings-buddy sync — Supabase schema.
 --
 -- Run this once in a fresh Supabase project (SQL Editor → paste → Run).
 -- Then also: Authentication → Providers → enable "Anonymous sign-ins".
 --
--- PRIVACY BOUNDARY (load-bearing for Abacus's positioning): the only data
+-- PRIVACY BOUNDARY (load-bearing for Pocklume's positioning): the only data
 -- that ever leaves a device is, per buddy per day, an anonymous auth user
 -- id + a calendar date + a single boolean "completed the daily check-in".
 -- No amounts, no categories, no notes — nothing financial. Row-Level
