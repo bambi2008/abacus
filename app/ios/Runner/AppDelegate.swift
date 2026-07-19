@@ -12,7 +12,12 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
-    let ocrRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "ReceiptOcrPlugin")
+    guard let ocrRegistrar = engineBridge.pluginRegistry.registrar(
+      forPlugin: "ReceiptOcrPlugin"
+    ) else {
+      assertionFailure("Unable to create the ReceiptOcrPlugin registrar")
+      return
+    }
     ReceiptOcrPlugin.register(with: ocrRegistrar)
   }
 }
