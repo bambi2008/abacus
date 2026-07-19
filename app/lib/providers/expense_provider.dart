@@ -224,8 +224,9 @@ class ExpenseProvider extends ChangeNotifier {
         (dayBeforeCompletion.loggedAnyExpense ||
             dayBeforeCompletion.completedNoSpend ||
             dayBeforeCompletion.usedStreakFreeze);
-    if (!hadActiveStreak || (!isPro && freeStreakFreezesAvailable <= 0))
+    if (!hadActiveStreak || (!isPro && freeStreakFreezesAvailable <= 0)) {
       return false;
+    }
     await _completionBox.put(
       _key(yesterday),
       DailyLogCompletion(
@@ -237,8 +238,9 @@ class ExpenseProvider extends ChangeNotifier {
     );
     // Pro is truly unlimited — the counter is a free-tier-only concept, so
     // it's never decremented (and never goes negative) for Pro users.
-    if (!isPro)
+    if (!isPro) {
       await setFreeStreakFreezesAvailable(freeStreakFreezesAvailable - 1);
+    }
     AnalyticsService.instance.capture('streak_freeze_used');
     notifyListeners();
     return true;

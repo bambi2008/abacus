@@ -101,8 +101,9 @@ class ProgressScreen extends StatelessWidget {
                             showTitles: true,
                             getTitlesWidget: (value, meta) {
                               final i = value.toInt();
-                              if (i < 0 || i >= categories.all.length)
+                              if (i < 0 || i >= categories.all.length) {
                                 return const SizedBox.shrink();
+                              }
                               return Padding(
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(

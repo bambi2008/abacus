@@ -140,7 +140,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             ),
           ],
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Founding Lifetime is a one-time, non-consumable App Store purchase. '
             'It unlocks the Pro features shown above for the life of the app and '
             'can be restored on another device using the same Apple ID.',

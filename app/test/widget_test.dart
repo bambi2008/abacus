@@ -61,7 +61,9 @@ void main() {
     await Hive.openBox<DailyLogCompletion>(HiveBoxes.dailyLogCompletions);
     await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
     await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
-    await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
+    await Hive.openBox<CategoryChallengeResult>(
+      HiveBoxes.categoryChallengeResults,
+    );
     await Hive.openBox<BuddyWeeklyChallenge>(HiveBoxes.buddyWeeklyChallenges);
     await Hive.openBox<OwlState>(HiveBoxes.owlState);
     await Hive.openBox<CompleteLogDayMark>(HiveBoxes.completeLogDays);
@@ -82,8 +84,10 @@ void main() {
           ChangeNotifierProvider(create: (_) => CategoryProvider()..load()),
           ChangeNotifierProvider(create: (_) => ExpenseProvider()..load()),
           ChangeNotifierProvider(create: (_) => GamificationProvider()..load()),
-          ChangeNotifierProvider(create: (_) => BuddyProvider(NoopBuddyBackend())),
-          ChangeNotifierProvider(create: (_) => SubscriptionProvider()..load()),
+          ChangeNotifierProvider(
+            create: (_) => BuddyProvider(NoopBuddyBackend()),
+          ),
+          ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
         ],
         child: const AbacusApp(),
       ),

@@ -213,8 +213,9 @@ class GamificationProvider extends ChangeNotifier {
     final prevMonthDate = DateTime(now.year, now.month - 1, 1);
     final wins = <CategoryChallengeResult>[];
     for (final category in categoryProvider.all) {
-      if (category.monthlyLimit <= 0)
+      if (category.monthlyLimit <= 0) {
         continue; // no challenge set — same convention as _totalMonthlyBudget
+      }
       final id =
           '${category.id}_${prevMonthDate.year}-${prevMonthDate.month.toString().padLeft(2, '0')}';
       if (_categoryResults.get(id) != null) continue; // already evaluated
@@ -388,8 +389,9 @@ class GamificationProvider extends ChangeNotifier {
     if (atRisk) return OwlMood.hungry;
 
     if (streak >= 100 || _recentCategoryWinCount >= 2) return OwlMood.thriving;
-    if (streak >= 30 || (streak >= 7 && _recentCategoryWinCount >= 1))
+    if (streak >= 30 || (streak >= 7 && _recentCategoryWinCount >= 1)) {
       return OwlMood.happy;
+    }
     return OwlMood.content;
   }
 

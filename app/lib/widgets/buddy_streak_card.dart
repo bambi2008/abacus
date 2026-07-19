@@ -136,7 +136,9 @@ class _SyncedBuddyCardState extends State<_SyncedBuddyCard> {
       ),
     );
     if (code == null || code.isEmpty) return;
+    if (!context.mounted) return;
     if (!buddy.hasOptedIn && !await _confirmBuddySync(context)) return;
+    if (!context.mounted) return;
     final ok = await buddy.joinLink(code);
     if (context.mounted && !ok) {
       ScaffoldMessenger.of(context).showSnackBar(

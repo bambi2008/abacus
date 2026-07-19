@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../config/constants.dart';
-import '../models/expense.dart';
 import '../providers/buddy_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
