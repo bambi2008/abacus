@@ -52,38 +52,57 @@ class EvolutionCelebrationCatalog {
 /// Milestone streak days that trigger a full-screen celebration, and the
 /// escalating emoji/copy for each — see MilestoneCelebrationScreen.
 class MilestoneCatalog {
-  static const Map<int, (String emoji, String headline, String message)> data = {
-    7: ('🔥', '7-Day Streak!', 'One week of consistent logging. Keep it up.'),
-    30: ('🏆', '30-Day Streak!', 'A full month. This is a habit now.'),
-    100: ('💎', '100-Day Streak!', 'Triple digits. Most people never get here.'),
-    365: ('👑', 'One Year Streak!', 'You logged an expense every day for a year.'),
-  };
+  static const Map<int, (String emoji, String headline, String message)> data =
+      {
+        7: (
+          '🔥',
+          '7-Day Streak!',
+          'One week of consistent logging. Keep it up.',
+        ),
+        30: ('🏆', '30-Day Streak!', 'A full month. This is a habit now.'),
+        100: (
+          '💎',
+          '100-Day Streak!',
+          'Triple digits. Most people never get here.',
+        ),
+        365: (
+          '👑',
+          'One Year Streak!',
+          'You logged an expense every day for a year.',
+        ),
+      };
 
   static List<int> get milestoneDays => data.keys.toList();
 }
 
 class SettingsKeys {
-  static const isPro = 'is_pro';
   static const hasOnboarded = 'has_onboarded';
-  static const analyticsEnabled = 'analytics_enabled';
   static const freeStreakFreezesAvailable = 'free_streak_freezes_available';
   static const reminderHour = 'reminder_hour';
   static const reminderMinute = 'reminder_minute';
   static const buddyStreakCode = 'buddy_streak_code';
   static const buddyStreakPartnerName = 'buddy_streak_partner_name';
+  static const buddySyncEnabled = 'buddy_sync_enabled';
   static const lastMonthBoundaryCheck = 'last_month_boundary_check';
 }
 
-/// No weekly billing — see docs/customer-and-market.md for why competitors'
-/// weekly mechanic is the single biggest driver of their worst reviews.
+/// The iOS launch has one transparent, non-consumable purchase. There is no
+/// recurring subscription until the product supplies recurring value.
 class ProductIds {
-  static const monthly = 'com.abacus.pro.monthly';
-  static const lifetime = 'com.abacus.pro.lifetime';
+  static const lifetime = 'com.pocklume.pro.lifetime';
+  static const proEntitlement = 'pro';
 }
 
-/// Public URLs for the legal pages the App Store requires to be reachable
-/// from inside the app (auto-renewable subscriptions must link to both an
-/// EULA/Terms and a Privacy Policy). The markdown sources live in
+/// Public RevenueCat SDK key. This is intentionally supplied at build time;
+/// RevenueCat public SDK keys are safe to embed, while secret keys must never
+/// be included in the app.
+class PurchaseConfig {
+  static const revenueCatAppleApiKey = String.fromEnvironment(
+    'REVENUECAT_APPLE_API_KEY',
+  );
+}
+
+/// Public URLs for the legal pages linked from inside the app. The markdown sources live in
 /// docs/legal/; these must point at a *hosted* rendering of them.
 ///
 /// TODO(launch): before submitting, host docs/legal/*.md somewhere public
@@ -91,15 +110,10 @@ class ProductIds {
 /// these to the real URLs. The pattern below assumes GitHub Pages under the
 /// existing account — enable Pages and publish the two pages to make it real.
 class LegalLinks {
-  static const privacyPolicy = 'https://bambi2008.github.io/abacus/privacy-policy.html';
-  static const termsOfUse = 'https://bambi2008.github.io/abacus/terms-of-use.html';
-}
-
-/// Empty key disables the feature entirely (safe default) — see
-/// AnalyticsService.
-class RemoteConfig {
-  static const posthogApiKey = String.fromEnvironment('POSTHOG_API_KEY');
-  static const posthogHost = 'https://us.i.posthog.com';
+  static const privacyPolicy =
+      'https://bambi2008.github.io/abacus/privacy-policy.html';
+  static const termsOfUse =
+      'https://bambi2008.github.io/abacus/terms-of-use.html';
 }
 
 /// Savings-buddy sync backend. Empty values (the default) disable networking

@@ -21,20 +21,27 @@ class OwlEvolutionCelebrationScreen extends StatefulWidget {
   const OwlEvolutionCelebrationScreen({super.key, required this.newStage});
 
   @override
-  State<OwlEvolutionCelebrationScreen> createState() => _OwlEvolutionCelebrationScreenState();
+  State<OwlEvolutionCelebrationScreen> createState() =>
+      _OwlEvolutionCelebrationScreenState();
 }
 
-class _OwlEvolutionCelebrationScreenState extends State<OwlEvolutionCelebrationScreen> {
+class _OwlEvolutionCelebrationScreenState
+    extends State<OwlEvolutionCelebrationScreen> {
   final _shareCardKey = GlobalKey();
   late final ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
     HapticFeedback.heavyImpact();
     _confettiController.play();
-    AnalyticsService.instance.capture('owl_evolution_celebration_shown', properties: {'new_stage': widget.newStage});
+    AnalyticsService.instance.capture(
+      'owl_evolution_celebration_shown',
+      properties: {'new_stage': widget.newStage},
+    );
   }
 
   @override
@@ -44,15 +51,21 @@ class _OwlEvolutionCelebrationScreenState extends State<OwlEvolutionCelebrationS
   }
 
   Future<void> _share() async {
-    AnalyticsService.instance.capture('owl_evolution_shared', properties: {'new_stage': widget.newStage});
+    AnalyticsService.instance.capture(
+      'owl_evolution_shared',
+      properties: {'new_stage': widget.newStage},
+    );
     final ok = await ShareCaptureService.captureAndShare(
       key: _shareCardKey,
-      filename: 'abacus_owl_evolution_${widget.newStage}',
-      text: 'My Abacus owl evolved into a ${EvolutionStages.names[widget.newStage]}! 🦉',
+      filename: 'pocklume_owl_evolution_${widget.newStage}',
+      text:
+          'My Pocklume owl evolved into a ${EvolutionStages.names[widget.newStage]}! 🦉',
     );
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+        const SnackBar(
+          content: Text('Could not open the share sheet — try again.'),
+        ),
       );
     }
   }
@@ -66,7 +79,8 @@ class _OwlEvolutionCelebrationScreenState extends State<OwlEvolutionCelebrationS
   Widget build(BuildContext context) {
     final stageName = EvolutionStages.names[widget.newStage];
     final headline = 'Your owl evolved into a $stageName!';
-    final message = EvolutionCelebrationCatalog.messages[widget.newStage] ?? 'Keep it up.';
+    final message =
+        EvolutionCelebrationCatalog.messages[widget.newStage] ?? 'Keep it up.';
 
     return Scaffold(
       body: Stack(

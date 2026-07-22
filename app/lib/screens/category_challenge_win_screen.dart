@@ -18,24 +18,34 @@ class CategoryChallengeWinScreen extends StatefulWidget {
   final CategoryChallengeResult result;
   final ExpenseCategory category;
 
-  const CategoryChallengeWinScreen({super.key, required this.result, required this.category});
+  const CategoryChallengeWinScreen({
+    super.key,
+    required this.result,
+    required this.category,
+  });
 
   @override
-  State<CategoryChallengeWinScreen> createState() => _CategoryChallengeWinScreenState();
+  State<CategoryChallengeWinScreen> createState() =>
+      _CategoryChallengeWinScreenState();
 }
 
-class _CategoryChallengeWinScreenState extends State<CategoryChallengeWinScreen> {
+class _CategoryChallengeWinScreenState
+    extends State<CategoryChallengeWinScreen> {
   final _shareCardKey = GlobalKey();
   late final ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
     HapticFeedback.heavyImpact();
     _confettiController.play();
-    AnalyticsService.instance
-        .capture('category_challenge_celebration_shown', properties: {'category_id': widget.category.id});
+    AnalyticsService.instance.capture(
+      'category_challenge_celebration_shown',
+      properties: {'category_id': widget.category.id},
+    );
   }
 
   @override
@@ -45,21 +55,28 @@ class _CategoryChallengeWinScreenState extends State<CategoryChallengeWinScreen>
   }
 
   Future<void> _share() async {
-    AnalyticsService.instance.capture('category_challenge_shared', properties: {'category_id': widget.category.id});
+    AnalyticsService.instance.capture(
+      'category_challenge_shared',
+      properties: {'category_id': widget.category.id},
+    );
     final ok = await ShareCaptureService.captureAndShare(
       key: _shareCardKey,
-      filename: 'abacus_boss_${widget.result.id}',
-      text: 'I stayed under budget in ${widget.category.name} on Abacus 🛡️',
+      filename: 'pocklume_boss_${widget.result.id}',
+      text: 'I stayed under budget in ${widget.category.name} on Pocklume 🛡️',
     );
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open the share sheet — try again.')),
+        const SnackBar(
+          content: Text('Could not open the share sheet — try again.'),
+        ),
       );
     }
   }
 
   void _continue(BuildContext context) {
-    context.read<GamificationProvider>().markCategoryCelebrationShown(widget.result.id);
+    context.read<GamificationProvider>().markCategoryCelebrationShown(
+      widget.result.id,
+    );
     Navigator.of(context).pop();
   }
 
@@ -67,7 +84,8 @@ class _CategoryChallengeWinScreenState extends State<CategoryChallengeWinScreen>
   Widget build(BuildContext context) {
     final monthName = _monthName(widget.result.month);
     final headline = '🛡️ Boss Defeated: ${widget.category.name}!';
-    final message = 'You stayed under budget in ${widget.category.name} for $monthName.';
+    final message =
+        'You stayed under budget in ${widget.category.name} for $monthName.';
 
     return Scaffold(
       body: Stack(
@@ -94,8 +112,18 @@ class _CategoryChallengeWinScreenState extends State<CategoryChallengeWinScreen>
 
   String _monthName(int month) {
     const names = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return names[month - 1];
   }

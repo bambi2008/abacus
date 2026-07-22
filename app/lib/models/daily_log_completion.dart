@@ -7,12 +7,14 @@ class DailyLogCompletion {
   final bool loggedAnyExpense;
   final bool withinBudget;
   final bool usedStreakFreeze;
+  final bool completedNoSpend;
 
   DailyLogCompletion({
     required this.date,
     required this.loggedAnyExpense,
     required this.withinBudget,
     this.usedStreakFreeze = false,
+    this.completedNoSpend = false,
   });
 }
 
@@ -32,12 +34,13 @@ class DailyLogCompletionAdapter extends TypeAdapter<DailyLogCompletion> {
       loggedAnyExpense: fields[1] as bool,
       withinBudget: fields[2] as bool,
       usedStreakFreeze: fields[3] as bool? ?? false,
+      completedNoSpend: fields[4] as bool? ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, DailyLogCompletion obj) {
-    writer.writeByte(4);
+    writer.writeByte(5);
     writer.writeByte(0);
     writer.write(obj.date);
     writer.writeByte(1);
@@ -46,5 +49,7 @@ class DailyLogCompletionAdapter extends TypeAdapter<DailyLogCompletion> {
     writer.write(obj.withinBudget);
     writer.writeByte(3);
     writer.write(obj.usedStreakFreeze);
+    writer.writeByte(4);
+    writer.write(obj.completedNoSpend);
   }
 }

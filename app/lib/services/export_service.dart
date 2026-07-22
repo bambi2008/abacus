@@ -18,7 +18,10 @@ class ExportService {
   /// unguarded await hangs forever. This was previously also called
   /// fire-and-forget from Settings with no error path at all; the return
   /// value lets the caller show a snackbar on failure instead.
-  static Future<bool> exportExpenses(List<Expense> expenses, List<ExpenseCategory> categories) async {
+  static Future<bool> exportExpenses(
+    List<Expense> expenses,
+    List<ExpenseCategory> categories,
+  ) async {
     final categoryNames = {for (final c in categories) c.id: c.name};
     final rows = [
       ['Date', 'Category', 'Amount', 'Note'],
@@ -32,10 +35,12 @@ class ExportService {
     ];
     final csv = const ListToCsvConverter().convert(rows);
     final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/abacus_export.csv');
+    final file = File('${dir.path}/pocklume_export.csv');
     await file.writeAsString(csv);
     try {
-      await Share.shareXFiles([XFile(file.path)], text: 'Abacus expense export').timeout(const Duration(seconds: 15));
+      await Share.shareXFiles([
+        XFile(file.path),
+      ], text: 'Pocklume expense export').timeout(const Duration(seconds: 15));
       return true;
     } catch (e) {
       debugPrint('ExportService: share failed or timed out: $e');

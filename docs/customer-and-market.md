@@ -72,11 +72,11 @@ YNAB, each for a structural reason (not just "YNAB could do this better"):
    group. This is a pricing-model gap, not a feature gap.
 2. **Internationally-located users** — YNAB has limited bank-linking
    support outside the US/UK/EU. This is the sharpest, most structurally-
-   matched gap for Abacus specifically: YNAB's limitation exists *because*
+   matched gap for Pocklume specifically: YNAB's limitation exists *because*
    it's a bank-linking product, and international bank API coverage is
-   incomplete. Abacus's core architecture never needed bank-linking in the
+   incomplete. Pocklume's core architecture never needed bank-linking in the
    first place ("no bank credentials, ever" — chosen originally as a
-   privacy/trust wedge) — so this isn't a market Abacus has to build new
+   privacy/trust wedge) — so this isn't a market Pocklume has to build new
    capability to serve, it's a market its existing architecture already
    fits. Worth treating as a real secondary segment, not just an
    afterthought.
@@ -88,10 +88,10 @@ YNAB, each for a structural reason (not just "YNAB could do this better"):
 
 **One segment is explicitly NOT a fit, and worth ruling out on purpose**:
 "set-and-forgetters" who want automation, not manual entry — YNAB doesn't
-serve them well, but neither does Abacus (also manual-entry-first). That
+serve them well, but neither does Pocklume (also manual-entry-first). That
 segment's actual home is Monarch/Copilot (bank-linked, automated). Chasing
 them would mean abandoning the "no bank credentials" architecture that is
-Abacus's core differentiation — not a segment to target, a segment to
+Pocklume's core differentiation — not a segment to target, a segment to
 consciously not chase.
 
 ## Market sizing — real, proven, not speculative
@@ -164,7 +164,7 @@ resolve it:
   Reserve's 2026 Diary of Consumer Payment Choice found consumers average
   16 credit + 15 debit + 6 cash payments per month — **~37/month, ~1.2
   transactions/day**. Card + digital payments are ~2/3 of all transactions;
-  cash is ~1 in 7 and concentrated in demographics *outside* Abacus's
+  cash is ~1 in 7 and concentrated in demographics *outside* Pocklume's
   target (households under $25K/year, ages 55+, rural) — meaning the
   actual target user (younger, urban, digital-native) likely transacts
   even more card-heavy than the average. The core mechanic only requires
@@ -236,7 +236,7 @@ still the largest single line. The **only number in the entire model with
 zero real-world anchor is the referral participation rate**
 (0.5-1.2% of active users/month) — bounty size, add-on ARPU, and B2B seat
 pricing are now all checked against disclosed real terms, even though the
-specific rate at which Abacus's own users behave in each case is still
+specific rate at which Pocklume's own users behave in each case is still
 inferred, not measured.
 
 B2B's contribution is modest and plausible for a bootstrapped, no-sales-team
@@ -377,7 +377,7 @@ across research firms) and an assumed ~$104/year category ARPU (anchored to
 YNAB's $109/yr and Monarch's $99/yr), the implied total paying-customer
 base for the category is ~2.5M people.
 
-Abacus's Base Case active paying-customer base at month 36 (active
+Pocklume's Base Case active paying-customer base at month 36 (active
 subscribers + cumulative lifetime buyers) is **~1,034 people** — an implied
 market share of **~0.04%**. A more concrete, single-anchor comparison: that
 is **~0.23% of YNAB's own implied customer count** (YNAB's $49M ARR ÷ $109

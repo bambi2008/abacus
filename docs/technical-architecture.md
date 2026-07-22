@@ -15,14 +15,14 @@ if the user just types the three fields.
 
 The single biggest lever on the "will people actually do fully-manual entry"
 question isn't automating it away — that's Copilot/Monarch's territory and
-conceding it would erase Abacus's whole positioning — it's making each
+conceding it would erase Pocklume's whole positioning — it's making each
 manual entry faster. `ReceiptOcrService` (`lib/services/receipt_ocr_service.dart`)
 lets the user snap a photo of a receipt from the log-expense sheet; on iOS,
 Apple's **Vision framework** (`VNRecognizeTextRequest`,
 `ios/Runner/ReceiptOcrPlugin.swift`) recognizes the text; on Android,
 **Google ML Kit's** on-device text recognizer
 (`android/.../ReceiptOcrPlugin.kt`) does the same job behind an identical
-method-channel contract (`com.abacus.app/receipt_ocr`, `recognizeText` →
+method-channel contract (`com.pocklume.app/receipt_ocr`, `recognizeText` →
 `{"lines": [...]}`) so the Dart side needs zero platform branching beyond
 `ReceiptOcrService.isAvailable`. Both run entirely on-device — the photo is
 never uploaded anywhere, matching the "no cloud, no bank credentials"
@@ -49,15 +49,14 @@ Same stack, same reasons, third time proven:
   only architecture isn't just a privacy nice-to-have, it's the literal
   product positioning ("no bank credentials, ever") in a category with a
   recent, well-known data-monetization scandal (Mint) to point at.
-- **Analytics**: PostHog, same no-op-until-configured pattern, opt-out
-  toggle, anonymous events only (log "expense_logged", never the amount or
-  category).
-- **Payments**: `in_app_purchase`, no weekly billing (same discipline as
-  HeelEase/Regimen).
+- **Analytics**: no analytics SDK in iOS v1. The event façade is deliberately
+  a no-op so instrumentation cannot silently expand the privacy surface.
+- **Payments**: RevenueCat-backed App Store validation and one non-consumable
+  Founding Lifetime product; the verified `pro` entitlement is authoritative.
 
 ## Savings-buddy backend (the one networked feature)
 
-Everything financial in Abacus is local-first Hive, by design — but the
+Everything financial in Pocklume is local-first Hive, by design — but the
 "省钱搭子" (savings buddy) mechanic is inherently two-device and can't work
 without *some* server to broker it. Rather than ship it as a permanent local
 stub, it's now backed by **Supabase** (hosted Postgres + anonymous auth +
@@ -253,7 +252,7 @@ independently-unit-tested function: for each benchmark group, if the user
 tracks at least one of its category names, `max(0, benchmark - actual
 spend)` counts toward the total; a category that's simply *absent* from
 the user's list (deleted, never added) is excluded, not assumed to be a
-free win — Abacus has no way to know whether the user actually avoided
+free win — Pocklume has no way to know whether the user actually avoided
 that spending or just isn't tracking it. `GamificationProvider` evaluates
 this at the same month-boundary check that already runs the category boss
 battles, persists a `MonthlySavingsResult` keyed by `"yyyy-MM"` (idempotent,
@@ -316,7 +315,7 @@ credentials, ever" positioning, and Cleo's cash-advance model raises the
 same predatory-lending-adjacent concern flagged when DraftKings/FanDuel
 were ruled out earlier this session. Also explicitly rejected: **advertising**
 (Duolingo's own ~7%-of-revenue ad line) — this would directly contradict the
-"we don't monetize your attention or data" wedge that differentiates Abacus
+"we don't monetize your attention or data" wedge that differentiates Pocklume
 from Mint, the exact competitor whose collapse is cited as market
 validation.
 
@@ -331,17 +330,17 @@ Four lines survive, each checked against a real precedent:
    — the model's $30/referral assumption is conservative relative to this
    range. The one number still unvalidated is the participation rate
    (0.5-1.2% of active users/month) — no external benchmark exists for this,
-   since it depends on Abacus's own in-app prompt design, not affiliate-
+   since it depends on Pocklume's own in-app prompt design, not affiliate-
    network terms.
 2. **Add-on ARPU (virtual goods + paid course)**: cosmetic streak-freeze
    packs / theme packs (Duolingo's own IAP line, ~5% of its revenue) plus a
    one-time paid course (e.g. "Zero-Based Budgeting Mastery") — feasible to
    build cheaply now that AI can draft structured lesson content for a human
    to review, unlike a Duolingo English Test-style accredited certification
-   (which needs institutional recognition Abacus doesn't have and shouldn't
+   (which needs institutional recognition Pocklume doesn't have and shouldn't
    claim). Sold via IAP, so store commission applies. Modeled as a small
    blended ARPU on the active-user base, scaled down from Duolingo's real
-   mix since Abacus has no large free/ad-supported base to cross-sell
+   mix since Pocklume has no large free/ad-supported base to cross-sell
    against.
 3. **B2B employer-benefit channel** — real, proven precedent in this exact
    category (SmartDollar/Ramsey Solutions, Brightside — the latter reports
@@ -355,12 +354,12 @@ Four lines survive, each checked against a real precedent:
    anchored to real basic digital wellness-platform self-serve pricing
    ($3-5/employee/month found this session; full-service platforms with
    human coaching run far higher, $58+/employee/month, but that tier needs
-   a service org Abacus doesn't have). Modeled to go live later than the
+   a service org Pocklume doesn't have). Modeled to go live later than the
    C2C launch (month 10-15 depending on scenario) since a self-serve
    employer-benefit funnel needs a live product with organic traction to be
    credible in the first place.
-4. **Program purchase** (lifetime + subscription) — unchanged, the
-   best-anchored line (YNAB $109/yr, Monarch $99/yr).
+4. **Program purchase** — Founding Lifetime only in iOS v1. Launch price and
+   later value gates are documented in `founding-lifetime-pricing-and-value.md`.
 
 ## Operating costs — customer support, infra, and net profit (v3)
 
@@ -380,7 +379,7 @@ can handle per month, priced at a real contractor rate.
   (2.0%/1.5%/1.0% of active users per month across scenarios) — no
   published figure exists for "manual-entry budgeting app support ticket
   rate" specifically. Reasoned down from general consumer-app norms because
-  Abacus's architecture structurally removes the #1 driver of budgeting-app
+  Pocklume's architecture structurally removes the #1 driver of budgeting-app
   support tickets industry-wide: bank-sync failures. There is nothing to
   sync, so there is nothing to break in that specific, high-volume way.
 
@@ -429,7 +428,7 @@ $1-5, with cost-per-paying-user $20-80 (freemium apps convert 2-5% of
 installs, meaning true CPPU is 20-50x CPI). Fintech specifically runs much
 higher: non-premium fintech/business apps at $3.50-8 CPI, premium banking/
 investing keywords at $10-25 CPI (the latter reflects intense competition
-for high-LTV users and wasn't used here — Abacus isn't competing for those
+for high-LTV users and wasn't used here — Pocklume isn't competing for those
 keywords). Modeled CPI: $6.00 (Conservative) → $5.00 (Base) → $3.50
 (Optimistic), from the non-premium fintech/business range.
 
@@ -506,6 +505,6 @@ Only one number in the whole model has no real-world anchor at all: the
 **referral participation rate** (line 1 above). Everything else — referral
 bounty size, add-on ARPU scale, B2B seat pricing, program pricing — is now
 checked against a real disclosed number, even if the specific rate at which
-Abacus's own users will behave is still a guess. That's a meaningfully
+Pocklume's own users will behave is still a guess. That's a meaningfully
 narrower risk surface than the original two-engine model, where the entire
 referral line (bounty *and* rate) was ungrounded.

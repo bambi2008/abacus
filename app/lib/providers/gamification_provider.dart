@@ -32,14 +32,21 @@ class GamificationProvider extends ChangeNotifier {
   void load() {
     _badges = Hive.box<BadgeRecord>(HiveBoxes.badges);
     _noSpendDays = Hive.box<NoSpendDayMark>(HiveBoxes.noSpendDays);
-    _categoryResults = Hive.box<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
+    _categoryResults = Hive.box<CategoryChallengeResult>(
+      HiveBoxes.categoryChallengeResults,
+    );
     _owlStateBox = Hive.box<OwlState>(HiveBoxes.owlState);
     _completeLogDays = Hive.box<CompleteLogDayMark>(HiveBoxes.completeLogDays);
-    _monthlySavingsResults = Hive.box<MonthlySavingsResult>(HiveBoxes.monthlySavingsResults);
+    _monthlySavingsResults = Hive.box<MonthlySavingsResult>(
+      HiveBoxes.monthlySavingsResults,
+    );
     _settings = Hive.box(HiveBoxes.settings);
   }
 
-  void bind(ExpenseProvider expenseProvider, CategoryProvider categoryProvider) {
+  void bind(
+    ExpenseProvider expenseProvider,
+    CategoryProvider categoryProvider,
+  ) {
     _expenseProvider = expenseProvider;
     _categoryProvider = categoryProvider;
   }
@@ -51,7 +58,8 @@ class GamificationProvider extends ChangeNotifier {
 
   List<BadgeRecord> get earnedBadges => _badges.values.toList();
 
-  bool isEarned(int milestoneDay) => _badges.get('streak_$milestoneDay') != null;
+  bool isEarned(int milestoneDay) =>
+      _badges.get('streak_$milestoneDay') != null;
 
   /// A badge that's been earned but whose full-screen celebration hasn't
   /// been shown yet — resilient to the app being killed mid-flow, since
@@ -70,9 +78,16 @@ class GamificationProvider extends ChangeNotifier {
     if (!MilestoneCatalog.milestoneDays.contains(currentStreak)) return null;
     final id = 'streak_$currentStreak';
     if (_badges.get(id) != null) return null;
-    final badge = BadgeRecord(id: id, milestoneDay: currentStreak, earnedAt: DateTime.now());
+    final badge = BadgeRecord(
+      id: id,
+      milestoneDay: currentStreak,
+      earnedAt: DateTime.now(),
+    );
     await _badges.put(id, badge);
-    AnalyticsService.instance.capture('milestone_reached', properties: {'milestone_day': currentStreak});
+    AnalyticsService.instance.capture(
+      'milestone_reached',
+      properties: {'milestone_day': currentStreak},
+    );
     notifyListeners();
     return badge;
   }
@@ -90,20 +105,29 @@ class GamificationProvider extends ChangeNotifier {
 
   int get noSpendDayCountThisMonth {
     final now = DateTime.now();
-    return _noSpendDays.values.where((m) => m.date.year == now.year && m.date.month == now.month).length;
+    return _noSpendDays.values
+        .where((m) => m.date.year == now.year && m.date.month == now.month)
+        .length;
   }
 
   /// Idempotent — marking an already-marked day is a no-op. Any date
   /// (including today) can be marked: intent-based framing ("I'm
   /// committing to no spend today") is a valid win condition too, matching
   /// real no-spend-challenge apps' "mark as a deliberate win" language.
-  Future<void> markNoSpendDay(DateTime date) async {
+  Future<bool> markNoSpendDay(DateTime date) async {
     final key = _dateKey(date);
-    if (_noSpendDays.get(key) != null) return;
-    await _noSpendDays.put(key, NoSpendDayMark(date: _dateOnly(date), markedAt: DateTime.now()));
+    if (_noSpendDays.get(key) != null) return true;
+    final expenses = _expenseProvider;
+    if (expenses == null || expenses.hasExpensesOn(date)) return false;
+    await _noSpendDays.put(
+      key,
+      NoSpendDayMark(date: _dateOnly(date), markedAt: DateTime.now()),
+    );
+    await expenses.recordNoSpendCompletion(date);
     AnalyticsService.instance.capture('no_spend_day_logged');
     await refreshOwlState();
     notifyListeners();
+    return true;
   }
 
   // --- Complete-log days (Layer 2 bonus — does NOT gate the streak) ---
@@ -118,13 +142,17 @@ class GamificationProvider extends ChangeNotifier {
   /// no bank sync to verify true completeness against. It only feeds
   /// [careScore] as an optional depth layer for more engaged users; the
   /// streak itself is untouched.
-  bool isCompleteLogDay(DateTime date) => _completeLogDays.get(_dateKey(date)) != null;
+  bool isCompleteLogDay(DateTime date) =>
+      _completeLogDays.get(_dateKey(date)) != null;
 
   /// Idempotent — marking an already-marked day is a no-op.
   Future<void> markCompleteLogDay(DateTime date) async {
     final key = _dateKey(date);
     if (_completeLogDays.get(key) != null) return;
-    await _completeLogDays.put(key, CompleteLogDayMark(date: _dateOnly(date), markedAt: DateTime.now()));
+    await _completeLogDays.put(
+      key,
+      CompleteLogDayMark(date: _dateOnly(date), markedAt: DateTime.now()),
+    );
     AnalyticsService.instance.capture('complete_log_day_marked');
     await refreshOwlState();
     notifyListeners();
@@ -132,7 +160,8 @@ class GamificationProvider extends ChangeNotifier {
 
   // --- Category "boss battle" (Layer 2) ---
 
-  List<CategoryChallengeResult> get categoryChallengeResults => _categoryResults.values.toList();
+  List<CategoryChallengeResult> get categoryChallengeResults =>
+      _categoryResults.values.toList();
 
   CategoryChallengeResult? get pendingCategoryCelebration {
     for (final result in _categoryResults.values) {
@@ -144,7 +173,10 @@ class GamificationProvider extends ChangeNotifier {
   Future<void> markCategoryCelebrationShown(String resultId) async {
     final result = _categoryResults.get(resultId);
     if (result == null) return;
-    await _categoryResults.put(resultId, result.copyWith(celebrationShown: true));
+    await _categoryResults.put(
+      resultId,
+      result.copyWith(celebrationShown: true),
+    );
     notifyListeners();
   }
 
@@ -162,10 +194,14 @@ class GamificationProvider extends ChangeNotifier {
     if (expenseProvider == null || categoryProvider == null) return [];
 
     final now = DateTime.now();
-    final lastCheckStr = _settings.get(SettingsKeys.lastMonthBoundaryCheck) as String?;
+    final lastCheckStr =
+        _settings.get(SettingsKeys.lastMonthBoundaryCheck) as String?;
 
     if (lastCheckStr == null) {
-      await _settings.put(SettingsKeys.lastMonthBoundaryCheck, now.toIso8601String());
+      await _settings.put(
+        SettingsKeys.lastMonthBoundaryCheck,
+        now.toIso8601String(),
+      );
       return [];
     }
 
@@ -177,10 +213,16 @@ class GamificationProvider extends ChangeNotifier {
     final prevMonthDate = DateTime(now.year, now.month - 1, 1);
     final wins = <CategoryChallengeResult>[];
     for (final category in categoryProvider.all) {
-      if (category.monthlyLimit <= 0) continue; // no challenge set — same convention as _totalMonthlyBudget
-      final id = '${category.id}_${prevMonthDate.year}-${prevMonthDate.month.toString().padLeft(2, '0')}';
+      if (category.monthlyLimit <= 0) {
+        continue; // no challenge set — same convention as _totalMonthlyBudget
+      }
+      final id =
+          '${category.id}_${prevMonthDate.year}-${prevMonthDate.month.toString().padLeft(2, '0')}';
       if (_categoryResults.get(id) != null) continue; // already evaluated
-      final spend = expenseProvider.spendForCategoryInMonth(category.id, prevMonthDate);
+      final spend = expenseProvider.spendForCategoryInMonth(
+        category.id,
+        prevMonthDate,
+      );
       final won = spend <= category.monthlyLimit;
       final result = CategoryChallengeResult(
         id: id,
@@ -194,12 +236,23 @@ class GamificationProvider extends ChangeNotifier {
       );
       await _categoryResults.put(id, result);
       if (won) {
-        AnalyticsService.instance.capture('category_challenge_won', properties: {'category_id': category.id});
+        AnalyticsService.instance.capture(
+          'category_challenge_won',
+          properties: {'category_id': category.id},
+        );
         wins.add(result);
       }
     }
-    await _evaluateMonthlySavings(categoryProvider, expenseProvider, prevMonthDate, now);
-    await _settings.put(SettingsKeys.lastMonthBoundaryCheck, now.toIso8601String());
+    await _evaluateMonthlySavings(
+      categoryProvider,
+      expenseProvider,
+      prevMonthDate,
+      now,
+    );
+    await _settings.put(
+      SettingsKeys.lastMonthBoundaryCheck,
+      now.toIso8601String(),
+    );
     await refreshOwlState();
     notifyListeners();
     return wins;
@@ -215,11 +268,15 @@ class GamificationProvider extends ChangeNotifier {
     DateTime prevMonthDate,
     DateTime now,
   ) async {
-    final id = '${prevMonthDate.year}-${prevMonthDate.month.toString().padLeft(2, '0')}';
+    final id =
+        '${prevMonthDate.year}-${prevMonthDate.month.toString().padLeft(2, '0')}';
     if (_monthlySavingsResults.get(id) != null) return;
     final spendByName = <String, double>{
       for (final category in categoryProvider.all)
-        category.name: expenseProvider.spendForCategoryInMonth(category.id, prevMonthDate),
+        category.name: expenseProvider.spendForCategoryInMonth(
+          category.id,
+          prevMonthDate,
+        ),
     };
     final totalSaved = computeMonthlySavings(spendByName);
     await _monthlySavingsResults.put(
@@ -260,14 +317,19 @@ class GamificationProvider extends ChangeNotifier {
   /// rather than a real record.
   List<MonthlySavingsResult> get monthlySavingsHistory {
     final results = _monthlySavingsResults.values.toList();
-    results.sort((a, b) => b.id.compareTo(a.id)); // "yyyy-MM" sorts correctly as a string
+    results.sort(
+      (a, b) => b.id.compareTo(a.id),
+    ); // "yyyy-MM" sorts correctly as a string
     return results;
   }
 
   Future<void> markMonthlySavingsCelebrationShown(String resultId) async {
     final result = _monthlySavingsResults.get(resultId);
     if (result == null) return;
-    await _monthlySavingsResults.put(resultId, result.copyWith(celebrationShown: true));
+    await _monthlySavingsResults.put(
+      resultId,
+      result.copyWith(celebrationShown: true),
+    );
     notifyListeners();
   }
 
@@ -286,7 +348,12 @@ class GamificationProvider extends ChangeNotifier {
     for (var i = 0; i < 7; i++) {
       final day = today.subtract(Duration(days: i));
       final completion = expenseProvider.completionOn(day);
-      if (completion != null && (completion.loggedAnyExpense || completion.usedStreakFreeze)) count++;
+      if (completion != null &&
+          (completion.loggedAnyExpense ||
+              completion.completedNoSpend ||
+              completion.usedStreakFreeze)) {
+        count++;
+      }
     }
     return count;
   }
@@ -302,7 +369,9 @@ class GamificationProvider extends ChangeNotifier {
 
   int get _recentCategoryWinCount {
     final cutoff = DateTime.now().subtract(_recentWinWindow);
-    return _categoryResults.values.where((r) => r.won && r.evaluatedAt.isAfter(cutoff)).length;
+    return _categoryResults.values
+        .where((r) => r.won && r.evaluatedAt.isAfter(cutoff))
+        .length;
   }
 
   /// Computed live from real streak/challenge data every time — never
@@ -320,7 +389,9 @@ class GamificationProvider extends ChangeNotifier {
     if (atRisk) return OwlMood.hungry;
 
     if (streak >= 100 || _recentCategoryWinCount >= 2) return OwlMood.thriving;
-    if (streak >= 30 || (streak >= 7 && _recentCategoryWinCount >= 1)) return OwlMood.happy;
+    if (streak >= 30 || (streak >= 7 && _recentCategoryWinCount >= 1)) {
+      return OwlMood.happy;
+    }
     return OwlMood.content;
   }
 
@@ -337,7 +408,11 @@ class GamificationProvider extends ChangeNotifier {
     final noSpendDays = _noSpendDays.length;
     final completeLogDays = _completeLogDays.length;
     final badges = _badges.length;
-    return loggedDays * 1 + categoryWins * 3 + noSpendDays * 5 + completeLogDays * 3 + badges * 10;
+    return loggedDays * 1 +
+        categoryWins * 3 +
+        noSpendDays * 5 +
+        completeLogDays * 3 +
+        badges * 10;
   }
 
   /// Coarse, long-term tier over [careScore] — separate from the day-to-day
@@ -362,7 +437,9 @@ class GamificationProvider extends ChangeNotifier {
     final mood = currentMood;
     final stage = evolutionStage;
     final existing = _owlStateBox.get('owl');
-    if (existing != null && existing.moodLevel == mood.index && existing.evolutionStage == stage) {
+    if (existing != null &&
+        existing.moodLevel == mood.index &&
+        existing.evolutionStage == stage) {
       return;
     }
     final previousStage = existing?.evolutionStage;
@@ -378,7 +455,10 @@ class GamificationProvider extends ChangeNotifier {
       ),
     );
     if (justEvolved) {
-      AnalyticsService.instance.capture('owl_evolved', properties: {'new_stage': stage});
+      AnalyticsService.instance.capture(
+        'owl_evolved',
+        properties: {'new_stage': stage},
+      );
     }
     notifyListeners();
   }
@@ -395,7 +475,10 @@ class GamificationProvider extends ChangeNotifier {
   Future<void> markOwlEvolutionCelebrationShown() async {
     final state = _owlStateBox.get('owl');
     if (state == null) return;
-    await _owlStateBox.put('owl', state.copyWith(evolutionCelebrationShown: true));
+    await _owlStateBox.put(
+      'owl',
+      state.copyWith(evolutionCelebrationShown: true),
+    );
     notifyListeners();
   }
 

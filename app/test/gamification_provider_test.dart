@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
-import 'package:abacus/config/constants.dart';
-import 'package:abacus/models/badge_record.dart';
-import 'package:abacus/models/owl_state.dart';
-import 'package:abacus/models/complete_log_day_mark.dart';
-import 'package:abacus/models/monthly_savings_result.dart';
-import 'package:abacus/models/category_challenge_result.dart';
-import 'package:abacus/models/no_spend_day_mark.dart';
-import 'package:abacus/providers/gamification_provider.dart';
+import 'package:pocklume/config/constants.dart';
+import 'package:pocklume/models/badge_record.dart';
+import 'package:pocklume/models/owl_state.dart';
+import 'package:pocklume/models/complete_log_day_mark.dart';
+import 'package:pocklume/models/monthly_savings_result.dart';
+import 'package:pocklume/models/category_challenge_result.dart';
+import 'package:pocklume/models/no_spend_day_mark.dart';
+import 'package:pocklume/providers/gamification_provider.dart';
 
 void main() {
   late GamificationProvider provider;
@@ -35,7 +35,9 @@ void main() {
     }
     await Hive.openBox<BadgeRecord>(HiveBoxes.badges);
     await Hive.openBox<NoSpendDayMark>(HiveBoxes.noSpendDays);
-    await Hive.openBox<CategoryChallengeResult>(HiveBoxes.categoryChallengeResults);
+    await Hive.openBox<CategoryChallengeResult>(
+      HiveBoxes.categoryChallengeResults,
+    );
     await Hive.openBox<OwlState>(HiveBoxes.owlState);
     await Hive.openBox<CompleteLogDayMark>(HiveBoxes.completeLogDays);
     await Hive.openBox<MonthlySavingsResult>(HiveBoxes.monthlySavingsResults);
@@ -69,15 +71,22 @@ void main() {
     final first = await provider.checkForNewMilestone(7);
     final second = await provider.checkForNewMilestone(7);
     expect(first, isNotNull);
-    expect(second, isNull, reason: 'already-earned milestone should not re-fire');
+    expect(
+      second,
+      isNull,
+      reason: 'already-earned milestone should not re-fire',
+    );
     expect(provider.earnedBadges.length, 1);
   });
 
-  test('pendingCelebration surfaces an unshown badge, then clears once marked shown', () async {
-    expect(provider.pendingCelebration, isNull);
-    final badge = await provider.checkForNewMilestone(30);
-    expect(provider.pendingCelebration?.id, badge!.id);
-    await provider.markCelebrationShown(badge.id);
-    expect(provider.pendingCelebration, isNull);
-  });
+  test(
+    'pendingCelebration surfaces an unshown badge, then clears once marked shown',
+    () async {
+      expect(provider.pendingCelebration, isNull);
+      final badge = await provider.checkForNewMilestone(30);
+      expect(provider.pendingCelebration?.id, badge!.id);
+      await provider.markCelebrationShown(badge.id);
+      expect(provider.pendingCelebration, isNull);
+    },
+  );
 }

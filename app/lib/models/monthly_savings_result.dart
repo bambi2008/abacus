@@ -81,7 +81,7 @@ class MonthlySavingsResultAdapter extends TypeAdapter<MonthlySavingsResult> {
 /// the user currently tracks (spend can legitimately be 0.0), keyed by
 /// name — a category that's simply *absent* from the map (deleted, never
 /// added) is correctly excluded from the comparison rather than assumed to
-/// be a full-benchmark "win," since Abacus has no way to know whether the
+/// be a full-benchmark "win," since Pocklume has no way to know whether the
 /// user actually avoided that kind of spending or just isn't tracking it.
 double computeMonthlySavings(Map<String, double> categorySpendByName) {
   double spendFor(Set<String> names) {
@@ -102,7 +102,16 @@ double computeMonthlySavings(Map<String, double> categorySpendByName) {
     return (benchmark - spend).clamp(0, double.infinity);
   }
 
-  return savedFor(NationalSpendingBenchmarks.diningAndSnacksCategoryNames, NationalSpendingBenchmarks.diningAndSnacksMonthly) +
-      savedFor(NationalSpendingBenchmarks.clothingCategoryNames, NationalSpendingBenchmarks.clothingMonthly) +
-      savedFor(NationalSpendingBenchmarks.entertainmentCategoryNames, NationalSpendingBenchmarks.entertainmentMonthly);
+  return savedFor(
+        NationalSpendingBenchmarks.diningAndSnacksCategoryNames,
+        NationalSpendingBenchmarks.diningAndSnacksMonthly,
+      ) +
+      savedFor(
+        NationalSpendingBenchmarks.clothingCategoryNames,
+        NationalSpendingBenchmarks.clothingMonthly,
+      ) +
+      savedFor(
+        NationalSpendingBenchmarks.entertainmentCategoryNames,
+        NationalSpendingBenchmarks.entertainmentMonthly,
+      );
 }

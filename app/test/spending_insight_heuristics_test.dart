@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:abacus/models/spending_insight.dart';
+import 'package:pocklume/models/spending_insight.dart';
 
 // Pure top-category-vs-last-month comparison that powers Progress screen's
 // "Spending insight" Pro card — previously that card unlocked for Pro but
@@ -34,25 +34,31 @@ void main() {
       expect(insight.thisMonthAmount, 200.0);
     });
 
-    test('a category present in spend but missing from categories (deleted) is skipped', () {
-      final insight = computeSpendingInsight(
-        thisMonthSpend: {'deleted-id': 500.0, 'food': 20.0},
-        lastMonthSpend: {},
-        categories: [(id: 'food', name: 'Food', emoji: '🍔')],
-      );
-      // "deleted-id" is the top spend but has no matching category, so no
-      // insight is shown rather than one with a blank name/emoji.
-      expect(insight, isNull);
-    });
+    test(
+      'a category present in spend but missing from categories (deleted) is skipped',
+      () {
+        final insight = computeSpendingInsight(
+          thisMonthSpend: {'deleted-id': 500.0, 'food': 20.0},
+          lastMonthSpend: {},
+          categories: [(id: 'food', name: 'Food', emoji: '🍔')],
+        );
+        // "deleted-id" is the top spend but has no matching category, so no
+        // insight is shown rather than one with a blank name/emoji.
+        expect(insight, isNull);
+      },
+    );
 
-    test('changeFraction is null with no last-month baseline for that category', () {
-      final insight = computeSpendingInsight(
-        thisMonthSpend: {'food': 100.0},
-        lastMonthSpend: {},
-        categories: [(id: 'food', name: 'Food', emoji: '🍔')],
-      );
-      expect(insight!.changeFraction, isNull);
-    });
+    test(
+      'changeFraction is null with no last-month baseline for that category',
+      () {
+        final insight = computeSpendingInsight(
+          thisMonthSpend: {'food': 100.0},
+          lastMonthSpend: {},
+          categories: [(id: 'food', name: 'Food', emoji: '🍔')],
+        );
+        expect(insight!.changeFraction, isNull);
+      },
+    );
 
     test('changeFraction is positive when spending more than last month', () {
       final insight = computeSpendingInsight(

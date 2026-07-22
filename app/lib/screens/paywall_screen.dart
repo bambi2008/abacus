@@ -23,19 +23,30 @@ class _PaywallScreenState extends State<PaywallScreen> {
     AnalyticsService.instance.capture('paywall_viewed');
   }
 
-  Future<void> _purchase(BuildContext context, String productId) async {
-    await context.read<SubscriptionProvider>().purchase(productId);
-    if (context.mounted) Navigator.of(context).pop();
+  Future<void> _purchase(BuildContext context) async {
+    final subscription = context.read<SubscriptionProvider>();
+    final success = await subscription.purchaseLifetime();
+    if (!context.mounted) return;
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pocklume Pro is unlocked.')),
+      );
+      Navigator.of(context).pop();
+    } else if (subscription.errorMessage != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(subscription.errorMessage!)));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final subscription = context.watch<SubscriptionProvider>();
-    String priceFor(String productId, String fallback) => subscription.productFor(productId)?.price ?? fallback;
+    final busy = subscription.state == PurchaseFlowState.loading;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Abacus Pro'),
+        title: const Text('Pocklume Pro'),
         actions: [
           TextButton(
             onPressed: () => context.read<SubscriptionProvider>().restore(),
@@ -58,7 +69,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
               Expanded(
                 flex: 2,
                 child: Center(
-                  child: Text('Free', style: Theme.of(context).textTheme.labelLarge),
+                  child: Text(
+                    'Free',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
                 ),
               ),
               Expanded(
@@ -66,10 +80,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 child: Center(
                   child: Text(
                     'Pro',
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelLarge
-                        ?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -103,29 +117,33 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ),
           const SizedBox(height: 24),
           _PlanCard(
-            title: 'Lifetime',
-            price: priceFor(ProductIds.lifetime, '\$89.99 once'),
-            subtitle: 'No subscription trap — pay once, use forever',
+            title: 'Founding Lifetime',
+            price: subscription.lifetimePrice,
+            subtitle:
+                'One early-supporter price. No subscription, ads, or bank connection.',
             highlighted: true,
-            onTap: () => _purchase(context, ProductIds.lifetime),
+            onTap: busy || !subscription.storeAvailable
+                ? null
+                : () => _purchase(context),
           ),
-          const SizedBox(height: 12),
-          _PlanCard(
-            title: 'Monthly',
-            price: priceFor(ProductIds.monthly, '\$7.99 / month'),
-            subtitle: 'Not sure yet? Try it month to month',
-            onTap: () => _purchase(context, ProductIds.monthly),
-          ),
+          if (busy) ...[
+            const SizedBox(height: 12),
+            const Center(child: CircularProgressIndicator()),
+          ],
+          if (!busy && !subscription.storeAvailable) ...[
+            const SizedBox(height: 12),
+            Text(
+              subscription.errorMessage ??
+                  'Purchases are unavailable. Check your connection and try again later.',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              textAlign: TextAlign.center,
+            ),
+          ],
           const SizedBox(height: 24),
-          // App Store requires auto-renewable subscriptions to disclose the
-          // renewal terms and cancellation path in the binary, plus reachable
-          // links to the Terms/EULA and Privacy Policy (Guideline 3.1.2).
           Text(
-            'The monthly plan is an auto-renewing subscription: it renews each '
-            'month at the price shown above unless you cancel at least 24 hours '
-            'before the period ends. Manage or cancel anytime in your device '
-            'Settings → Apple ID → Subscriptions. The Lifetime plan is a '
-            'one-time purchase, not a subscription.',
+            'Founding Lifetime is a one-time, non-consumable App Store purchase. '
+            'It unlocks the Pro features shown above for the life of the app and '
+            'can be restored on another device using the same Apple ID.',
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
@@ -151,10 +169,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _openLink(BuildContext context, String url) async {
-    final ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    final ok = await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    );
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open the link — check your connection.')),
+        const SnackBar(
+          content: Text('Could not open the link — check your connection.'),
+        ),
       );
     }
   }
@@ -169,7 +192,11 @@ class _ComparisonRow extends StatelessWidget {
   final Object free;
   final Object pro;
 
-  const _ComparisonRow({required this.label, required this.free, required this.pro});
+  const _ComparisonRow({
+    required this.label,
+    required this.free,
+    required this.pro,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -177,9 +204,15 @@ class _ComparisonRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Expanded(flex: 3, child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
+          Expanded(
+            flex: 3,
+            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          ),
           Expanded(flex: 2, child: Center(child: _cell(context, free))),
-          Expanded(flex: 2, child: Center(child: _cell(context, pro, isPro: true))),
+          Expanded(
+            flex: 2,
+            child: Center(child: _cell(context, pro, isPro: true)),
+          ),
         ],
       ),
     );
@@ -188,15 +221,22 @@ class _ComparisonRow extends StatelessWidget {
   Widget _cell(BuildContext context, Object value, {bool isPro = false}) {
     if (value is bool) {
       return value
-          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary, size: 18)
-          : Icon(Icons.close, color: Theme.of(context).colorScheme.outline, size: 18);
+          ? Icon(
+              Icons.check,
+              color: Theme.of(context).colorScheme.primary,
+              size: 18,
+            )
+          : Icon(
+              Icons.close,
+              color: Theme.of(context).colorScheme.outline,
+              size: 18,
+            );
     }
     return Text(
       value as String,
-      style: Theme.of(context)
-          .textTheme
-          .bodySmall
-          ?.copyWith(fontWeight: isPro ? FontWeight.bold : FontWeight.normal),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        fontWeight: isPro ? FontWeight.bold : FontWeight.normal,
+      ),
       textAlign: TextAlign.center,
     );
   }
@@ -207,7 +247,7 @@ class _PlanCard extends StatelessWidget {
   final String price;
   final String subtitle;
   final bool highlighted;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _PlanCard({
     required this.title,
@@ -220,7 +260,9 @@ class _PlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: highlighted ? Theme.of(context).colorScheme.primaryContainer : null,
+      color: highlighted
+          ? Theme.of(context).colorScheme.primaryContainer
+          : null,
       child: ListTile(
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(subtitle),

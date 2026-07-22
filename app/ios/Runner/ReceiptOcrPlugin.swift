@@ -6,12 +6,12 @@ import Vision
 /// photo never leaves the device — recognition runs locally and only the
 /// extracted text lines cross the method channel back to Dart, which does
 /// the amount/vendor/date heuristics (see receipt_scan_result.dart). This is
-/// an entry-speed assist for Abacus's manual-first core loop, not a step
+/// an entry-speed assist for Pocklume's manual-first core loop, not a step
 /// toward bank sync — see docs/technical-architecture.md.
 class ReceiptOcrPlugin: NSObject, FlutterPlugin {
     static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
-            name: "com.abacus.app/receipt_ocr",
+            name: "com.pocklume.app/receipt_ocr",
             binaryMessenger: registrar.messenger()
         )
         let instance = ReceiptOcrPlugin()

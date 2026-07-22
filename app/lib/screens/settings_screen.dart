@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../config/constants.dart';
-import '../models/expense.dart';
 import '../providers/buddy_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
@@ -25,11 +24,13 @@ class SettingsScreen extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text('Subscription', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text('Plan', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
           ListTile(
-            leading: Icon(subscription.isPro ? Icons.workspace_premium : Icons.lock_outline),
-            title: Text(subscription.isPro ? 'Abacus Pro' : 'Free plan'),
+            leading: Icon(
+              subscription.isPro ? Icons.workspace_premium : Icons.lock_outline,
+            ),
+            title: Text(subscription.isPro ? 'Pocklume Pro' : 'Free plan'),
             subtitle: Text(
               subscription.isPro
                   ? 'Unlimited streak freezes and spending insights.'
@@ -46,20 +47,37 @@ class SettingsScreen extends StatelessWidget {
           ),
           if (!subscription.isPro)
             TextButton(
-              onPressed: () => context.read<SubscriptionProvider>().restore(),
+              onPressed: () async {
+                final restored = await context
+                    .read<SubscriptionProvider>()
+                    .restore();
+                if (!context.mounted) return;
+                final message = restored
+                    ? 'Pocklume Pro was restored.'
+                    : context.read<SubscriptionProvider>().errorMessage ??
+                          'No previous purchase was found.';
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(message)));
+              },
               child: const Text('Restore Purchases'),
             ),
           const Divider(),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text('Streaks', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              'Streaks',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           // Buddy-streak invite/status lives on the Today screen as its own
           // main-line card (BuddyStreakCard) — this is just a pointer.
           const ListTile(
             leading: Icon(Icons.people_outline),
             title: Text('Savings buddy'),
-            subtitle: Text('Find or manage your savings buddy from the Today screen.'),
+            subtitle: Text(
+              'Find or manage your savings buddy from the Today screen.',
+            ),
           ),
           // In-app data deletion for the (anonymous) buddy account — required
           // by App Store Guideline 5.1.1(v) once the app creates accounts.
@@ -68,53 +86,46 @@ class SettingsScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.delete_outline),
               title: const Text('Delete my savings-buddy data'),
-              subtitle: const Text('Removes your buddy link and synced logging days from the server.'),
+              subtitle: const Text(
+                'Removes your buddy link and synced logging days from the server.',
+              ),
               onTap: () => _confirmDeleteBuddyData(context),
             ),
           const Divider(),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text('Your Data', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              'Your Data',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.download_outlined),
             title: const Text('Export as CSV'),
-            subtitle: const Text('Your data, not ours — take it with you anytime.'),
+            subtitle: const Text(
+              'Your data, not ours — take it with you anytime.',
+            ),
             onTap: () async {
               final expenses = context.read<ExpenseProvider>();
               final categories = context.read<CategoryProvider>();
-              final all = <Expense>[];
-              for (var i = 0; i < 365; i++) {
-                all.addAll(expenses.expensesOn(DateTime.now().subtract(Duration(days: i))));
-              }
+              final all = expenses.allExpenses;
               // Previously fire-and-forget with no error path at all — if
               // the share sheet failed or timed out, nothing told the user.
-              final ok = await ExportService.exportExpenses(all, categories.all);
+              final ok = await ExportService.exportExpenses(
+                all,
+                categories.all,
+              );
               if (!context.mounted) return;
               if (ok) {
                 AnalyticsService.instance.capture('data_exported');
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Could not export — try again.')),
+                  const SnackBar(
+                    content: Text('Could not export — try again.'),
+                  ),
                 );
               }
             },
-          ),
-          const Divider(),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text('Privacy', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-          const _AnalyticsToggle(),
-          const Divider(),
-          // Low-key, opt-in placement — the referral participation-rate
-          // assumption is unvalidated (see docs/customer-and-market.md), so
-          // this is deliberately not an aggressive prompt.
-          ListTile(
-            leading: const Icon(Icons.savings_outlined),
-            title: const Text('Know someone who\'d like a high-yield savings account?'),
-            subtitle: const Text('Optional — we only suggest this if it seems useful.'),
-            onTap: () => AnalyticsService.instance.capture('referral_settings_tapped'),
           ),
           const Divider(),
           const Padding(
@@ -139,10 +150,15 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Future<void> _openLink(BuildContext context, String url) async {
-    final ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    final ok = await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    );
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open the link — check your connection.')),
+        const SnackBar(
+          content: Text('Could not open the link — check your connection.'),
+        ),
       );
     }
   }
@@ -158,9 +174,14 @@ class SettingsScreen extends StatelessWidget {
           'streaks are not affected. This cannot be undone.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Delete'),
           ),
@@ -172,37 +193,17 @@ class SettingsScreen extends StatelessWidget {
     final buddy = context.read<BuddyProvider>();
     try {
       await buddy.deleteMyData();
-      messenger.showSnackBar(const SnackBar(content: Text('Your savings-buddy data was deleted.')));
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Your savings-buddy data was deleted.')),
+      );
     } catch (_) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Could not delete right now — check your connection and try again.')),
+        const SnackBar(
+          content: Text(
+            'Could not delete right now — check your connection and try again.',
+          ),
+        ),
       );
     }
-  }
-}
-
-class _AnalyticsToggle extends StatefulWidget {
-  const _AnalyticsToggle();
-
-  @override
-  State<_AnalyticsToggle> createState() => _AnalyticsToggleState();
-}
-
-class _AnalyticsToggleState extends State<_AnalyticsToggle> {
-  late bool _enabled = AnalyticsService.instance.enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile(
-      title: const Text('Anonymous usage analytics'),
-      subtitle: const Text(
-        'Helps us improve Abacus. Never sends expense amounts, categories, or notes.',
-      ),
-      value: _enabled,
-      onChanged: (v) {
-        setState(() => _enabled = v);
-        AnalyticsService.instance.setEnabled(v);
-      },
-    );
   }
 }

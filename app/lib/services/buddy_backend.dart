@@ -2,7 +2,7 @@
 /// interface so the concrete provider (Supabase today) can be swapped
 /// without touching the provider/UI, and so tests can supply a fake.
 ///
-/// PRIVACY BOUNDARY (load-bearing for Abacus's positioning): a buddy link
+/// PRIVACY BOUNDARY (load-bearing for Pocklume's positioning): a buddy link
 /// syncs only three things per person per day — an anonymous user id, a
 /// date, and a single boolean "logged something that day". No amounts, no
 /// categories, no notes, nothing financial ever leaves the device. All
@@ -75,11 +75,11 @@ class BuddyRemoteState {
   });
 
   const BuddyRemoteState.unlinked()
-      : linked = false,
-        code = null,
-        partnerJoined = false,
-        selfLoggedDays = const {},
-        partnerLoggedDays = const {};
+    : linked = false,
+      code = null,
+      partnerJoined = false,
+      selfLoggedDays = const {},
+      partnerLoggedDays = const {};
 }
 
 /// Normalizes a timestamp to a date-only value (local midnight) so set
@@ -96,7 +96,9 @@ int computeJointStreak(
   Set<DateTime> partnerLoggedDays,
   DateTime today,
 ) {
-  final partnerDays = <DateTime>{for (final d in partnerLoggedDays) dateOnly(d)};
+  final partnerDays = <DateTime>{
+    for (final d in partnerLoggedDays) dateOnly(d),
+  };
   final both = <DateTime>{
     for (final d in selfLoggedDays)
       if (partnerDays.contains(dateOnly(d))) dateOnly(d),
@@ -137,7 +139,8 @@ class NoopBuddyBackend implements BuddyBackend {
   @override
   Future<void> markDay(DateTime date, {required bool logged}) async {}
   @override
-  Future<BuddyRemoteState> fetchState() async => const BuddyRemoteState.unlinked();
+  Future<BuddyRemoteState> fetchState() async =>
+      const BuddyRemoteState.unlinked();
   @override
   Future<void> deleteMyData() async {}
   @override

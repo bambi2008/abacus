@@ -29,7 +29,10 @@ class ShareableAchievementCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [scheme.primaryContainer, scheme.primary.withValues(alpha: 0.6)],
+            colors: [
+              scheme.primaryContainer,
+              scheme.primary.withValues(alpha: 0.6),
+            ],
           ),
         ),
         child: Column(
@@ -40,24 +43,26 @@ class ShareableAchievementCard extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(color: scheme.onPrimaryContainer, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: scheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onPrimaryContainer),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: scheme.onPrimaryContainer,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
-              'Abacus',
-              style: Theme.of(context)
-                  .textTheme
-                  .labelLarge
-                  ?.copyWith(color: scheme.onPrimaryContainer, letterSpacing: 1.5),
+              'Pocklume',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: scheme.onPrimaryContainer,
+                letterSpacing: 1.5,
+              ),
             ),
           ],
         ),
